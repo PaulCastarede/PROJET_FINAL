@@ -23,10 +23,11 @@ class GameView(arcade.View):
 
         self.player_sprite_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList(use_spatial_hash=True)
+        self.camera = arcade.camera.Camera2D()
 
         # Setup our game
         self.setup()
-
+        
     def setup(self) -> None:
         """Set up the game here."""
         self.player_sprite = arcade.Sprite(
@@ -60,7 +61,12 @@ class GameView(arcade.View):
                 self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
             case arcade.key.UP: 
                 # jump by giving an initial vertical speed
-                self.player_sprite.change_y = PLAYER_JUMP_SPEED   
+                self.player_sprite.change_y = PLAYER_JUMP_SPEED
+            case arcade.key.ESCAPE:
+                # resets the game
+                self.__init__()
+   
+            
 
     def on_key_release(self, key: int, modifiers: int) -> None:
         """Called when the user releases a key on the keyboard."""
@@ -75,9 +81,11 @@ class GameView(arcade.View):
         This is where in-world time "advances", or "ticks".
         """
         self.physics_engine.update()
+        self.camera.position = self.player_sprite.position #type : ignore 
 
     def on_draw(self) -> None:
         """Render the screen."""
         self.clear() # always start with self.clear()
-        self.player_sprite_list.draw()
-        self.wall_list.draw()
+        with self.camera.activate():
+          self.wall_list.draw()
+          self.player_sprite_list.draw()
