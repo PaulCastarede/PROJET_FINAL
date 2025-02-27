@@ -1,4 +1,14 @@
 import arcade
+
+PLAYER_MOVEMENT_SPEED = 5
+"""Lateral speed of the player, in pixels per frame."""
+
+PLAYER_GRAVITY = 1
+"""Gravity applied to the player, in pixels per frame²."""
+
+PLAYER_JUMP_SPEED = 18
+"""Instant vertical speed for jumping, in pixels per frame."""
+
 class GameView(arcade.View):
     player_sprite: arcade.Sprite
     player_sprite_list: arcade.SpriteList[arcade.Sprite]
@@ -37,6 +47,34 @@ class GameView(arcade.View):
             boxCrate_sprite.center_x = i 
             boxCrate_sprite.center_y = 96
             self.wall_list.append(boxCrate_sprite)
+        self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, walls=self.wall_list,gravity_constant=PLAYER_GRAVITY)    
+
+    def on_key_press(self, key: int, modifiers: int) -> None:
+        """Called when the user presses a key on the keyboard."""
+        match key:
+            case arcade.key.RIGHT:
+                # start moving to the right
+                self.player_sprite.change_x = +PLAYER_MOVEMENT_SPEED
+            case arcade.key.LEFT:
+                # start moving to the left
+                self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
+            case arcade.key.UP: 
+                # jump by giving an initial vertical speed
+                self.player_sprite.change_y = PLAYER_JUMP_SPEED   
+
+    def on_key_release(self, key: int, modifiers: int) -> None:
+        """Called when the user releases a key on the keyboard."""
+        match key:
+            case arcade.key.RIGHT | arcade.key.LEFT:
+                # stop lateral movement
+                self.player_sprite.change_x = 0
+
+    def on_update(self, delta_time: float) -> None:
+        """Called once per frame, before drawing.
+
+        This is where in-world time "advances", or "ticks".
+        """
+        self.physics_engine.update()
 
     def on_draw(self) -> None:
         """Render the screen."""
