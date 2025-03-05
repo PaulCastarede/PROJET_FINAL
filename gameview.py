@@ -42,6 +42,7 @@ class GameView(arcade.View):
         )
         self.player_sprite_list.append(self.player_sprite)
 
+
         for i in range(0, 1187, 64):
             grass_sprite = arcade.Sprite(":resources:images/tiles/grassMid.png", scale=0.5)
             grass_sprite.center_x = i
