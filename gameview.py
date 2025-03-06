@@ -27,6 +27,7 @@ class GameView(arcade.View):
         self.slimes_list = arcade.SpriteList()
         self.camera = arcade.camera.Camera2D()
         self.coins_list = arcade.SpriteList(use_spatial_hash=True)
+        self.no_go_list = arcade.SpriteList(use_spatial_hash=True)
         self.right_pressed = False
         self.left_pressed = False
         self.coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
@@ -36,23 +37,73 @@ class GameView(arcade.View):
         
     
 
-
-        self.camera_margin_left = 150
-        self.camera_margin_right = 200  
-        self.camera_margin_top = 150
-        self.camera_margin_bottom = 200
+        self.map_width = 0
+        self.map_height = 0
+        self.S_x = 0
+        self.S_y = 0
         # Setup our game
+        self.readmap()
         self.setup()
 
+
+    def readmap(self) -> None:
+        with open("maps/map1.txt", "r") as file:
+            for i in range(2):
+                    line = file.readline()  # Retirer les espaces et sauts de ligne
+                    if ": " in line:
+                        key, value = line.split(":", 1)  # Séparer la clé et la valeur
+                        key = key.strip()
+                        value = int(value.strip())  # Convertir la valeur en entier
+                        if key == "width":
+                            self.map_width = value
+                        elif key == "height":
+                            self.map_height = value
+
+            if self.map_width == 0 or self.map_height == 0 : 
+                    raise ValueError()
+            
+            for i, line in enumerate(file, start=3):
+                if i > self.map_height + 3 :
+                    break
+                for j, character in enumerate(line):
+                    match character :
+                        case "=":   
+                            grass= arcade.Sprite(":resources:images/tiles/grassMid.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
+                            self.wall_list.append(grass)
+                                
+                        case "-":   
+                            half_grass = arcade.Sprite(":resources:/images/tiles/grassHalf_mid.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
+                            self.wall_list.append(half_grass)
+                    
+                        case "x":   
+                            crate= arcade.Sprite(":resources:/images/tiles/boxCrate_double.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
+                            self.wall_list.append(crate)
+                                        
+                        case "*":   
+                            coin = arcade.Sprite(":resources:/images/items/coinGold.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
+                            self.coins_list.append(coin)
+                    
+                        case "o":   
+                            monster = arcade.Sprite(":resources:/images/enemies/slimeBlue.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
+                            self.monster_list.append(monster)
+                    
+                        case "£":   
+                            lava = arcade.Sprite(":resources:/images/tiles/lava.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
+                            self.no_go_list.append(lava)
+                    
+                        case "S":   
+                            self.S_x = 64*j
+                            self.S_y = 64*(self.map_height - i)
+                    
     def setup(self) -> None:
         """Set up the game here."""
+        self.player_sprite_list.clear()
         self.death = False
         self.player_sprite = arcade.Sprite(
             ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png",
-            center_x=64,
-            center_y=128
+            center_x=self.S_x,
+            center_y=self.S_y, scale=0.5
         )
-        self.player_sprite_list.clear()
         self.player_sprite_list.append(self.player_sprite)
         self.wall_list.clear()
         self.player_sprite_death = arcade.Sprite(
@@ -61,38 +112,15 @@ class GameView(arcade.View):
         center_y=self.player_sprite.center_y
         )
 
-        self.slime_sprite = arcade.Sprite(":resources:/images/enemies/slimeBlue.png",
-        center_x=400,
-        center_y = 128)
-        self.slimes_list.append(self.slime_sprite)
 
-        for i in range(0, 1187, 64):
-            grass_sprite = arcade.Sprite(":resources:images/tiles/grassMid.png", scale=0.5)
-            grass_sprite.center_x = i
-            grass_sprite.center_y = 32
-            self.wall_list.append(grass_sprite)
-        
-        for i in range(256, 769, 256):
-            boxCrate_sprite = arcade.Sprite(":resources:images/tiles/boxCrate_double.png", scale=0.5)
-            boxCrate_sprite.center_x = i 
-            boxCrate_sprite.center_y = 96
-            self.wall_list.append(boxCrate_sprite)
+
+    
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.player_sprite, 
             walls=self.wall_list,
             gravity_constant=PLAYER_GRAVITY
         )
-
-        self.coins_list.clear()
-        for i in range(128, 1251, 256):
-            coin_sprite = arcade.Sprite(
-                ":resources:images/items/coinGold.png",
-                center_x=i,
-                center_y=96,
-                scale=0.5
-            )  
-            self.coins_list.append(coin_sprite)
 
     # COMMANDES
     def on_key_press(self, key: int, modifiers: int) -> None:
