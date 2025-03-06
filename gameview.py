@@ -1,4 +1,5 @@
 import arcade
+import time 
 
 PLAYER_MOVEMENT_SPEED = 5
 """Lateral speed of the player, in pixels per frame."""
@@ -8,6 +9,9 @@ PLAYER_GRAVITY = 1
 
 PLAYER_JUMP_SPEED = 18
 """Instant vertical speed for jumping, in pixels per frame."""
+
+SLIMES_SPEED = 1
+"""Speed of the slimes, in pixels per frame"""
 
 class GameView(arcade.View):
     """Main in-game view."""
@@ -19,10 +23,19 @@ class GameView(arcade.View):
         self.background_color = arcade.csscolor.CORNFLOWER_BLUE
         self.player_sprite_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList(use_spatial_hash=True)
+        self.no_go_list = arcade.SpriteList(use_spatial_hash=True)
+        self.slimes_list = arcade.SpriteList()
         self.camera = arcade.camera.Camera2D()
         self.coins_list = arcade.SpriteList(use_spatial_hash=True)
         self.right_pressed = False
         self.left_pressed = False
+        self.coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
+        self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
+        self.death_sound = arcade.load_sound(":resources:sounds/gameover1.wav.")
+        self.death = False
+        
+    
+
 
         self.camera_margin_left = 150
         self.camera_margin_right = 200  
@@ -33,6 +46,7 @@ class GameView(arcade.View):
 
     def setup(self) -> None:
         """Set up the game here."""
+        self.death = False
         self.player_sprite = arcade.Sprite(
             ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png",
             center_x=64,
@@ -41,6 +55,16 @@ class GameView(arcade.View):
         self.player_sprite_list.clear()
         self.player_sprite_list.append(self.player_sprite)
         self.wall_list.clear()
+        self.player_sprite_death = arcade.Sprite(
+        ":resources:/images/animated_characters/female_adventurer/femaleAdventurer_fall.png",
+        center_x=self.player_sprite.center_x,
+        center_y=self.player_sprite.center_y
+        )
+
+        self.slime_sprite = arcade.Sprite(":resources:/images/enemies/slimeBlue.png",
+        center_x=400,
+        center_y = 128)
+        self.slimes_list.append(self.slime_sprite)
 
         for i in range(0, 1187, 64):
             grass_sprite = arcade.Sprite(":resources:images/tiles/grassMid.png", scale=0.5)
@@ -84,6 +108,7 @@ class GameView(arcade.View):
                 if self.physics_engine.can_jump():
                     # jump by giving an initial vertical speed
                     self.player_sprite.change_y = PLAYER_JUMP_SPEED
+                    arcade.play_sound(self.jump_sound)
             case arcade.key.ESCAPE:
                 # resets the game
                 self.setup()
@@ -108,6 +133,17 @@ class GameView(arcade.View):
         
         self.physics_engine.update()
         self.camera.position = self.player_sprite.position
+        
+
+        for slime in self.slimes_list:
+            slime.change_x += SLIMES_SPEED
+            below = arcade.check_for_collision_with_list(slime, self.wall_list)
+            front = arcade.Sprite(center_x= slime.center_x + slime.change_x * 10, center_y= 1000) #slime.center_y + 20)
+            front_collision = arcade.check_for_collision_with_list(front, self.wall_list)
+            
+            if not below or front_collision:
+                slime.change_x *= -1
+
 
         collided_coins = arcade.check_for_collision_with_list(
             self.player_sprite, 
@@ -115,7 +151,26 @@ class GameView(arcade.View):
         )
         for coin in collided_coins:
             coin.remove_from_sprite_lists()
+            arcade.play_sound(self.coin_sound)
+
+        collided_no_go = arcade.check_for_collision_with_list(
+            self.player_sprite, 
+            self.no_go_list)
+        collided_slimes = arcade.check_for_collision_with_list(
+            self.player_sprite, 
+            self.slimes_list)
+        
+        if not(not collided_no_go) or not(not collided_slimes)  :    #Si le joueur est en collision avec la lave ou un monstre...
+            self.death = True                                        #...le joueur meurt.
+        
         self.update_camera()
+
+        if self.death :
+            arcade.play_sound(self.death_sound)
+            self.player_sprite_list.clear()                             # Si le joueur est mort, déclenche l'animation et le son de mort
+            self.player_sprite_list.append(self.player_sprite_death)
+            time.sleep(1)
+            self.setup()
 
     def update_camera(self) -> None:
         # Position du joueur
@@ -155,3 +210,5 @@ class GameView(arcade.View):
             self.wall_list.draw()
             self.player_sprite_list.draw()
             self.coins_list.draw()
+            self.no_go_list.draw()
+            self.slimes_list.draw()
