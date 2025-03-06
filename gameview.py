@@ -23,11 +23,6 @@ class GameView(arcade.View):
         self.coins_list = arcade.SpriteList(use_spatial_hash=True)
         self.right_pressed = False
         self.left_pressed = False
-
-        self.camera_margin_left = 150
-        self.camera_margin_right = 200  
-        self.camera_margin_top = 150
-        self.camera_margin_bottom = 200
         # Setup our game
         self.setup()
 
@@ -115,38 +110,7 @@ class GameView(arcade.View):
         )
         for coin in collided_coins:
             coin.remove_from_sprite_lists()
-        self.update_camera()
 
-    def update_camera(self) -> None:
-        # Position du joueur
-        player_x = self.player_sprite.center_x
-        player_y = self.player_sprite.center_y
-
-        # Position actuelle de la caméra
-        camera_x, camera_y = self.camera.position
-
-        # Largeur et hauteur de la vue de la caméra
-        screen_width, screen_height = self.window.width, self.window.height
-
-        # Calculer les limites de la zone de suivi
-        left_boundary = camera_x - (screen_width / 2) + self.camera_margin_left
-        right_boundary = camera_x + (screen_width / 2) - self.camera_margin_right
-        top_boundary = camera_y + (screen_height / 2) - self.camera_margin_top
-        bottom_boundary = camera_y - (screen_height / 2) + self.camera_margin_bottom
-
-        # Déplacer la caméra si le joueur dépasse les marges
-        if player_x < left_boundary:
-            camera_x -= left_boundary - player_x
-        elif player_x > right_boundary:
-            camera_x += player_x - right_boundary
-
-        if player_y < bottom_boundary:
-            camera_y -= bottom_boundary - player_y
-        elif player_y > top_boundary:
-            camera_y += player_y - top_boundary
-
-        # Appliquer la nouvelle position de la caméra
-        self.camera.position = (camera_x, camera_y)
 
     # AFFICHAGE #
     def on_draw(self) -> None:
