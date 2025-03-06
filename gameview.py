@@ -30,17 +30,16 @@ class GameView(arcade.View):
         self.no_go_list = arcade.SpriteList(use_spatial_hash=True)
         self.right_pressed = False
         self.left_pressed = False
-        self.coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
-        self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
-        self.death_sound = arcade.load_sound(":resources:sounds/gameover1.wav.")
-        self.death = False
         
-    
-
         self.map_width = 0
         self.map_height = 0
         self.S_x = 0
         self.S_y = 0
+
+        self.coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
+        self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
+        self.death_sound = arcade.load_sound(":resources:sounds/gameover1.wav")
+        self.death = False
         # Setup our game
         self.readmap()
         self.setup()
@@ -84,8 +83,8 @@ class GameView(arcade.View):
                             self.coins_list.append(coin)
                     
                         case "o":   
-                            monster = arcade.Sprite(":resources:/images/enemies/slimeBlue.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
-                            self.monster_list.append(monster)
+                            slime = arcade.Sprite(":resources:/images/enemies/slimeBlue.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
+                            self.slimes_list.append(slime)
                     
                         case "£":   
                             lava = arcade.Sprite(":resources:/images/tiles/lava.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
@@ -98,29 +97,18 @@ class GameView(arcade.View):
     def setup(self) -> None:
         """Set up the game here."""
         self.player_sprite_list.clear()
-        self.death = False
         self.player_sprite = arcade.Sprite(
             ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png",
             center_x=self.S_x,
             center_y=self.S_y, scale=0.5
         )
+        self.death = False
         self.player_sprite_list.append(self.player_sprite)
-        self.wall_list.clear()
-        self.player_sprite_death = arcade.Sprite(
-        ":resources:/images/animated_characters/female_adventurer/femaleAdventurer_fall.png",
-        center_x=self.player_sprite.center_x,
-        center_y=self.player_sprite.center_y
-        )
-
-
-
-    
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.player_sprite, 
             walls=self.wall_list,
-            gravity_constant=PLAYER_GRAVITY
-        )
+            gravity_constant=PLAYER_GRAVITY)
 
     # COMMANDES
     def on_key_press(self, key: int, modifiers: int) -> None:
@@ -191,47 +179,13 @@ class GameView(arcade.View):
         if not(not collided_no_go) or not(not collided_slimes)  :    #Si le joueur est en collision avec la lave ou un monstre...
             self.death = True                                        #...le joueur meurt.
         
-        self.update_camera()
 
         if self.death :
             arcade.play_sound(self.death_sound)
             self.player_sprite_list.clear()                             # Si le joueur est mort, déclenche l'animation et le son de mort
-            self.player_sprite_list.append(self.player_sprite_death)
             time.sleep(1)
             self.setup()
 
-    def update_camera(self) -> None:
-        # Position du joueur
-        player_x = self.player_sprite.center_x
-        player_y = self.player_sprite.center_y
-
-        # Position actuelle de la caméra
-        camera_x, camera_y = self.camera.position
-
-        # Largeur et hauteur de la vue de la caméra
-        screen_width, screen_height = self.window.width, self.window.height
-
-        # Calculer les limites de la zone de suivi
-        left_boundary = camera_x - (screen_width / 2) + self.camera_margin_left
-        right_boundary = camera_x + (screen_width / 2) - self.camera_margin_right
-        top_boundary = camera_y + (screen_height / 2) - self.camera_margin_top
-        bottom_boundary = camera_y - (screen_height / 2) + self.camera_margin_bottom
-
-        # Déplacer la caméra si le joueur dépasse les marges
-        if player_x < left_boundary:
-            camera_x -= left_boundary - player_x
-        elif player_x > right_boundary:
-            camera_x += player_x - right_boundary
-
-        if player_y < bottom_boundary:
-            camera_y -= bottom_boundary - player_y
-        elif player_y > top_boundary:
-            camera_y += player_y - top_boundary
-
-        # Appliquer la nouvelle position de la caméra
-        self.camera.position = (camera_x, camera_y)
-
-    # AFFICHAGE #
     def on_draw(self) -> None:
         self.clear()
         with self.camera.activate():
