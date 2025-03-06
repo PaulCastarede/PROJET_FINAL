@@ -1,5 +1,9 @@
 import arcade
+import time
 
+
+SLIMES_SPEED = 1
+"""Speed of the slimes, in pixels per frame"""
 PLAYER_MOVEMENT_SPEED = 5
 """Lateral speed of the player, in pixels per frame."""
 
@@ -19,7 +23,7 @@ class GameView(arcade.View):
         self.background_color = arcade.csscolor.CORNFLOWER_BLUE
         self.player_sprite_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList(use_spatial_hash=True)
-        self.monster_list = arcade.SpriteList(use_spatial_hash=True)
+        self.slimes_list = arcade.SpriteList(use_spatial_hash=True)
         self.camera = arcade.camera.Camera2D()
         self.coins_list = arcade.SpriteList(use_spatial_hash=True)
         self.no_go_list = arcade.SpriteList(use_spatial_hash=True)
@@ -29,6 +33,10 @@ class GameView(arcade.View):
         self.map_height = 0
         self.S_x = 0
         self.S_y = 0
+        self.coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
+        self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
+        self.death_sound = arcade.load_sound(":resources:sounds/gameover1.wav")
+        self.death = False
         # Setup our game
         self.readmap()
         self.setup()
@@ -72,8 +80,8 @@ class GameView(arcade.View):
                             self.coins_list.append(coin)
                     
                         case "o":   
-                            monster = arcade.Sprite(":resources:/images/enemies/slimeBlue.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
-                            self.monster_list.append(monster)
+                            slimes = arcade.Sprite(":resources:/images/enemies/slimeBlue.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
+                            self.slimes_list.append(slimes)
                     
                         case "£":   
                             lava = arcade.Sprite(":resources:/images/tiles/lava.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
@@ -92,6 +100,13 @@ class GameView(arcade.View):
             center_y=self.S_y, scale=0.5
         )
         self.player_sprite_list.append(self.player_sprite)
+        self.death = False
+
+        self.player_sprite_death = arcade.Sprite(
+        ":resources:/images/animated_characters/female_adventurer/femaleAdventurer_fall.png",
+        center_x=self.player_sprite.center_x,
+        center_y=self.player_sprite.center_y
+        )
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.player_sprite, 
@@ -113,6 +128,7 @@ class GameView(arcade.View):
                 if self.physics_engine.can_jump():
                     # jump by giving an initial vertical speed
                     self.player_sprite.change_y = PLAYER_JUMP_SPEED
+                    arcade.play_sound(self.jump_sound)
             case arcade.key.ESCAPE:
                 # resets the game
                 self.setup()
@@ -138,12 +154,32 @@ class GameView(arcade.View):
         self.physics_engine.update()
         self.camera.position = self.player_sprite.position
 
+        for slime in self.slimes_list:
+            slime.change_x += SLIMES_SPEED
+            below = arcade.check_for_collision_with_list(slime, self.wall_list)
+            front = arcade.Sprite(center_x= slime.center_x + slime.change_x * 10, center_y= 1000) #slime.center_y + 20)
+            front_collision = arcade.check_for_collision_with_list(front, self.wall_list)
+            
+            if not below or front_collision:
+                slime.change_x *= -1
+
         collided_coins = arcade.check_for_collision_with_list(
             self.player_sprite, 
             self.coins_list
         )
         for coin in collided_coins:
             coin.remove_from_sprite_lists()
+            arcade.play_sound(self.coin_sound)
+        
+        collided_no_go = arcade.check_for_collision_with_list(
+            self.player_sprite, 
+            self.no_go_list)
+        collided_slimes = arcade.check_for_collision_with_list(
+            self.player_sprite, 
+            self.slimes_list)
+        
+        if not(not collided_no_go) or not(not collided_slimes)  :    #Si le joueur est en collision avec la lave ou un monstre...
+            self.death = True 
 
 
     # AFFICHAGE #
@@ -154,4 +190,4 @@ class GameView(arcade.View):
             self.player_sprite_list.draw()
             self.coins_list.draw()
             self.no_go_list.draw()
-            self.monster_list.draw()
+            self.slimes_list.draw()
