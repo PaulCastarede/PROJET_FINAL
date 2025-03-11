@@ -16,6 +16,12 @@ SLIMES_SPEED = 1
 class GameView(arcade.View):
     """Main in-game view."""
 
+    player_sprite_list : arcade.SpriteList
+    wall_list : arcade.SpriteList
+    no_go_list : arcade.SpriteList
+    slimes_list : arcade.SpriteList
+    coins_list : arcade.SpriteList
+    test_position_list : arcade.SpriteList
     # INITIALISATION DE LA PARTIE
     def __init__(self) -> None:
         super().__init__()
@@ -27,11 +33,10 @@ class GameView(arcade.View):
         self.slimes_list = arcade.SpriteList()
         self.camera = arcade.camera.Camera2D()
         self.coins_list = arcade.SpriteList(use_spatial_hash=True)
-        self.no_go_list = arcade.SpriteList(use_spatial_hash=True)
         self.right_pressed = False
         self.left_pressed = False
-        
-        self.map_width = 0
+        self.test_position_list = arcade.SpriteList()
+        self.map_width = 0  
         self.map_height = 0
         self.S_x = 0
         self.S_y = 0
@@ -46,7 +51,7 @@ class GameView(arcade.View):
 
 
     def readmap(self) -> None:
-        with open("maps/map1.txt", "r") as file:
+        with open("maps/map1.txt", "r", encoding="utf-8") as file:
             for i in range(2):
                     line = file.readline()  # Retirer les espaces et sauts de ligne
                     if ": " in line:
@@ -65,6 +70,7 @@ class GameView(arcade.View):
                 if i > self.map_height + 3 :
                     break
                 for j, character in enumerate(line):
+                    print(line)
                     match character :
                         case "=":   
                             grass= arcade.Sprite(":resources:images/tiles/grassMid.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
@@ -84,10 +90,12 @@ class GameView(arcade.View):
                     
                         case "o":   
                             slime = arcade.Sprite(":resources:/images/enemies/slimeBlue.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
+                            slime.change_x = SLIMES_SPEED
                             self.slimes_list.append(slime)
+                            
                     
                         case "£":   
-                            lava = arcade.Sprite(":resources:/images/tiles/lava.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
+                            lava = arcade.Sprite(":resources:/images/tiles/lava.png", scale=0.5, center_x=64*j, center_y=64*(self.map_height - i))
                             self.no_go_list.append(lava)
                     
                         case "S":   
@@ -152,12 +160,13 @@ class GameView(arcade.View):
         
 
         for slime in self.slimes_list:
-            slime.change_x += SLIMES_SPEED
-            below = arcade.check_for_collision_with_list(slime, self.wall_list)
-            front = arcade.Sprite(center_x= slime.center_x + slime.change_x * 10, center_y= 1000) #slime.center_y + 20)
+            slime.center_x += slime.change_x
+            below = arcade.Sprite(center_x = slime.center_x + slime.change_x * 85, center_y = slime.center_y - 30 )
+            below_collision = arcade.check_for_collision_with_list(below, self.wall_list)
+            front = arcade.Sprite(scale = 0.005, center_x= slime.center_x + slime.change_x * 22 , center_y = slime.center_y - 15 )
             front_collision = arcade.check_for_collision_with_list(front, self.wall_list)
-            
-            if not below or front_collision:
+            self.test_position_list.append(front)
+            if not below_collision or front_collision:
                 slime.change_x *= -1
 
 
@@ -183,7 +192,7 @@ class GameView(arcade.View):
         if self.death :
             arcade.play_sound(self.death_sound)
             self.player_sprite_list.clear()                             # Si le joueur est mort, déclenche l'animation et le son de mort
-            time.sleep(1)
+            time.sleep(0.25)
             self.setup()
 
     def on_draw(self) -> None:
@@ -194,4 +203,3 @@ class GameView(arcade.View):
             self.coins_list.draw()
             self.no_go_list.draw()
             self.slimes_list.draw()
-            
