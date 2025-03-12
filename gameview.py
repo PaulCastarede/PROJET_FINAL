@@ -25,6 +25,7 @@ class GameView(arcade.View):
     coins_list : arcade.SpriteList[arcade.Sprite]
     test_position_list : arcade.SpriteList[arcade.Sprite]
     Sword_Sprite : arcade.Sprite 
+    score : int 
 
 
     # INITIALISATION DE LA PARTIE
@@ -126,6 +127,7 @@ class GameView(arcade.View):
             center_y=self.S_y, scale=0.5
         )
         self.death = False
+        self.score = 0
         self.player_sprite_list.append(self.player_sprite)
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(
@@ -175,29 +177,31 @@ class GameView(arcade.View):
         self.camera.position = self.player_sprite.position  #type: ignore
         
 
-        for slime in self.slimes_list:
-            slime.center_x += slime.change_x
+        for slime in self.slimes_list:                                            #Comportement des slimes 
+            slime.center_x += slime.change_x 
             below = arcade.Sprite(center_x = slime.center_x + slime.change_x * 85, center_y = slime.center_y - 30 )
-            below_collision = arcade.check_for_collision_with_list(below, self.wall_list)
+            below_collision = arcade.check_for_collision_with_list(below, self.wall_list)                                             #Check s'il y a un wall en dessous de l'endroit ou le slime se dirige                   
             front = arcade.Sprite(scale = 0.005, center_x= slime.center_x + slime.change_x * 22 , center_y = slime.center_y - 15 )
-            front_collision = arcade.check_for_collision_with_list(front, self.wall_list)
+            front_collision = arcade.check_for_collision_with_list(front, self.wall_list)                                             #Check s'il y a un obstacle en face du slime
             self.test_position_list.append(front)
             if not below_collision or front_collision:
-                slime.change_x *= -1
+                slime.change_x *= -1                        #S'il y a un obstacle, le slime fait demit-tour
 
 
         collided_coins = arcade.check_for_collision_with_list(
             self.player_sprite, 
-            self.coins_list
+            self.coins_list                                             #Vérifie si le joueur est en contact avec des pièces
         )
         for coin in collided_coins:
-            coin.remove_from_sprite_lists()
+            self.score += len(collided_coins)                           #Incrémente le score du nombre de pièces  
+            coin.remove_from_sprite_lists()                             #Retire les pièces en contact avec le joueur
             arcade.play_sound(self.coin_sound)
+                                                        
 
         collided_no_go = arcade.check_for_collision_with_list(
             self.player_sprite, 
             self.no_go_list)
-        collided_slimes = arcade.check_for_collision_with_list(
+        collided_slimes = arcade.check_for_collision_with_list(         #Vérifie si le joueur est en contact avec un élément léthal
             self.player_sprite, 
             self.slimes_list)
         
@@ -211,7 +215,7 @@ class GameView(arcade.View):
             time.sleep(0.25)
             self.setup()
 
-    def on_draw(self) -> None:
+    def on_draw(self) -> None:                                       #Affichage de tous les sprites
         self.clear()
         with self.camera.activate():
             self.wall_list.draw()
