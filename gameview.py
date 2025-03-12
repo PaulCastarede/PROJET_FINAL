@@ -16,6 +16,8 @@ SLIMES_SPEED = 1
 class GameView(arcade.View):
     """Main in-game view."""
 
+
+    #DECLARATION DES ATTRIBUTS
     player_sprite_list : arcade.SpriteList[arcade.Sprite]
     wall_list : arcade.SpriteList[arcade.Sprite]
     no_go_list : arcade.SpriteList[arcade.Sprite]
@@ -23,6 +25,8 @@ class GameView(arcade.View):
     coins_list : arcade.SpriteList[arcade.Sprite]
     test_position_list : arcade.SpriteList[arcade.Sprite]
     Sword_Sprite : arcade.Sprite 
+
+
     # INITIALISATION DE LA PARTIE
     def __init__(self) -> None:
         super().__init__()
@@ -53,7 +57,7 @@ class GameView(arcade.View):
 
 
     def readmap(self) -> None:
-        with open("maps/map1.txt", "r", encoding="utf-8") as file:
+        with open("maps/map1.txt", "r", encoding="utf-8") as file:     
             for i in range(2):
                     line = file.readline()  # Retirer les espaces et sauts de ligne
                     if ": " in line:
@@ -69,11 +73,12 @@ class GameView(arcade.View):
                     raise ValueError()
             
             self.wall_list.clear()
-            self.coins_list.clear()
+            self.coins_list.clear()           #On enlève les sprites qui étaient générés auparavant
             self.slimes_list.clear()
             self.no_go_list.clear()
+            self.player_sprite_list.clear()                                                              
             
-            for i, line in enumerate(file, start=3):
+            for i, line in enumerate(file, start=3):           #On parcourt chaque ligne et chaque colonne de la map 
                 if i > self.map_height + 3 :
                     break
                 for j, character in enumerate(line):
@@ -111,10 +116,12 @@ class GameView(arcade.View):
                     
     def setup(self) -> None:
         """Set up the game here."""
-        self.player_sprite_list.clear()
-        self.readmap()
-        self.player_sprite = arcade.Sprite(
-            ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png",
+
+        self.readmap()     #Génération de la map
+
+        
+        self.player_sprite = arcade.Sprite( 
+            ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png",            #Génération du joueur
             center_x=self.S_x,
             center_y=self.S_y, scale=0.5
         )
