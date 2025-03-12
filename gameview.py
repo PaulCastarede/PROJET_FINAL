@@ -16,12 +16,12 @@ SLIMES_SPEED = 1
 class GameView(arcade.View):
     """Main in-game view."""
 
-    player_sprite_list : arcade.SpriteList
-    wall_list : arcade.SpriteList
-    no_go_list : arcade.SpriteList
-    slimes_list : arcade.SpriteList
-    coins_list : arcade.SpriteList
-    test_position_list : arcade.SpriteList
+    player_sprite_list : arcade.SpriteList[arcade.Sprite]
+    wall_list : arcade.SpriteList[arcade.Sprite]
+    no_go_list : arcade.SpriteList[arcade.Sprite]
+    slimes_list : arcade.SpriteList[arcade.Sprite]
+    coins_list : arcade.SpriteList[arcade.Sprite]
+    test_position_list : arcade.SpriteList[arcade.Sprite]
     Sword_Sprite : arcade.Sprite 
     # INITIALISATION DE LA PARTIE
     def __init__(self) -> None:
