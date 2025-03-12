@@ -22,6 +22,7 @@ class GameView(arcade.View):
     slimes_list : arcade.SpriteList
     coins_list : arcade.SpriteList
     test_position_list : arcade.SpriteList
+    Sword_Sprite : arcade.Sprite 
     # INITIALISATION DE LA PARTIE
     def __init__(self) -> None:
         super().__init__()
@@ -40,6 +41,8 @@ class GameView(arcade.View):
         self.map_height = 0
         self.S_x = 0
         self.S_y = 0
+
+       
 
         self.coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
         self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
@@ -135,7 +138,7 @@ class GameView(arcade.View):
                     arcade.play_sound(self.jump_sound)
             case arcade.key.ESCAPE:
                 # resets the game
-                self.setup()
+                self.__init__()
 
     def on_key_release(self, key: int, modifiers: int) -> None:
         match key:
