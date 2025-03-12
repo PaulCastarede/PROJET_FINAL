@@ -49,7 +49,6 @@ class GameView(arcade.View):
         self.death_sound = arcade.load_sound(":resources:sounds/gameover1.wav")
         self.death = False
         # Setup our game
-        self.readmap()
         self.setup()
 
 
@@ -60,14 +59,19 @@ class GameView(arcade.View):
                     if ": " in line:
                         key, value = line.split(":", 1)  # Séparer la clé et la valeur
                         key = key.strip()
-                        value = int(value.strip())  # Convertir la valeur en entier
+                        value_int = int(value)  # Convertir la valeur en entier
                         if key == "width":
-                            self.map_width = value
+                            self.map_width = value_int
                         elif key == "height":
-                            self.map_height = value
+                            self.map_height = value_int
 
             if self.map_width == 0 or self.map_height == 0 : 
                     raise ValueError()
+            
+            self.wall_list.clear()
+            self.coins_list.clear()
+            self.slimes_list.clear()
+            self.no_go_list.clear()
             
             for i, line in enumerate(file, start=3):
                 if i > self.map_height + 3 :
@@ -108,6 +112,7 @@ class GameView(arcade.View):
     def setup(self) -> None:
         """Set up the game here."""
         self.player_sprite_list.clear()
+        self.readmap()
         self.player_sprite = arcade.Sprite(
             ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png",
             center_x=self.S_x,
@@ -138,7 +143,7 @@ class GameView(arcade.View):
                     arcade.play_sound(self.jump_sound)
             case arcade.key.ESCAPE:
                 # resets the game
-                self.__init__()
+                self.setup()
 
     def on_key_release(self, key: int, modifiers: int) -> None:
         match key:
@@ -159,7 +164,8 @@ class GameView(arcade.View):
             self.player_sprite.change_x -= PLAYER_MOVEMENT_SPEED
         
         self.physics_engine.update()
-        self.camera.position = self.player_sprite.position
+        #Waiting for a new version mypy
+        self.camera.position = self.player_sprite.position  #type: ignore
         
 
         for slime in self.slimes_list:
