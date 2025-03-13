@@ -56,65 +56,96 @@ class GameView(arcade.View):
         # Setup our game
         self.setup()
 
-
     def readmap(self) -> None:
-        with open("maps/map1.txt", "r", encoding="utf-8") as file:     
-            for i in range(2):
-                    line = file.readline()  # Retirer les espaces et sauts de ligne
-                    if ": " in line:
-                        key, value = line.split(":", 1)  # Séparer la clé et la valeur
-                        key = key.strip()
-                        value_int = int(value)  # Convertir la valeur en entier
-                        if key == "width":
-                            self.map_width = value_int
-                        elif key == "height":
-                            self.map_height = value_int
 
-            if self.map_width == 0 or self.map_height == 0 : 
-                    raise ValueError()
-            
+        # Ouvrir le fichier sous l'acronyme 'file'
+        with open("maps/map1.txt", "r", encoding="utf-8") as file:
+
+            for line in file:
+                stripped_line = line.strip()  # Supprimer chaque espace / saut
+
+                # Lire chaque ligne jusqu'à la premiere "---"
+                if stripped_line == "---":
+                    break  # Fin de la configuration
+
+                if ": " in stripped_line:
+                    key, value = stripped_line.split(": ", 1)  # Diviser en 2 la ligne : clé, valeur
+                    key = key.strip()  # Retirer les espaces
+                    value = value.strip()  # Retirer les espaces
+
+                    # Bloc if, try, except pour ne pas utiliser if, else :
+                    if key in ("width", "height"):  # On va convertir en type int la valeur de la clé  
+                        try:
+                            value_int = int(value) 
+
+                            if value_int <= 0: # On vérifie que la valeur de la clé est un entier positif
+                                raise ValueError(f"Valeur invalide pour la clé : {key}: {value}")
+
+                            if key == "width":
+                                self.map_width = value_int  # On définit la largeur de la carte
+
+                            else:
+                                self.map_height = value_int  # On définit la longueur de la carte
+
+                        except ValueError as e: 
+                            raise ValueError(f"Valeur invalide pour la clé {key}: {value}") from e
+
+            # Vérifier que les dimensions sont des entiers strictement positifs
+            if self.map_width <= 0 or self.map_height <= 0:
+                raise ValueError("Les dimensions dans la configuration sont invalides")
+
+            # Initier les listes
             self.wall_list.clear()
-            self.coins_list.clear()           #On enlève les sprites qui étaient générés auparavant
+            self.coins_list.clear()
             self.slimes_list.clear()
             self.no_go_list.clear()
-            self.player_sprite_list.clear()                                                              
-            
-            for i, line in enumerate(file, start=3):           #On parcourt chaque ligne et chaque colonne de la map 
-                if i > self.map_height + 3 :
-                    break
+            self.player_sprite_list.clear()
+
+            # Lire les caractères de la carte après le ("---")
+            map_lines = []
+
+            for A in range(self.map_height):
+                line = file.readline().rstrip('\n')  # Lire sans sauter une ligne
+
+                if len(line) > self.map_width:
+                    raise ValueError(f"La ligne dépasse la longueur de la config {self.map_width}")
+
+                map_lines.append(line)
+
+            # Vérifier que le fichier se termine par "---"
+            end_line = file.readline().strip() # Ligne +1 après dernière ligne de la boucle 
+            if end_line != "---":
+                raise ValueError("Le fichier ne se termine pas par :  '---' ")
+
+            for i, line in enumerate(map_lines): 
                 for j, character in enumerate(line):
-                    print(line)
-                    match character :
-                        case "=":   
-                            grass= arcade.Sprite(":resources:images/tiles/grassMid.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
+                    x = 64 * j  # (64 pixels par element)
+                    y = 64 * (len(map_lines)-i) # (Car renversé)
+
+                    match character:
+                        case "=":  # Grass block
+                            grass = arcade.Sprite(":resources:images/tiles/grassMid.png", scale=0.5, center_x=x, center_y=y)
                             self.wall_list.append(grass)
-                                
-                        case "-":   
-                            half_grass = arcade.Sprite(":resources:/images/tiles/grassHalf_mid.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
+                        case "-":  # Half grass block
+                            half_grass = arcade.Sprite(":resources:images/tiles/grassHalf_mid.png", scale=0.5, center_x=x, center_y=y)
                             self.wall_list.append(half_grass)
-                    
-                        case "x":   
-                            crate= arcade.Sprite(":resources:/images/tiles/boxCrate_double.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
+                        case "x":  # Crate
+                            crate = arcade.Sprite(":resources:images/tiles/boxCrate_double.png", scale=0.5, center_x=x, center_y=y)
                             self.wall_list.append(crate)
-                                        
-                        case "*":   
-                            coin = arcade.Sprite(":resources:/images/items/coinGold.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
+                        case "*":  # Coin
+                            coin = arcade.Sprite(":resources:images/items/coinGold.png", scale=0.5, center_x=x, center_y=y)
                             self.coins_list.append(coin)
-                    
-                        case "o":   
-                            slime = arcade.Sprite(":resources:/images/enemies/slimeBlue.png", scale=0.5, center_x=64*j, center_y= 64*(self.map_height - i))
-                            slime.change_x = SLIMES_SPEED
+                        case "o":  # Slime enemy
+                            slime = arcade.Sprite(":resources:images/enemies/slimeBlue.png", scale=0.5, center_x=x, center_y=y)
+                            slime.change_x = SLIMES_SPEED  # Slime movement speed
                             self.slimes_list.append(slime)
-                            
-                    
-                        case "£":   
-                            lava = arcade.Sprite(":resources:/images/tiles/lava.png", scale=0.5, center_x=64*j, center_y=64*(self.map_height - i))
+                        case "£":  # Lava
+                            lava = arcade.Sprite(":resources:images/tiles/lava.png", scale=0.5, center_x=x, center_y=y)
                             self.no_go_list.append(lava)
-                    
-                        case "S":   
-                            self.S_x = 64*j
-                            self.S_y = 64*(self.map_height - i)
-                    
+                        case "S":  # Player start position
+                            self.S_x = x
+                            self.S_y = y
+
     def setup(self) -> None:
         """Set up the game here."""
 
