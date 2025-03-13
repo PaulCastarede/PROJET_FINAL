@@ -71,6 +71,8 @@ class GameView(arcade.View):
         # Ouvrir le fichier sous l'acronyme 'file'
         with open(f"maps/{map}", "r", encoding="utf-8") as file:
 
+            self.last_level = True
+
             for line in file:
                 stripped_line = line.strip()  # Supprimer chaque espace / saut
 
@@ -269,8 +271,8 @@ class GameView(arcade.View):
                 self.readmap( map = self.Next_map)
             #VICTORY !
             else:
-                self.victory_text = arcade.Text(x = 300, y = 300, font_size = 200, text = "YOU WON" )
-                Victory = True
+                self.victory_text = arcade.Text(x = 400, y = 360, font_size = 100, text = "YOU WON" )
+                self.Victory = True
                 
 
 
