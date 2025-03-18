@@ -13,6 +13,11 @@ PLAYER_JUMP_SPEED = 18
 SLIMES_SPEED = 1
 """Speed of the slimes, in pixels per frame"""
 
+# Index of textures, first element faces left, second faces right
+TEXTURE_LEFT = 0
+TEXTURE_RIGHT = 1
+
+
 class GameView(arcade.View):
     """Main in-game view."""
 
@@ -56,7 +61,14 @@ class GameView(arcade.View):
         self.map_height = 0
         self.S_x = 0
         self.S_y = 0
-
+        self.slime_textures = []
+        
+        #On ajoute le sprite du slime qui regarde à gauche
+        texture = arcade.load_texture(":resources:/images/enemies/slimeBlue.png")    
+        self.slime_textures.append(texture)   
+        #Et celui du slime regardant a droite                                    
+        texture = arcade.load_texture("C:\EPFL\BA2\POO\projets\PROJET_FINAL\Assets\PNG\Other\slimeBlue.png",)
+        self.slime_textures.append(texture)
        
 
         self.coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
@@ -152,7 +164,7 @@ class GameView(arcade.View):
                             coin = arcade.Sprite(":resources:images/items/coinGold.png", scale=0.5, center_x=x, center_y=y)
                             self.coins_list.append(coin)
                         case "o":  # Slime enemy
-                            slime = arcade.Sprite(":resources:images/enemies/slimeBlue.png", scale=0.5, center_x=x, center_y=y)
+                            slime = arcade.Sprite("C:\EPFL\BA2\POO\projets\PROJET_FINAL\Assets\PNG\Other\slimeBlue.png", scale=0.5, center_x=x, center_y=y)
                             slime.change_x = SLIMES_SPEED  # Slime movement speed
                             self.slimes_list.append(slime)
                         case "£":  # Lava
@@ -239,7 +251,15 @@ class GameView(arcade.View):
             front_collision = arcade.check_for_collision_with_list(front, self.wall_list)                                             #Check s'il y a un obstacle en face du slime
             self.test_position_list.append(front)
             if not below_collision or front_collision:
-                slime.change_x *= -1                #S'il y a un obstacle, le slime fait demi-tour
+                #S'il y a un obstacle, le slime fait demi-tour
+                slime.change_x *= -1  
+            
+            #On adapte le sprite du slime en fonction de sa direction
+            if slime.change_x < 0:
+                slime.texture = self.slime_textures[TEXTURE_LEFT]
+            elif slime.change_x > 0:
+                slime.texture = self.slime_textures[TEXTURE_RIGHT]
+
 
 
         collided_coins = arcade.check_for_collision_with_list(
