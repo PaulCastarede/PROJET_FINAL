@@ -54,6 +54,7 @@ class GameView(arcade.View):
         self.camera = arcade.camera.Camera2D()
         self.idle_camera = arcade.camera.Camera2D()
         self.coins_list = arcade.SpriteList(use_spatial_hash=True)
+        self.exit_list = arcade.SpriteList(use_spatial_hash=True)
         self.right_pressed = False
         self.left_pressed = False
         self.mouse_left_pressed = False
@@ -66,8 +67,6 @@ class GameView(arcade.View):
         self.S_y = 0
         self.slime_textures = []
         self.sword_sprite_list = arcade.SpriteList()
-        self.exit_list = arcade.SpriteList()
-        self.score_UI = arcade.Text(Score )
         
         #On ajoute le sprite du slime qui regarde à gauche
         texture = arcade.load_texture(":resources:/images/enemies/slimeBlue.png")    
@@ -87,7 +86,9 @@ class GameView(arcade.View):
     def readmap(self, map : str) -> None:
 
         # Ouvrir le fichier sous l'acronyme 'file'
-        with open("maps/map1.txt", "r", encoding="utf-8") as file:
+        with open(f"maps/{map}", "r", encoding="utf-8") as file:
+
+            self.last_level = True
 
             for line in file:
                 stripped_line = line.strip()  # Supprimer chaque espace / saut
@@ -131,6 +132,7 @@ class GameView(arcade.View):
             self.slimes_list.clear()
             self.no_go_list.clear()
             self.player_sprite_list.clear()
+            self.exit_list.clear()
 
             # Lire les caractères de la carte après le ("---")
             map_lines = []
@@ -251,9 +253,9 @@ class GameView(arcade.View):
         """
         self.player_sprite.change_x = 0
         if self.right_pressed:
-            self.player_sprite.change_x += PLAYER_MOVEMENT_SPEED
-        if self.left_pressed:
-            self.player_sprite.change_x -= PLAYER_MOVEMENT_SPEED
+            self.player_sprite.change_x += PLAYER_MOVEMENT_SPEED       #Joueur avance si -> pressed
+        if self.left_pressed:                 
+            self.player_sprite.change_x -= PLAYER_MOVEMENT_SPEED       #Joueur recule si <- pressed
         
         self.physics_engine.update()
         #Waiting for a new version mypy
@@ -335,13 +337,14 @@ class GameView(arcade.View):
             self.player_sprite, 
             self.coins_list               #Vérifie si le joueur est en contact avec des pièces
         )
-
         for coin in collided_coins:
             self.score += len(collided_coins)              #Incrémente le score du nombre de pièces  
             coin.remove_from_sprite_lists()                #Retire les pièces en contact avec le joueur
             arcade.play_sound(self.coin_sound)
-                                                        
 
+
+        self.score_UI = arcade.Text( x =  70, y = 650, font_size = 20, text = f"Score : {str(self.score)}"    )                                   
+        
         collided_no_go = arcade.check_for_collision_with_list(
             self.player_sprite, 
             self.no_go_list)
@@ -353,6 +356,20 @@ class GameView(arcade.View):
             self.death = True                                        #...le joueur meurt.
         
 
+        #NEXT LEVEL
+        if arcade.check_for_collision_with_list(self.player_sprite, self.exit_list) :
+            if not(self.last_level):
+                self.readmap( map = self.Next_map)
+            #VICTORY !
+            else:
+                self.victory_text = arcade.Text(x = 400, y = 360, font_size = 100, text = "YOU WON" )
+                self.Victory = True
+                
+
+
+
+            
+        #GAME OVER SET
         if self.death :
              arcade.play_sound(self.death_sound)
              self.player_sprite_list.clear()                             # Si le joueur est mort, déclenche l'animation et le son de mort
