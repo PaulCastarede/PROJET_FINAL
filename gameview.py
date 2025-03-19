@@ -31,7 +31,7 @@ class GameView(arcade.View):
     coins_list : arcade.SpriteList[arcade.Sprite]
     test_position_list : arcade.SpriteList[arcade.Sprite]
     exit_list : arcade.SpriteList[arcade.Sprite]
-    sword_sprite_list : arcade.SpriteList[arcade.Sprite]
+    sword_sprite_list : arcade.SpriteList[arcade.Sprite] 
     score : int 
     score_UI : arcade.Text
     victory_text : arcade.Text
@@ -65,12 +65,13 @@ class GameView(arcade.View):
         self.S_x = 0
         self.S_y = 0
         self.slime_textures = []
+        self.sword_sprite_list = arcade.SpriteList()
         
         #On ajoute le sprite du slime qui regarde à gauche
         texture = arcade.load_texture(":resources:/images/enemies/slimeBlue.png")    
         self.slime_textures.append(texture)   
         #Et celui du slime regardant a droite                                    
-        texture = arcade.load_texture("C:\EPFL\BA2\POO\projets\PROJET_FINAL\Assets\PNG\Other\slimeBlue.png",)
+        texture = arcade.load_texture("assets/slimeBlue.png",)
         self.slime_textures.append(texture)
        
 
@@ -164,7 +165,7 @@ class GameView(arcade.View):
                             coin = arcade.Sprite(":resources:images/items/coinGold.png", scale=0.5, center_x=x, center_y=y)
                             self.coins_list.append(coin)
                         case "o":  # Slime enemy
-                            slime = arcade.Sprite("C:\EPFL\BA2\POO\projets\PROJET_FINAL\Assets\PNG\Other\slimeBlue.png", scale=0.5, center_x=x, center_y=y)
+                            slime = arcade.Sprite("assets/slimeBlue.png", scale=0.5, center_x=x, center_y=y)
                             slime.change_x = SLIMES_SPEED  # Slime movement speed
                             self.slimes_list.append(slime)
                         case "£":  # Lava
@@ -223,6 +224,23 @@ class GameView(arcade.View):
                 self.right_pressed = False
             case arcade.key.LEFT:
                 self.left_pressed = False
+   
+    def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> None:
+        # Mettre à jour les coordonnées de la souris
+        self.mouse_x = x
+        self.mouse_y = y
+        
+    
+    def on_mouse_press(self, x: int, y: int, button: int, modifiers: int) -> None:
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            self.mouse_left_pressed = True
+
+    def on_mouse_release(self, x: int, y: int, button: int, modifiers: int) -> None:
+        if button == arcade.MOUSE_BUTTON_LEFT : 
+            self.mouse_left_pressed = False
+            self.sword_sprite_list.clear()
+    
+
 
     def on_update(self, delta_time: float) -> None:
         """Called once per frame, before drawing.
@@ -249,7 +267,66 @@ class GameView(arcade.View):
             front_collision = arcade.check_for_collision_with_list(front, self.wall_list)                                             #Check s'il y a un obstacle en face du slime
             self.test_position_list.append(front)
             if not below_collision or front_collision:
-                slime.change_x *= -1                        #S'il y a un obstacle, le slime fait demit-tour
+                #S'il y a un obstacle, le slime fait demi-tour
+                slime.change_x *= -1  
+            
+            #On adapte le sprite du slime en fonction de sa direction
+            if slime.change_x < 0:
+                slime.texture = self.slime_textures[TEXTURE_LEFT]
+            elif slime.change_x > 0:
+                slime.texture = self.slime_textures[TEXTURE_RIGHT]
+
+            
+
+            if self.mouse_left_pressed:
+                world_coords = self.camera.unproject((self.mouse_x, self.mouse_y))
+                world_x = world_coords[0]
+                world_y =  world_coords[1]
+
+                self.position_x = 0
+                # Calculer l'angle entre le joueur et la position de la souris dans le monde
+                self.angle = math.atan2(world_y - self.player_sprite.center_y, world_x - self.player_sprite.center_x)
+                print(f"Clic écran: ({self.mouse_x}, {self.mouse_y})")
+                print(f"Clic monde (unproject): ({world_x}, {world_y})")
+                print(f"Joueur monde: ({self.player_sprite.center_x}, {self.player_sprite.center_y})")
+                print(f"Angle (radians): ({self.angle}, (degrés): {math.degrees(self.angle)}")
+
+                if abs(math.degrees(self.angle)) > 90:
+                    self.position_x = -20
+                else : 
+                    self.position_x =20
+
+
+                if len(self.sword_sprite_list)==0:
+                    self.sword_sprite = arcade.Sprite(
+                                    "assets/kenney-voxel-items-png/sword_silver.png",
+                                    scale=0.5 * 0.7,
+                                    center_x=self.player_sprite.center_x + self.position_x,
+                                    center_y=self.player_sprite.center_y - 10,
+                                    angle=-math.degrees(self.angle)+45)
+                    self.sword_sprite_list.append(self.sword_sprite)
+                else :
+                    self.sword_sprite_list[0].center_x = self.player_sprite.center_x + self.position_x
+                    self.sword_sprite_list[0].center_y = self.player_sprite.center_y-10
+                    self.sword_sprite_list[0].angle=-math.degrees(self.angle)+45
+
+
+            
+
+            if self.mouse_left_pressed:
+                touched_slimes = []
+                for sword in self.sword_sprite_list:
+                    touched_slimes.extend(arcade.check_for_collision_with_list(sword, self.slimes_list))
+
+                slimes_to_remove = []
+                for slime in touched_slimes:
+                    slimes_to_remove.append(slime)
+                    self.score += 1     
+
+                for slime in slimes_to_remove:
+                    slime.remove_from_sprite_lists()
+                    arcade.play_sound(self.coin_sound)
+
 
 
         collided_coins = arcade.check_for_collision_with_list(
@@ -291,3 +368,10 @@ class GameView(arcade.View):
             self.coins_list.draw()
             self.no_go_list.draw()
             self.slimes_list.draw()
+            self.exit_list.draw()
+            if self.mouse_left_pressed:
+                self.sword_sprite_list.draw()
+        with self.idle_camera.activate():
+             self.score_UI.draw()
+             if self.Victory :                
+                 self.victory_text.draw()
