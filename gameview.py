@@ -66,6 +66,8 @@ class GameView(arcade.View):
         self.S_y = 0
         self.slime_textures = []
         self.sword_sprite_list = arcade.SpriteList()
+        self.exit_list = arcade.SpriteList()
+        self.score_UI = arcade.Text(Score )
         
         #On ajoute le sprite du slime qui regarde à gauche
         texture = arcade.load_texture(":resources:/images/enemies/slimeBlue.png")    
