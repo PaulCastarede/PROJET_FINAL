@@ -1,5 +1,6 @@
 import arcade
 import time 
+import math
 
 PLAYER_MOVEMENT_SPEED = 5
 """Lateral speed of the player, in pixels per frame."""
@@ -24,23 +25,37 @@ class GameView(arcade.View):
     slimes_list : arcade.SpriteList[arcade.Sprite]
     coins_list : arcade.SpriteList[arcade.Sprite]
     test_position_list : arcade.SpriteList[arcade.Sprite]
-    Sword_Sprite : arcade.Sprite 
+    exit_list : arcade.SpriteList[arcade.Sprite]
+    sword_sprite_list : arcade.SpriteList[arcade.Sprite]
     score : int 
-
+    score_UI : arcade.Text
+    victory_text : arcade.Text
+    Next_map : str
+    last_level : bool
+    Victory : bool
 
     # INITIALISATION DE LA PARTIE
     def __init__(self) -> None:
         super().__init__()
         # Choose a nice comfy background color
         self.background_color = arcade.csscolor.CORNFLOWER_BLUE
+
+        
+        #Initialisation des tributs
         self.player_sprite_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList(use_spatial_hash=True)
         self.no_go_list = arcade.SpriteList(use_spatial_hash=True)
         self.slimes_list = arcade.SpriteList()
         self.camera = arcade.camera.Camera2D()
+        self.idle_camera = arcade.camera.Camera2D()
         self.coins_list = arcade.SpriteList(use_spatial_hash=True)
+        self.exit_list = arcade.SpriteList(use_spatial_hash=True)
+        self.sword_sprite_list = arcade.SpriteList()
         self.right_pressed = False
         self.left_pressed = False
+        self.mouse_left_pressed = False
+        self.mouse_x = 0
+        self.mouse_y = 0
         self.test_position_list = arcade.SpriteList()
         self.map_width = 0  
         self.map_height = 0
@@ -56,10 +71,10 @@ class GameView(arcade.View):
         # Setup our game
         self.setup()
 
-    def readmap(self) -> None:
+    def readmap(self, map : str) -> None:
 
         # Ouvrir le fichier sous l'acronyme 'file'
-        with open("maps/map1.txt", "r", encoding="utf-8") as file:
+        with open(f"maps/{map}", "r", encoding="utf-8") as file:
 
             for line in file:
                 stripped_line = line.strip()  # Supprimer chaque espace / saut
@@ -74,18 +89,21 @@ class GameView(arcade.View):
                     value = value.strip()  # Retirer les espaces
 
                     # Bloc if, try, except pour ne pas utiliser if, else :
-                    if key in ("width", "height"):  # On va convertir en type int la valeur de la clé  
+                    if key in ("width", "height", "next-map"):  # On va convertir en type int la valeur de la clé  
                         try:
-                            value_int = int(value) 
-
-                            if value_int <= 0: # On vérifie que la valeur de la clé est un entier positif
-                                raise ValueError(f"Valeur invalide pour la clé : {key}: {value}")
+                            if key in ("width", "height"):
+                                if int(value) <= 0:             # On vérifie que la valeur de la clé est un entier positif
+                                    raise ValueError(f"Valeur invalide pour la clé : {key}: {value}")
 
                             if key == "width":
-                                self.map_width = value_int  # On définit la largeur de la carte
+                                self.map_width = int(value) # On définit la largeur de la carte
 
-                            else:
-                                self.map_height = value_int  # On définit la longueur de la carte
+                            if key == "height":
+                                self.map_height = int(value)  # On définit la longueur de la carte
+
+                            if key == "next-map":
+                                self.last_level = False
+                                self.Next_map = value        # On définit le niveau suivant 
 
                         except ValueError as e: 
                             raise ValueError(f"Valeur invalide pour la clé {key}: {value}") from e
@@ -94,12 +112,14 @@ class GameView(arcade.View):
             if self.map_width <= 0 or self.map_height <= 0:
                 raise ValueError("Les dimensions dans la configuration sont invalides")
 
-            # Initier les listes
+            # Effacer les sprites précédents
             self.wall_list.clear()
             self.coins_list.clear()
             self.slimes_list.clear()
             self.no_go_list.clear()
             self.player_sprite_list.clear()
+            self.sword_sprite_list.clear()
+            self.exit_list.clear()
 
             # Lire les caractères de la carte après le ("---")
             map_lines = []
@@ -107,7 +127,7 @@ class GameView(arcade.View):
             for A in range(self.map_height):
                 line = file.readline().rstrip('\n')  # Lire sans sauter une ligne
 
-                if len(line) > self.map_width:
+                if len(line) > self.map_width:                
                     raise ValueError(f"La ligne dépasse la longueur de la config {self.map_width}")
 
                 map_lines.append(line)
@@ -143,28 +163,32 @@ class GameView(arcade.View):
                             lava = arcade.Sprite(":resources:images/tiles/lava.png", scale=0.5, center_x=x, center_y=y)
                             self.no_go_list.append(lava)
                         case "S":  # Player start position
-                            self.S_x = x
-                            self.S_y = y
+                            self.player_sprite =  arcade.Sprite( 
+                           ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png",            #Génération du joueur
+                            center_x=x,
+                            center_y=y, scale=0.5)
+                            self.player_sprite_list.append(self.player_sprite)
+
+
+                            self.physics_engine = arcade.PhysicsEnginePlatformer(
+                            self.player_sprite, 
+                            walls=self.wall_list,                                     #On définit les lois physiques qui s'appliquent sur le sprite Player
+                            gravity_constant=PLAYER_GRAVITY)
+
+                        case "E":  #Map end
+                            exit = arcade.Sprite(":resources:/images/tiles/signExit.png", scale = 0.5, center_x = x, center_y = y)
+                            self.exit_list.append(exit)
 
     def setup(self) -> None:
         """Set up the game here."""
 
-        self.readmap()     #Génération de la map
-
+        self.readmap("map1.txt")     #Génération de la map
         
-        self.player_sprite = arcade.Sprite( 
-            ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png",            #Génération du joueur
-            center_x=self.S_x,
-            center_y=self.S_y, scale=0.5
-        )
         self.death = False
-        self.score = 0
-        self.player_sprite_list.append(self.player_sprite)
+        self.Victory = False
+        self.score = 0              #Reset du score au début du jeu/ à chaque mort
 
-        self.physics_engine = arcade.PhysicsEnginePlatformer(
-            self.player_sprite, 
-            walls=self.wall_list,
-            gravity_constant=PLAYER_GRAVITY)
+    
 
     # COMMANDES
     def on_key_press(self, key: int, modifiers: int) -> None:
@@ -192,6 +216,21 @@ class GameView(arcade.View):
             case arcade.key.LEFT:
                 self.left_pressed = False
 
+    def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> None:
+        # Mettre à jour les coordonnées de la souris
+        self.mouse_x = x
+        self.mouse_y = y
+        
+    
+    def on_mouse_press(self, x: int, y: int, button: int, modifiers: int) -> None:
+        if button == arcade.MOUSE_BUTTON_LEFT:
+            self.mouse_left_pressed = True
+
+    def on_mouse_release(self, x: int, y: int, button: int, modifiers: int) -> None:
+        if button == arcade.MOUSE_BUTTON_LEFT : 
+            self.mouse_left_pressed = False
+            self.sword_sprite_list.clear()
+
     def on_update(self, delta_time: float) -> None:
         """Called once per frame, before drawing.
 
@@ -199,16 +238,52 @@ class GameView(arcade.View):
         """
         self.player_sprite.change_x = 0
         if self.right_pressed:
-            self.player_sprite.change_x += PLAYER_MOVEMENT_SPEED
-        if self.left_pressed:
-            self.player_sprite.change_x -= PLAYER_MOVEMENT_SPEED
+            self.player_sprite.change_x += PLAYER_MOVEMENT_SPEED       #Joueur avance si -> pressed
+        if self.left_pressed:                 
+            self.player_sprite.change_x -= PLAYER_MOVEMENT_SPEED       #Joueur recule si <- pressed
         
+        if self.mouse_left_pressed:
+            world_coords = self.camera.unproject((self.mouse_x, self.mouse_y))
+            world_x, world_y = world_coords[0], world_coords[1]
+
+            self.position_x = 0
+            # Calculer l'angle entre le joueur et la position de la souris dans le monde
+            self.angle = math.atan2(world_y - self.player_sprite.center_y, world_x - self.player_sprite.center_x)
+            print(f"Clic écran: ({self.mouse_x}, {self.mouse_y})")
+            print(f"Clic monde (unproject): ({world_x}, {world_y})")
+            print(f"Joueur monde: ({self.player_sprite.center_x}, {self.player_sprite.center_y})")
+            print(f"Angle (radians): ({self.angle}, (degrés): {math.degrees(self.angle)}")
+
+            if abs(math.degrees(self.angle)) > 90:
+                self.position_x = -20
+            else : 
+                self.position_x =20
+
+
+            if len(self.sword_sprite_list)==0:
+                self.sword_sprite = arcade.Sprite(
+                                "assets/kenney-voxel-items-png/sword_silver.png",
+                                scale=0.5 * 0.7,
+                                center_x=self.player_sprite.center_x + self.position_x,
+                                center_y=self.player_sprite.center_y - 10,
+                                angle=-math.degrees(self.angle)+45)
+                self.sword_sprite_list.append(self.sword_sprite)
+            else :
+                self.sword_sprite_list[0].center_x = self.player_sprite.center_x + self.position_x
+                self.sword_sprite_list[0].center_y = self.player_sprite.center_y-10
+                self.sword_sprite_list[0].angle=-math.degrees(self.angle)+45
+
+
+            
+                    
+            
         self.physics_engine.update()
         #Waiting for a new version mypy
         self.camera.position = self.player_sprite.position  #type: ignore
         
-
-        for slime in self.slimes_list:                                            #Comportement des slimes 
+        
+        #COMPORTEMENT DES SLIMES
+        for slime in self.slimes_list:          
             slime.center_x += slime.change_x 
             below = arcade.Sprite(center_x = slime.center_x + slime.change_x * 85, center_y = slime.center_y - 30 )
             below_collision = arcade.check_for_collision_with_list(below, self.wall_list)                                             #Check s'il y a un wall en dessous de l'endroit ou le slime se dirige                   
@@ -216,19 +291,37 @@ class GameView(arcade.View):
             front_collision = arcade.check_for_collision_with_list(front, self.wall_list)                                             #Check s'il y a un obstacle en face du slime
             self.test_position_list.append(front)
             if not below_collision or front_collision:
-                slime.change_x *= -1                        #S'il y a un obstacle, le slime fait demit-tour
+                slime.change_x *= -1                #S'il y a un obstacle, le slime fait demi-tour
 
 
         collided_coins = arcade.check_for_collision_with_list(
             self.player_sprite, 
-            self.coins_list                                             #Vérifie si le joueur est en contact avec des pièces
+            self.coins_list               #Vérifie si le joueur est en contact avec des pièces
         )
-        for coin in collided_coins:
-            self.score += len(collided_coins)                           #Incrémente le score du nombre de pièces  
-            coin.remove_from_sprite_lists()                             #Retire les pièces en contact avec le joueur
-            arcade.play_sound(self.coin_sound)
-                                                        
 
+        for coin in collided_coins:
+            self.score += len(collided_coins)              #Incrémente le score du nombre de pièces  
+            coin.remove_from_sprite_lists()                #Retire les pièces en contact avec le joueur
+            arcade.play_sound(self.coin_sound)
+        
+        if self.mouse_left_pressed:
+            touched_slimes = []
+            for sword in self.sword_sprite_list:
+                touched_slimes.extend(arcade.check_for_collision_with_list(sword, self.slimes_list))
+
+            slimes_to_remove = []
+            for slime in touched_slimes:
+                slimes_to_remove.append(slime)
+                self.score += 1  
+
+            for slime in slimes_to_remove:
+                slime.remove_from_sprite_lists()
+                arcade.play_sound(self.coin_sound)
+
+
+
+        self.score_UI = arcade.Text( x =  70, y = 650, font_size = 20, text = f"Score : {str(self.score)}"    )                                   
+        
         collided_no_go = arcade.check_for_collision_with_list(
             self.player_sprite, 
             self.no_go_list)
@@ -240,13 +333,30 @@ class GameView(arcade.View):
             self.death = True                                        #...le joueur meurt.
         
 
-        if self.death :
-            arcade.play_sound(self.death_sound)
-            self.player_sprite_list.clear()                             # Si le joueur est mort, déclenche l'animation et le son de mort
-            time.sleep(0.25)
-            self.setup()
+        #NEXT LEVEL
+        if arcade.check_for_collision_with_list(self.player_sprite, self.exit_list) :
+            if not(self.last_level):
+                self.readmap( map = self.Next_map)
+            #VICTORY !
+            else:
+                self.victory_text = arcade.Text(x = 300, y = 300, font_size = 200, text = "YOU WON" )
+                Victory = True
+                
 
-    def on_draw(self) -> None:                                       #Affichage de tous les sprites
+
+
+            
+        #GAME OVER SET
+        if self.death :
+             arcade.play_sound(self.death_sound)
+             self.player_sprite_list.clear()                             # Si le joueur est mort, déclenche l'animation et le son de mort
+             time.sleep(0.25)
+             self.setup()
+    
+
+
+    #AFFICHAGE DES SPRITES
+    def on_draw(self) -> None:                                 
         self.clear()
         with self.camera.activate():
             self.wall_list.draw()
@@ -254,3 +364,10 @@ class GameView(arcade.View):
             self.coins_list.draw()
             self.no_go_list.draw()
             self.slimes_list.draw()
+            self.exit_list.draw()
+            if self.mouse_left_pressed:
+                self.sword_sprite_list.draw()
+        with self.idle_camera.activate():
+             self.score_UI.draw()
+             if self.Victory :                
+                 self.victory_text.draw()
