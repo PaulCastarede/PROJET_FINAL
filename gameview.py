@@ -282,55 +282,48 @@ class GameView(arcade.View):
 
             
 
-            if self.mouse_left_pressed:
-                world_coords = self.camera.unproject((self.mouse_x, self.mouse_y))
-                world_x = world_coords[0]
-                world_y =  world_coords[1]
+        if self.mouse_left_pressed:
+            world_coords = self.camera.unproject((self.mouse_x, self.mouse_y))
+            world_x = world_coords[0]
+            world_y =  world_coords[1]
 
-                self.position_x = 0
-                # Calculer l'angle entre le joueur et la position de la souris dans le monde
-                self.angle = math.atan2(world_y - self.player_sprite.center_y, world_x - self.player_sprite.center_x)
-                print(f"Clic écran: ({self.mouse_x}, {self.mouse_y})")
-                print(f"Clic monde (unproject): ({world_x}, {world_y})")
-                print(f"Joueur monde: ({self.player_sprite.center_x}, {self.player_sprite.center_y})")
-                print(f"Angle (radians): ({self.angle}, (degrés): {math.degrees(self.angle)}")
+            self.position_x = 0
+            # Calculer l'angle entre le joueur et la position de la souris dans le monde
+            self.angle = math.atan2(world_y - self.player_sprite.center_y, world_x - self.player_sprite.center_x)
+            print(f"Clic écran: ({self.mouse_x}, {self.mouse_y})")
+            print(f"Clic monde (unproject): ({world_x}, {world_y})")
+            print(f"Joueur monde: ({self.player_sprite.center_x}, {self.player_sprite.center_y})")
+            print(f"Angle (radians): ({self.angle}, (degrés): {math.degrees(self.angle)}")
 
-                if abs(math.degrees(self.angle)) > 90:
-                    self.position_x = -20
-                else : 
-                    self.position_x =20
+            if abs(math.degrees(self.angle)) > 90:
+                self.position_x = -20
+            else : 
+                self.position_x =20
 
 
-                if len(self.sword_sprite_list)==0:
-                    self.sword_sprite = arcade.Sprite(
+            if len(self.sword_sprite_list)==0:
+                self.sword_sprite = arcade.Sprite(
                                     "assets/kenney-voxel-items-png/sword_silver.png",
                                     scale=0.5 * 0.7,
                                     center_x=self.player_sprite.center_x + self.position_x,
                                     center_y=self.player_sprite.center_y - 10,
                                     angle=-math.degrees(self.angle)+45)
-                    self.sword_sprite_list.append(self.sword_sprite)
-                else :
-                    self.sword_sprite_list[0].center_x = self.player_sprite.center_x + self.position_x
-                    self.sword_sprite_list[0].center_y = self.player_sprite.center_y-10
-                    self.sword_sprite_list[0].angle=-math.degrees(self.angle)+45
+                self.sword_sprite_list.append(self.sword_sprite)
+            else :
+                self.sword_sprite_list[0].center_x = self.player_sprite.center_x + self.position_x
+                self.sword_sprite_list[0].center_y = self.player_sprite.center_y-10
+                self.sword_sprite_list[0].angle=-math.degrees(self.angle)+45
 
 
             
+        if self.mouse_left_pressed and len(self.sword_sprite_list) > 0:  
+                 touched_slimes = arcade.check_for_collision_with_list(self.sword_sprite_list[0], self.slimes_list)
 
-            if self.mouse_left_pressed:
-                touched_slimes = []
-                for sword in self.sword_sprite_list:
-                    touched_slimes.extend(arcade.check_for_collision_with_list(sword, self.slimes_list))
-
-                slimes_to_remove = []
-                for slime in touched_slimes:
-                    slimes_to_remove.append(slime)
-                    self.score += 1     
-
-                for slime in slimes_to_remove:
-                    slime.remove_from_sprite_lists()
-                    arcade.play_sound(self.coin_sound)
-
+                 for slime in touched_slimes:
+                     self.score += len(touched_slimes)     
+                     slime.remove_from_sprite_lists()
+                     arcade.play_sound(self.coin_sound)
+ 
 
 
         collided_coins = arcade.check_for_collision_with_list(
