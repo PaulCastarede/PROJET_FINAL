@@ -3,24 +3,25 @@ import time
 import math
 import random
 import dataclasses
+from typing import Final
 
 class Bat(arcade.Sprite): 
-    __x_spawn : float
-    __y_spawn : float
+    x_spawn : Final[float]
+    y_spawn : Final[float]
     time_travel : int
     theta : float
 
     def __init__(self, path_or_texture : str, center_x : float, center_y : float, scale : float) -> None:
-        super().__init__(path_or_texture=path_or_texture,scale=scale, center_x=center_x, center_y=center_y )
-        self.__x_spawn = self.center_x
-        self.__y_spawn = self.center_y
+        super().__init__(path_or_texture,scale, center_x, center_y )
+        self.x_spawn = self.center_x
+        self.y_spawn = self.center_y
         self.time_travel = 0
         self.theta = 0
     
     #Calcul de la distance entre la position de la bat et son point d'apparition
     def distance_from_spawn(self) -> float: 
-        #return math.sqrt((self.center_x - self.__x_spawn)**2 + (self.center_y - self.__y_spawn)**2)  
-        return math.dist((self.__x_spawn,self.__y_spawn),(self.center_x,self.center_y))
+        return math.sqrt((self.center_x - self.x_spawn)**2 + (self.center_y - self.y_spawn)**2) 
+        #return math.dist((self.__x_spawn,self.__y_spawn),(self.center_x,self.center_y))
     
 
 
@@ -57,7 +58,11 @@ class GameView(arcade.View):
     bats_list : arcade.SpriteList[Bat]
     monsters_list : arcade.SpriteList[arcade.Sprite]
     coins_list : arcade.SpriteList[arcade.Sprite]
+
+    
     test_position_list : arcade.SpriteList[arcade.Sprite]
+
+
     exit_list : arcade.SpriteList[arcade.Sprite]
     sword_sprite_list : arcade.SpriteList[arcade.Sprite] 
     score : int 
@@ -97,6 +102,8 @@ class GameView(arcade.View):
         self.S_y = 0
         self.slime_textures = []
         self.sword_sprite_list = arcade.SpriteList()
+
+        
         
         #On ajoute le sprite du slime qui regarde à gauche
         texture = arcade.load_texture(":resources:/images/enemies/slimeBlue.png")    
@@ -164,6 +171,7 @@ class GameView(arcade.View):
             self.player_sprite_list.clear()
             self.exit_list.clear()
             self.bats_list.clear()
+            self.test_position_list.clear()
 
             # Lire les caractères de la carte après le ("---")
             map_lines = []
@@ -320,16 +328,15 @@ class GameView(arcade.View):
         for bats in self.bats_list:
             bats.center_x += bats.change_x
             bats.center_y += bats.change_y
-            
+            bats.change_x = BAT_SPEED*math.cos(bats.theta)
+            bats.change_y = BAT_SPEED*math.sin(bats.theta)
             bats.time_travel += 1
-            self.timetravel_UI = arcade.Text( x =  70, y = 650, font_size = 20, text = f"Score : {str(bats.time_travel)} theta = {str(bats.theta)}, d = {str(bats.distance_from_spawn())} x = {str(bats.center_x)} "    )
-            if  bats.distance_from_spawn() > 75.0:
+            ###########
+            if  bats.distance_from_spawn() > 200.0 and bats.time_travel > 30:
                 bats.theta += math.pi
-            if bats.time_travel > 60:
-                bats.change_x = BAT_SPEED*math.cos(bats.theta)
-                bats.change_y = BAT_SPEED*math.sin(bats.theta)
-                bats.theta = random.normalvariate(bats.theta, math.pi/30)
                 bats.time_travel = 0
+            if bats.time_travel%15 == 0:
+                bats.theta = random.normalvariate(bats.theta, math.pi/10)
 
 
 
@@ -437,9 +444,13 @@ class GameView(arcade.View):
             self.slimes_list.draw()
             self.bats_list.draw()
             self.exit_list.draw()
+            self.test_position_list.draw()
             if self.mouse_left_pressed:
                 self.sword_sprite_list.draw()
+            #for elem in self.bats_list:
+                #arcade.draw_circle_outline(elem.x_spawn,elem.y_spawn, 200, arcade.color.RED)
         with self.idle_camera.activate():
-             self.timetravel_UI.draw()
+             self.score_UI.draw()
              if self.Victory :                
                  self.victory_text.draw()
+        
