@@ -39,6 +39,12 @@ SLIMES_SPEED = 1
 BAT_SPEED = 2
 """Speed of the slimes, in pixels per frame"""
 
+ARROW_SPEED = 15
+"""Speed of the arrows, in pixels per frame"""
+
+ARROW_GRAVITY = 0.8 
+"""Lateral speed of the arrows, in pixels per frame"""
+
 # Index of textures, first element faces left, second faces right
 TEXTURE_LEFT = 0
 TEXTURE_RIGHT = 1
@@ -63,7 +69,7 @@ class GameView(arcade.View):
 
 
     exit_list : arcade.SpriteList[arcade.Sprite]
-    sword_sprite_list : arcade.SpriteList[arcade.Sprite] 
+    arrow_sprite_list : arcade.SpriteList[arcade.Sprite]
     score : int 
     score_UI : arcade.Text
     timetravel_UI : arcade.Text
@@ -85,22 +91,33 @@ class GameView(arcade.View):
         self.no_go_list = arcade.SpriteList(use_spatial_hash=True)
         self.slimes_list = arcade.SpriteList()
         self.bats_list = arcade.SpriteList()
-        self.camera = arcade.camera.Camera2D()
-        self.idle_camera = arcade.camera.Camera2D()
         self.coins_list = arcade.SpriteList(use_spatial_hash=True)
         self.exit_list = arcade.SpriteList(use_spatial_hash=True)
+        self.test_position_list = arcade.SpriteList()
+        self.arrow_sprite_list = arcade.SpriteList()
+
+        self.camera = arcade.camera.Camera2D()
+        self.idle_camera = arcade.camera.Camera2D()
+        self.arrow = arcade.Sprite("assets/kenney-voxel-items-png/arrow.png", scale=0.5) 
+
+
         self.right_pressed = False
         self.left_pressed = False
         self.mouse_left_pressed = False
+        self.arrow_release = False
+        
+        self.active_weapon = 0
         self.mouse_x = 0
         self.mouse_y = 0
-        self.test_position_list = arcade.SpriteList()
         self.map_width = 0  
         self.map_height = 0
         self.S_x = 0
         self.S_y = 0
+        self.angle = 0
+        self.world_x = 0
+        self.world_y = 0
+
         self.slime_textures = []
-        self.sword_sprite_list = arcade.SpriteList()
 
         
         
@@ -171,6 +188,7 @@ class GameView(arcade.View):
             self.exit_list.clear()
             self.bats_list.clear()
             self.test_position_list.clear()
+            self.arrow_sprite_list.clear()
 
             # Lire les caractères de la carte après le ("---")
             map_lines = []
@@ -207,7 +225,7 @@ class GameView(arcade.View):
                             coin = arcade.Sprite(":resources:images/items/coinGold.png", scale=0.5, center_x=x, center_y=y)
                             self.coins_list.append(coin)
                         case "o":  # Slime enemy
-                            slime = arcade.Sprite("assets\slimeBlue.png", scale=0.5, center_x=x, center_y=y)
+                            slime = arcade.Sprite("assets/slimeBlue.png", scale=0.5, center_x=x, center_y=y)
                             slime.change_x = SLIMES_SPEED  # Slime movement speed
                             self.slimes_list.append(slime)
                         case "v":  # Bat enemy
@@ -241,7 +259,12 @@ class GameView(arcade.View):
         
         self.death = False
         self.Victory = False
-        self.score = 0              #Reset du score au début du jeu/ à chaque mort
+        self.score = 0 #Reset du score au début du jeu/ à chaque mort
+        self.weapons_list = []
+        self.weapons_list.append(arcade.Sprite("assets/kenney-voxel-items-png/sword_silver.png",scale=0.5 * 0.7))
+        self.weapons_list.append(arcade.Sprite("assets/kenney-voxel-items-png/bow.png", scale=0.5))
+        self.sword = self.weapons_list[0]
+        self.bow = self.weapons_list[1]
 
     
 
@@ -275,17 +298,32 @@ class GameView(arcade.View):
         # Mettre à jour les coordonnées de la souris
         self.mouse_x = x
         self.mouse_y = y
-        
+        world_coords = self.camera.unproject((self.mouse_x, self.mouse_y)) #Coordonnées monde
+        self.world_x = world_coords[0]
+        self.world_y =  world_coords[1]
+        self.angle = math.atan2(self.world_y - self.player_sprite.center_y, self.world_x - self.player_sprite.center_x) # Calculer l'angle entre le joueur et la position de la souris dans le monde
     
+        
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int) -> None:
         if button == arcade.MOUSE_BUTTON_LEFT:
             self.mouse_left_pressed = True
+            if self.active_weapon == 1 :
+                self.arrow = arcade.Sprite("assets/kenney-voxel-items-png/arrow.png", scale=0.5,  center_x=self.player_sprite.center_x + self.position_x + 5, center_y=self.player_sprite.center_y - 5, angle=self.bow.angle + 55)
+        if button == arcade.MOUSE_BUTTON_RIGHT:
+            if self.active_weapon == 0:
+                self.active_weapon =1
+            else : 
+                self.active_weapon =0
 
     def on_mouse_release(self, x: int, y: int, button: int, modifiers: int) -> None:
         if button == arcade.MOUSE_BUTTON_LEFT : 
             self.mouse_left_pressed = False
-            self.sword_sprite_list.clear()
-    
+            if self.active_weapon == 1 :
+                self.arrow_release = True
+                self.arrow_sprite_list.append(self.arrow)
+                self.arrow_sprite_list[-1].change_x = ARROW_SPEED * math.cos(self.angle)
+                self.arrow_sprite_list[-1].change_y = ARROW_SPEED * math.sin(self.angle)
+
 
 
     def on_update(self, delta_time: float) -> None:
@@ -337,45 +375,65 @@ class GameView(arcade.View):
             if bats.time_travel%15 == 0:
                 bats.theta = random.normalvariate(bats.theta, math.pi/10)
 
-
-
         if self.mouse_left_pressed:
-            world_coords = self.camera.unproject((self.mouse_x, self.mouse_y))
-            world_x = world_coords[0]
-            world_y =  world_coords[1]
-
             self.position_x = 0
-            # Calculer l'angle entre le joueur et la position de la souris dans le monde
-            self.angle = math.atan2(world_y - self.player_sprite.center_y, world_x - self.player_sprite.center_x)
-            print(f"Clic écran: ({self.mouse_x}, {self.mouse_y})")
-            print(f"Clic monde (unproject): ({world_x}, {world_y})")
-            print(f"Joueur monde: ({self.player_sprite.center_x}, {self.player_sprite.center_y})")
-            print(f"Angle (radians): ({self.angle}, (degrés): {math.degrees(self.angle)}")
-
             if abs(math.degrees(self.angle)) > 90:
                 self.position_x = -20
-            else : 
-                self.position_x =20
+            else: 
+                self.position_x = 20
 
+            if self.active_weapon == 0:
+                # Gestion de l'épée (inchangé)
+                self.sword.center_x = self.player_sprite.center_x + self.position_x
+                self.sword.center_y = self.player_sprite.center_y - 10
+                self.sword.angle = -math.degrees(self.angle) + 45
+            else:
+                # Position et angle de l'arc
+                self.bow.center_x = self.player_sprite.center_x + self.position_x 
+                self.bow.center_y = self.player_sprite.center_y - 10
+                self.bow.angle = -math.degrees(self.angle) - 35  # Angle de l'arc
+                
+                # Position statique de la flèche (même centre que l'arc)
+                self.arrow.center_x = self.player_sprite.center_x + self.position_x + 5
+                self.arrow.center_y = self.player_sprite.center_y - 5
+                
+                # Angle de la flèche 
+                self.arrow.angle = -math.degrees(self.angle) + 55
 
-            if len(self.sword_sprite_list)==0:
-                self.sword_sprite = arcade.Sprite(
-                                    "assets/kenney-voxel-items-png/sword_silver.png",
-                                    scale=0.5 * 0.7,
-                                    center_x=self.player_sprite.center_x + self.position_x,
-                                    center_y=self.player_sprite.center_y - 10,
-                                    angle=-math.degrees(self.angle)+45)
-                self.sword_sprite_list.append(self.sword_sprite)
-            else :
-                self.sword_sprite_list[0].center_x = self.player_sprite.center_x + self.position_x
-                self.sword_sprite_list[0].center_y = self.player_sprite.center_y-10
-                self.sword_sprite_list[0].angle=-math.degrees(self.angle)+45
+        for arrow in self.arrow_sprite_list:
+            # Appliquer la physique
+            arrow.change_y -= ARROW_GRAVITY
+            arrow.center_x += arrow.change_x
+            arrow.center_y += arrow.change_y
+            #arrow.angle = math.degrees(math.atan2(arrow.change_y, arrow.change_x)) + 90
+            
+            # Vérifier les collisions avec les murs
+            if arcade.check_for_collision_with_list(arrow, self.wall_list):
+                arrow.remove_from_sprite_lists()
+                self.arrow_release = False
 
+            for bat in self.bats_list : 
+                if arcade.check_for_collision(arrow, bat):
+                    arrow.remove_from_sprite_lists()
+                    bat.remove_from_sprite_lists()
+                    self.score +=1
 
             
-        if self.mouse_left_pressed and len(self.sword_sprite_list) > 0:  
-                 touched_slimes = arcade.check_for_collision_with_list(self.sword_sprite_list[0], self.slimes_list)
-                 touched_bats = arcade.check_for_collision_with_list(self.sword_sprite_list[0], self.bats_list)
+            # Vérifier les collisions avec les slimes
+            touched_slimes = arcade.check_for_collision_with_list(arrow, self.slimes_list)
+            for slime in touched_slimes:
+                slime.remove_from_sprite_lists()
+                arrow.remove_from_sprite_lists()
+                self.score += 1
+                arcade.play_sound(self.coin_sound)
+
+            if (arrow.bottom > self.camera.viewport_height or arrow.top < 0 or arcade.check_for_collision_with_list(arrow, self.wall_list)):
+                arrow.remove_from_sprite_lists()
+            self.arrow_release = False
+            
+        if self.mouse_left_pressed > 0:  
+                 touched_slimes = arcade.check_for_collision_with_list(self.weapons_list[0], self.slimes_list)
+                 touched_bats = arcade.check_for_collision_with_list(self.weapons_list[0], self.bats_list)
 
                  for slime in touched_slimes or touched_bats:
                      self.score += len(touched_slimes)     
@@ -436,6 +494,7 @@ class GameView(arcade.View):
     def on_draw(self) -> None:                                 
         self.clear()
         with self.camera.activate():
+            self.arrow_sprite_list.draw()
             self.wall_list.draw()
             self.player_sprite_list.draw()
             self.coins_list.draw()
@@ -443,13 +502,14 @@ class GameView(arcade.View):
             self.slimes_list.draw()
             self.bats_list.draw()
             self.exit_list.draw()
-            #self.test_position_list.draw()
             if self.mouse_left_pressed:
-                self.sword_sprite_list.draw()
+                arcade.draw_sprite(self.weapons_list[self.active_weapon])
+                if self.active_weapon == 1:
+                    arcade.draw_sprite(self.arrow)
+            #self.test_position_list.draw()
             #for elem in self.bats_list:
                 #arcade.draw_circle_outline(elem.x_spawn,elem.y_spawn, 200, arcade.color.RED)
         with self.idle_camera.activate():
              self.score_UI.draw()
              if self.Victory :                
                  self.victory_text.draw()
-        
