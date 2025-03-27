@@ -4,24 +4,7 @@ import math
 import random
 import dataclasses
 from typing import Final
-
-class Bat(arcade.Sprite): 
-    x_spawn : Final[float]
-    y_spawn : Final[float]
-    time_travel : int
-    theta : float
-
-    def __init__(self, path_or_texture : str, center_x : float, center_y : float, scale : float) -> None:
-        super().__init__(path_or_texture,scale, center_x, center_y )
-        self.x_spawn = self.center_x
-        self.y_spawn = self.center_y
-        self.time_travel = 0
-        self.theta = 0
-    
-    #Calcul de la distance entre la position de la bat et son point d'apparition
-    def distance_from_spawn(self) -> float: 
-        return math.sqrt((self.center_x - self.x_spawn)**2 + (self.center_y - self.y_spawn)**2) 
-    
+from monsters import *
 
 
 PLAYER_MOVEMENT_SPEED = 5
@@ -33,21 +16,12 @@ PLAYER_GRAVITY = 1
 PLAYER_JUMP_SPEED = 18
 """Instant vertical speed for jumping, in pixels per frame."""
 
-SLIMES_SPEED = 1
-"""Speed of the slimes, in pixels per frame"""
-
-BAT_SPEED = 2
-"""Speed of the slimes, in pixels per frame"""
-
 ARROW_SPEED = 15
 """Speed of the arrows, in pixels per frame"""
 
-ARROW_GRAVITY = 0.8 
+ARROW_GRAVITY = 0.4
 """Lateral speed of the arrows, in pixels per frame"""
 
-# Index of textures, first element faces left, second faces right
-TEXTURE_LEFT = 0
-TEXTURE_RIGHT = 1
 
 
 class GameView(arcade.View):
@@ -56,14 +30,13 @@ class GameView(arcade.View):
 
 
     #DECLARATION DES ATTRIBUTS
+    player_sprite : arcade.Sprite
     player_sprite_list : arcade.SpriteList[arcade.Sprite]
     wall_list : arcade.SpriteList[arcade.Sprite]
     no_go_list : arcade.SpriteList[arcade.Sprite]
-    slimes_list : arcade.SpriteList[arcade.Sprite]
-    bats_list : arcade.SpriteList[Bat]
-    monsters_list : arcade.SpriteList[arcade.Sprite]
+    monsters_list : arcade.SpriteList[Monster]
     coins_list : arcade.SpriteList[arcade.Sprite]
-
+    physics_engine : arcade.PhysicsEnginePlatformer
     
     test_position_list : arcade.SpriteList[arcade.Sprite]
 
@@ -89,8 +62,7 @@ class GameView(arcade.View):
         self.player_sprite_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList(use_spatial_hash=True)
         self.no_go_list = arcade.SpriteList(use_spatial_hash=True)
-        self.slimes_list = arcade.SpriteList()
-        self.bats_list = arcade.SpriteList()
+        self.monsters_list = arcade.SpriteList()
         self.coins_list = arcade.SpriteList(use_spatial_hash=True)
         self.exit_list = arcade.SpriteList(use_spatial_hash=True)
         self.test_position_list = arcade.SpriteList()
@@ -113,20 +85,11 @@ class GameView(arcade.View):
         self.map_height = 0
         self.S_x = 0
         self.S_y = 0
-        self.angle = 0
-        self.world_x = 0
-        self.world_y = 0
-
-        self.slime_textures = []
+        self.angle : float = 0
+        self.world_x : float = 0
+        self.world_y : float = 0
 
         
-        
-        #On ajoute le sprite du slime qui regarde à gauche
-        texture = arcade.load_texture(":resources:/images/enemies/slimeBlue.png")    
-        self.slime_textures.append(texture)   
-        #Et celui du slime regardant a droite                                    
-        texture = arcade.load_texture("assets/slimeBlue.png",)
-        self.slime_textures.append(texture)
        
 
         self.coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
@@ -135,10 +98,11 @@ class GameView(arcade.View):
         self.death = False
         # Setup our game
         self.setup()
+    
 
     def readmap(self, map : str) -> None:
 
-        # Ouvrir le fichier sous l'acronyme 'file'
+    # Ouvrir le fichier sous l'acronyme 'file'
         with open(f"maps/{map}", "r", encoding="utf-8") as file:
 
             self.last_level = True
@@ -182,11 +146,10 @@ class GameView(arcade.View):
             # Effacer les sprites précédents
             self.wall_list.clear()
             self.coins_list.clear()
-            self.slimes_list.clear()
+            self.monsters_list.clear()
             self.no_go_list.clear()
             self.player_sprite_list.clear()
             self.exit_list.clear()
-            self.bats_list.clear()
             self.test_position_list.clear()
             self.arrow_sprite_list.clear()
 
@@ -225,19 +188,18 @@ class GameView(arcade.View):
                             coin = arcade.Sprite(":resources:images/items/coinGold.png", scale=0.5, center_x=x, center_y=y)
                             self.coins_list.append(coin)
                         case "o":  # Slime enemy
-                            slime = arcade.Sprite("assets/slimeBlue.png", scale=0.5, center_x=x, center_y=y)
-                            slime.change_x = SLIMES_SPEED  # Slime movement speed
-                            self.slimes_list.append(slime)
+                            slime = Slime("assets/slimeBlue.png", scale=0.5, center_x=x, center_y=y)
+                            self.monsters_list.append(slime)
                         case "v":  # Bat enemy
-                             
+                                
                             bat = Bat("assets/kenney-extended-enemies-png/bat.png", scale=0.5, center_x=x, center_y=y)
-                            self.bats_list.append(bat)
+                            self.monsters_list.append(bat)
                         case "£":  # Lava
                             lava = arcade.Sprite(":resources:images/tiles/lava.png", scale=0.5, center_x=x, center_y=y)
                             self.no_go_list.append(lava)
                         case "S":  # Player start position
                             self.player_sprite =  arcade.Sprite( 
-                           ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png",            #Génération du joueur
+                            ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png",            #Génération du joueur
                             center_x=x,
                             center_y=y, scale=0.5)
                             self.player_sprite_list.append(self.player_sprite)
@@ -252,10 +214,15 @@ class GameView(arcade.View):
                             exit = arcade.Sprite(":resources:/images/tiles/signExit.png", scale = 0.5, center_x = x, center_y = y)
                             self.exit_list.append(exit)
 
+            for slimes in [monsters for monsters in self.monsters_list if type(monsters) == Slime] :
+                slimes.wall_list = self.wall_list
+
+
+
     def setup(self) -> None:
         """Set up the game here."""
 
-        self.readmap("map1.txt")     #Génération de la map
+        self.readmap( "map1.txt")     #Génération de la map
         
         self.death = False
         self.Victory = False
@@ -265,6 +232,8 @@ class GameView(arcade.View):
         self.weapons_list.append(arcade.Sprite("assets/kenney-voxel-items-png/bow.png", scale=0.5))
         self.sword = self.weapons_list[0]
         self.bow = self.weapons_list[1]
+
+     
 
     
 
@@ -342,38 +311,10 @@ class GameView(arcade.View):
         self.camera.position = self.player_sprite.position  #type: ignore
         
         
-        #COMPORTEMENT DES SLIMES
-        for slime in self.slimes_list:          
-            slime.center_x += slime.change_x 
-            below = arcade.Sprite(center_x = slime.center_x + slime.change_x * 85, center_y = slime.center_y - 30 )
-            below_collision = arcade.check_for_collision_with_list(below, self.wall_list)                                             #Check s'il y a un wall en dessous de l'endroit ou le slime se dirige                   
-            front = arcade.Sprite(scale = 0.005, center_x= slime.center_x + slime.change_x * 22 , center_y = slime.center_y - 15 )
-            front_collision = arcade.check_for_collision_with_list(front, self.wall_list)                                             #Check s'il y a un obstacle en face du slime
-            self.test_position_list.append(front)
-            if not below_collision or front_collision:
-                #S'il y a un obstacle, le slime fait demi-tour
-                slime.change_x *= -1  
+        #COMPORTEMENT DES MONSTRES
+        for monster in self.monsters_list:
+            monster.movement()         
             
-            #On adapte le sprite du slime en fonction de sa direction
-            if slime.change_x < 0:
-                slime.texture = self.slime_textures[TEXTURE_LEFT]
-            elif slime.change_x > 0:
-                slime.texture = self.slime_textures[TEXTURE_RIGHT]
-
-            
-        #COMPORTEMENT DES BATS 
-        for bats in self.bats_list:
-            bats.center_x += bats.change_x
-            bats.center_y += bats.change_y
-            bats.change_x = BAT_SPEED*math.cos(bats.theta)
-            bats.change_y = BAT_SPEED*math.sin(bats.theta)
-            bats.time_travel += 1
-            ###########
-            if  bats.distance_from_spawn() > 200.0 and bats.time_travel > 30:
-                bats.theta += math.pi
-                bats.time_travel = 0
-            if bats.time_travel%15 == 0:
-                bats.theta = random.normalvariate(bats.theta, math.pi/10)
 
         if self.mouse_left_pressed:
             self.position_x = 0
@@ -411,18 +352,11 @@ class GameView(arcade.View):
             if arcade.check_for_collision_with_list(arrow, self.wall_list):
                 arrow.remove_from_sprite_lists()
                 self.arrow_release = False
-
-            for bat in self.bats_list : 
-                if arcade.check_for_collision(arrow, bat):
-                    arrow.remove_from_sprite_lists()
-                    bat.remove_from_sprite_lists()
-                    self.score +=1
-
             
-            # Vérifier les collisions avec les slimes
-            touched_slimes = arcade.check_for_collision_with_list(arrow, self.slimes_list)
-            for slime in touched_slimes:
-                slime.remove_from_sprite_lists()
+            # Vérifier les collisions avec les monstres
+            touched_by_shot_monsters = arcade.check_for_collision_with_list(arrow, self.monsters_list)
+            for monster in touched_by_shot_monsters:
+                monster.remove_from_sprite_lists()
                 arrow.remove_from_sprite_lists()
                 self.score += 1
                 arcade.play_sound(self.coin_sound)
@@ -431,13 +365,11 @@ class GameView(arcade.View):
                 arrow.remove_from_sprite_lists()
             self.arrow_release = False
             
-        if self.mouse_left_pressed > 0:  
-                 touched_slimes = arcade.check_for_collision_with_list(self.weapons_list[0], self.slimes_list)
-                 touched_bats = arcade.check_for_collision_with_list(self.weapons_list[0], self.bats_list)
-
-                 for slime in touched_slimes or touched_bats:
-                     self.score += len(touched_slimes)     
-                     slime.remove_from_sprite_lists()
+        if self.mouse_left_pressed:  
+                 touched_monsters = arcade.check_for_collision_with_list(self.weapons_list[0], self.monsters_list)
+                 for monster in touched_monsters: 
+                     monster.remove_from_sprite_lists()
+                     self.score += 1    
                      arcade.play_sound(self.coin_sound)
  
 
@@ -457,30 +389,24 @@ class GameView(arcade.View):
         collided_no_go = arcade.check_for_collision_with_list(          #
             self.player_sprite,                                         #
             self.no_go_list)                                            #
-        collided_slimes = arcade.check_for_collision_with_list(         #Vérifie si le joueur est en contact avec un élément léthal
+        collided_monsters = arcade.check_for_collision_with_list(         #Vérifie si le joueur est en contact avec un élément léthal
             self.player_sprite,                                         # 
-            self.slimes_list)                                           #
-        collided_bats = arcade.check_for_collision_with_list(           #     
-            self.player_sprite,                                         #
-            self.bats_list)                                             #
+            self.monsters_list)                                           #
         
-        if collided_no_go or  collided_slimes or collided_bats  :    #Si le joueur est en collision avec la lave ou un monstre...
+        if collided_no_go or  collided_monsters  :    #Si le joueur est en collision avec la lave ou un monstre...
             self.death = True                                                         #...le joueur meurt.
         
 
         #NEXT LEVEL
         if arcade.check_for_collision_with_list(self.player_sprite, self.exit_list) :
             if not(self.last_level):
-                self.readmap( map = self.Next_map)
+                self.readmap(map = self.Next_map)
             #VICTORY !
             else:
                 self.victory_text = arcade.Text(x = 400, y = 360, font_size = 100, text = "YOU WON" )
                 self.Victory = True
                 
 
-
-
-            
         #GAME OVER SET
         if self.death :
              arcade.play_sound(self.death_sound)
@@ -499,8 +425,7 @@ class GameView(arcade.View):
             self.player_sprite_list.draw()
             self.coins_list.draw()
             self.no_go_list.draw()
-            self.slimes_list.draw()
-            self.bats_list.draw()
+            self.monsters_list.draw()
             self.exit_list.draw()
             if self.mouse_left_pressed:
                 arcade.draw_sprite(self.weapons_list[self.active_weapon])
