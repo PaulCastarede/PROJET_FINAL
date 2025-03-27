@@ -42,6 +42,7 @@ class Bat(Monster):
     y_spawn : Final[float]
     time_travel : int
     theta : float
+    range : int
 
     def __init__(self, path_or_texture : str, center_x : float, center_y : float, scale : float) -> None:
         super().__init__(path_or_texture,scale, center_x, center_y )
@@ -49,6 +50,7 @@ class Bat(Monster):
         self.y_spawn = self.center_y
         self.time_travel = 0
         self.theta = 0
+        self.range = 200
     
     #Calcul de la distance entre la position de la bat et son point d'apparition
     def distance_from_spawn(self) -> float: 
@@ -59,11 +61,13 @@ class Bat(Monster):
         #Modifie leur position en fonction de leur vitesse
         self.center_x += self.change_x
         self.center_y += self.change_y
+        #vitesse selon x et selon y en fonction de l'angle de leur direction
         self.change_x = BAT_SPEED*math.cos(self.theta)
         self.change_y = BAT_SPEED*math.sin(self.theta)
-        self.time_travel += 1
-        if  self.distance_from_spawn() > 200.0 and self.time_travel > 30:
-            self.theta += math.pi
+        self.time_travel += 1       
+        #Si la chauve-souris dépasse sa sphère d'action...
+        if  self.distance_from_spawn() > self.range and self.time_travel > 30:
+            self.theta += math.pi   #... elle fait demi-tour
             self.time_travel = 0
         if self.time_travel%15 == 0:
             self.theta = random.normalvariate(self.theta, math.pi/10)
