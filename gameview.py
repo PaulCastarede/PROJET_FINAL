@@ -21,7 +21,6 @@ class Bat(arcade.Sprite):
     #Calcul de la distance entre la position de la bat et son point d'apparition
     def distance_from_spawn(self) -> float: 
         return math.sqrt((self.center_x - self.x_spawn)**2 + (self.center_y - self.y_spawn)**2) 
-        #return math.dist((self.__x_spawn,self.__y_spawn),(self.center_x,self.center_y))
     
 
 
@@ -444,7 +443,7 @@ class GameView(arcade.View):
             self.slimes_list.draw()
             self.bats_list.draw()
             self.exit_list.draw()
-            self.test_position_list.draw()
+            #self.test_position_list.draw()
             if self.mouse_left_pressed:
                 self.sword_sprite_list.draw()
             #for elem in self.bats_list:

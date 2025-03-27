@@ -31,25 +31,27 @@
 * [x] Meilleure gestion de la caméra                                  10
 * [x] `README.md` à jour, expliquant comment jouer                     3
 * [x] Bug fixes                                                       20
+* [x] Implémenter les bruitages                                       10
+* [x] Fixer les sauts multiples                                       20
 
-   ## A faire :
-Paul : Implementer les bruitages, 
-Mikail : Fixer les sauts multiples
 ### Semaine 3
 * [x] Coder la fonction qui lit les maps                              90
 * [x] Interactions avec les "no go" / Implémentation de la mort       20
 * [x] Comportement des blobs                                          60
-
+* [x] Corriger les bugs de readmap                                    20
+* [x] Mise à jour de `ANSWERS.md`                                     10
 A faire :
-Enlever la plateforme en haut à gauche
 Ecrire des tests
 ### Semaine 4
-
+*[x] 
 
 ### Semaine 5
 
 ### Semaine 6
-
+* [] Amélioration de l'arc
+* [x] Mise à jour de `README.md`, avec les nouvelles fonctionnalités  10
+* [x] Mise à jour de `ANSWERS.md`                                     15 
+* []  Mise à jour de `LOG.md` 
 ### Semaine 7
 
 ### Semaine 8
