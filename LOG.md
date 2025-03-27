@@ -1,25 +1,9 @@
 # Journal
 
-## Progression
-
-
-
-* [x] Créer le LOG.md                                                  1
-* [ ] S'inscrire en binôme                                            ??
-* [ ] Découverte d'Arcade                                             ??
-* [ ] Meilleure gestion du clavier                                    ??
-* [ ] Meilleure gestion de la caméra                                  ??
-* [ ] `README.md` à jour, expliquant comment jouer                    ??
-
----
-
-## À faire (prochaine étape)
-
-* Ron : meilleure gestion du clavier
-* Hermione: finir le reste du projet
-
----
-
+A faire :
+Ecrire des tests !!!
+Adapter l'orientation visuelle des fleches en fonction de leur direction.
+Refactorer
 ## Suivi
 
 ### Semaine 2
@@ -40,18 +24,34 @@
 * [x] Comportement des blobs                                          60
 * [x] Corriger les bugs de readmap                                    20
 * [x] Mise à jour de `ANSWERS.md`                                     10
-A faire :
-Ecrire des tests
+
 ### Semaine 4
-*[x] 
+* [x] Comprendre le fonctionnement des arcade.text                     7
+* [x] Coder l'incrémentation de la variable score et l'afficher       15
+* [x] Concevoir et implémenter le code "passer d'un niveau a l'autre" 30
+* [x] Adapter la fonction readmap a cette fonctionnalité              30
+* [x] Adapter le reste du code                                        10
+* [x] Afficher l'épée dans la direction de la souris                  50
+* [x] Tuer les slimes en collision avec l'épée                        20
 
 ### Semaine 5
+* [x] Fixer les bugs liés à l'épée                                    30
+* [x] Création du sprite des bats                                     15
+* [x] Concevoir les formules pour leur déplacement                    20
+* [x] Implémentation de la classe héritée Bat                         30
+* [x] Résolution des bugs liés à la classe et au déplacement des Bats 75
+* [x] Creation du sprite des arcs                                     10
+* [x] Code pour switch d'arme                                         20
+* [x] Physique des flèches et interaction avec les monstres           50
 
 ### Semaine 6
-* [] Amélioration de l'arc
+* [x] Amélioration de l'arc                                           30
 * [x] Mise à jour de `README.md`, avec les nouvelles fonctionnalités  10
 * [x] Mise à jour de `ANSWERS.md`                                     15 
-* []  Mise à jour de `LOG.md` 
+* [x]  Mise à jour de `LOG.md`                                        25
+
+
+
 ### Semaine 7
 
 ### Semaine 8
