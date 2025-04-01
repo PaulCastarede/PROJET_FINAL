@@ -5,51 +5,29 @@ import random
 import dataclasses
 from typing import Final
 from monsters import *
-
-
-PLAYER_MOVEMENT_SPEED = 5
-"""Lateral speed of the player, in pixels per frame."""
-
-PLAYER_GRAVITY = 1
-"""Gravity applied to the player, in pixels per frame²."""
-
-PLAYER_JUMP_SPEED = 18
-"""Instant vertical speed for jumping, in pixels per frame."""
+from player import *
+from weapons import Arrow
+from create_world import *
 
 ARROW_SPEED = 15
 """Speed of the arrows, in pixels per frame"""
 
-ARROW_GRAVITY = 0.4
+ARROW_GRAVITY = 0.3
 """Lateral speed of the arrows, in pixels per frame"""
-
 
 
 class GameView(arcade.View):
     """Main in-game view."""
     
-
-
     #DECLARATION DES ATTRIBUTS
-    player_sprite : arcade.Sprite
-    player_sprite_list : arcade.SpriteList[arcade.Sprite]
-    wall_list : arcade.SpriteList[arcade.Sprite]
-    no_go_list : arcade.SpriteList[arcade.Sprite]
-    monsters_list : arcade.SpriteList[Monster]
-    coins_list : arcade.SpriteList[arcade.Sprite]
-    physics_engine : arcade.PhysicsEnginePlatformer
-    
-    test_position_list : arcade.SpriteList[arcade.Sprite]
-
-
-    exit_list : arcade.SpriteList[arcade.Sprite]
-    arrow_sprite_list : arcade.SpriteList[arcade.Sprite]
+    world : World      # --> create_world.py
     score : int 
     score_UI : arcade.Text
     timetravel_UI : arcade.Text
     victory_text : arcade.Text
-    Next_map : str
-    last_level : bool
     Victory : bool
+    position_x : int 
+
 
     # INITIALISATION DE LA PARTIE
     def __init__(self) -> None:
@@ -57,32 +35,17 @@ class GameView(arcade.View):
         # Choose a nice comfy background color
         self.background_color = arcade.csscolor.CORNFLOWER_BLUE
 
-        
         #Initialisation des tributs
-        self.player_sprite_list = arcade.SpriteList()
-        self.wall_list = arcade.SpriteList(use_spatial_hash=True)
-        self.no_go_list = arcade.SpriteList(use_spatial_hash=True)
-        self.monsters_list = arcade.SpriteList()
-        self.coins_list = arcade.SpriteList(use_spatial_hash=True)
-        self.exit_list = arcade.SpriteList(use_spatial_hash=True)
-        self.test_position_list = arcade.SpriteList()
-        self.arrow_sprite_list = arcade.SpriteList()
-
+        self.world = World()
         self.camera = arcade.camera.Camera2D()
         self.idle_camera = arcade.camera.Camera2D()
-        self.arrow = arcade.Sprite("assets/kenney-voxel-items-png/arrow.png", scale=0.5) 
-
-
         self.right_pressed = False
         self.left_pressed = False
         self.mouse_left_pressed = False
         self.arrow_release = False
-        
         self.active_weapon = 0
         self.mouse_x = 0
         self.mouse_y = 0
-        self.map_width = 0  
-        self.map_height = 0
         self.S_x = 0
         self.S_y = 0
         self.angle : float = 0
@@ -90,7 +53,6 @@ class GameView(arcade.View):
         self.world_y : float = 0
 
         
-       
 
         self.coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
         self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
@@ -100,27 +62,21 @@ class GameView(arcade.View):
         self.setup()
     
 
-    
-
     def setup(self) -> None:
         """Set up the game here."""
-
-        from readmap import readmap 
-
-        readmap(self, "map1.txt")     #Génération de la map
-        
+         
+        readmap(self.world, "map1.txt")     #Génération de la map
+         
         self.death = False
         self.Victory = False
-        self.score = 0 #Reset du score au début du jeu/ à chaque mort
+        self.score = 0  #Reset du score au début du jeu/ à chaque mort
         self.weapons_list = []
         self.weapons_list.append(arcade.Sprite("assets/kenney-voxel-items-png/sword_silver.png",scale=0.5 * 0.7))
         self.weapons_list.append(arcade.Sprite("assets/kenney-voxel-items-png/bow.png", scale=0.5))
         self.sword = self.weapons_list[0]
         self.bow = self.weapons_list[1]
 
-     
 
-    
     # COMMANDES
     def on_key_press(self, key: int, modifiers: int) -> None:
         """Called when the user presses a key on the keyboard."""
@@ -132,13 +88,15 @@ class GameView(arcade.View):
                 # start moving to the left
                 self.left_pressed = True
             case arcade.key.UP: 
-                if self.physics_engine.can_jump():
+                if self.world.physics_engine.can_jump():
                     # jump by giving an initial vertical speed
-                    self.player_sprite.change_y = PLAYER_JUMP_SPEED
+                    self.world.player_sprite_list
+                    self.world.player.change_y = PLAYER_JUMP_SPEED
                     arcade.play_sound(self.jump_sound)
             case arcade.key.ESCAPE:
                 # resets the game
                 self.setup()
+
 
     def on_key_release(self, key: int, modifiers: int) -> None:
         match key:
@@ -146,7 +104,7 @@ class GameView(arcade.View):
                 self.right_pressed = False
             case arcade.key.LEFT:
                 self.left_pressed = False
-   
+
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> None:
         # Mettre à jour les coordonnées de la souris
         self.mouse_x = x
@@ -154,14 +112,14 @@ class GameView(arcade.View):
         world_coords = self.camera.unproject((self.mouse_x, self.mouse_y)) #Coordonnées monde
         self.world_x = world_coords[0]
         self.world_y =  world_coords[1]
-        self.angle = math.atan2(self.world_y - self.player_sprite.center_y, self.world_x - self.player_sprite.center_x) # Calculer l'angle entre le joueur et la position de la souris dans le monde
-    
+        self.angle = math.atan2(self.world_y - self.world.player.center_y, self.world_x - self.world.player.center_x) # Calculer l'angle entre le joueur et la position de la souris dans le monde
+
         
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int) -> None:
         if button == arcade.MOUSE_BUTTON_LEFT:
             self.mouse_left_pressed = True
             if self.active_weapon == 1 :
-                self.arrow = arcade.Sprite("assets/kenney-voxel-items-png/arrow.png", scale=0.5,  center_x=self.player_sprite.center_x + self.position_x + 5, center_y=self.player_sprite.center_y - 5, angle=self.bow.angle + 55)
+                self.arrow = Arrow("assets/kenney-voxel-items-png/arrow.png", scale=0.5,  center_x=self.world.player.center_x + self.position_x + 5, center_y=self.world.player.center_y - 5, angle=self.bow.angle + 55)
         if button == arcade.MOUSE_BUTTON_RIGHT:
             if self.active_weapon == 0:
                 self.active_weapon =1
@@ -173,31 +131,32 @@ class GameView(arcade.View):
             self.mouse_left_pressed = False
             if self.active_weapon == 1 :
                 self.arrow_release = True
-                self.arrow_sprite_list.append(self.arrow)
-                self.arrow_sprite_list[-1].change_x = ARROW_SPEED * math.cos(self.angle)
-                self.arrow_sprite_list[-1].change_y = ARROW_SPEED * math.sin(self.angle)
+                self.world.arrow_sprite_list.append(self.arrow)
+                self.world.arrow_sprite_list[-1].change_x = ARROW_SPEED * math.cos(self.angle)
+                self.world.arrow_sprite_list[-1].change_y = ARROW_SPEED * math.sin(self.angle)
 
-
-
+     
 
     def on_update(self, delta_time: float) -> None:
         """Called once per frame, before drawing.
 
         This is where in-world time "advances", or "ticks".
         """
-        self.player_sprite.change_x = 0
-        if self.right_pressed:
-            self.player_sprite.change_x += PLAYER_MOVEMENT_SPEED       #Joueur avance si -> pressed
-        if self.left_pressed:                 
-            self.player_sprite.change_x -= PLAYER_MOVEMENT_SPEED       #Joueur recule si <- pressed
+
         
-        self.physics_engine.update()
+        self.world.player.change_x = 0
+        if self.right_pressed:
+            self.world.player.change_x += PLAYER_MOVEMENT_SPEED       #Joueur avance si -> pressed
+        if self.left_pressed:                 
+            self.world.player.change_x -= PLAYER_MOVEMENT_SPEED       #Joueur recule si <- pressed
+        
+        self.world.physics_engine.update()
         #Waiting for a new version mypy
-        self.camera.position = self.player_sprite.position  #type: ignore
+        self.camera.position = self.world.player.position  #type: ignore
         
         
         #COMPORTEMENT DES MONSTRES
-        for monster in self.monsters_list:
+        for monster in self.world.monsters_list:
             monster.movement()         
             
 
@@ -210,23 +169,23 @@ class GameView(arcade.View):
 
             if self.active_weapon == 0:
                 # Gestion de l'épée (inchangé)
-                self.sword.center_x = self.player_sprite.center_x + self.position_x
-                self.sword.center_y = self.player_sprite.center_y - 10
+                self.sword.center_x = self.world.player.center_x + self.position_x
+                self.sword.center_y = self.world.player.center_y - 10
                 self.sword.angle = -math.degrees(self.angle) + 45
             else:
                 # Position et angle de l'arc
-                self.bow.center_x = self.player_sprite.center_x + self.position_x 
-                self.bow.center_y = self.player_sprite.center_y - 10
+                self.bow.center_x = self.world.player.center_x + self.position_x 
+                self.bow.center_y = self.world.player.center_y - 10
                 self.bow.angle = -math.degrees(self.angle) - 35  # Angle de l'arc
                 
                 # Position statique de la flèche (même centre que l'arc)
-                self.arrow.center_x = self.player_sprite.center_x + self.position_x + 5
-                self.arrow.center_y = self.player_sprite.center_y - 5
+                self.arrow.center_x = self.world.player.center_x + self.position_x + 5
+                self.arrow.center_y = self.world.player.center_y - 5
                 
                 # Angle de la flèche 
                 self.arrow.angle = -math.degrees(self.angle) + 55
 
-        for arrow in self.arrow_sprite_list:
+        for arrow in self.world.arrow_sprite_list:
             # Appliquer la physique
             arrow.change_y -= ARROW_GRAVITY
             arrow.center_x += arrow.change_x
@@ -235,27 +194,27 @@ class GameView(arcade.View):
                 arrow.angle = math.degrees(math.acos(arrow.change_y/(math.sqrt((arrow.change_x)**2 +(arrow.change_y)**2)))) -45
             elif arrow.change_x < 0:
                 arrow.angle = math.degrees(math.asin(arrow.change_y/(math.sqrt((arrow.change_x)**2 +(arrow.change_y)**2)))) +225
-            #arrow.angle = math.degrees(math.atan2(arrow.change_y, arrow.change_x)) + 90
             
             # Vérifier les collisions avec les murs
-            if arcade.check_for_collision_with_list(arrow, self.wall_list):
+            if arcade.check_for_collision_with_list(arrow, self.world.wall_list):
                 arrow.remove_from_sprite_lists()
                 self.arrow_release = False
             
             # Vérifier les collisions avec les monstres
-            touched_by_shot_monsters = arcade.check_for_collision_with_list(arrow, self.monsters_list)
+            touched_by_shot_monsters = arcade.check_for_collision_with_list(arrow, self.world.monsters_list)
             for monster in touched_by_shot_monsters:
                 monster.remove_from_sprite_lists()
                 arrow.remove_from_sprite_lists()
                 self.score += 1
                 arcade.play_sound(self.coin_sound)
 
-            if (arrow.bottom > self.camera.viewport_height or arrow.top < 0 or arcade.check_for_collision_with_list(arrow, self.wall_list)):
+            if (arrow.bottom > self.camera.viewport_height or arrow.top < 0 or arcade.check_for_collision_with_list(arrow, self.world.wall_list)):
                 arrow.remove_from_sprite_lists()
-            self.arrow_release = False
+            self.arrow_release = False 
+ 
             
         if self.mouse_left_pressed:  
-                 touched_monsters = arcade.check_for_collision_with_list(self.weapons_list[0], self.monsters_list)
+                 touched_monsters = arcade.check_for_collision_with_list(self.weapons_list[0], self.world.monsters_list)
                  for monster in touched_monsters: 
                      monster.remove_from_sprite_lists()
                      self.score += 1    
@@ -264,8 +223,8 @@ class GameView(arcade.View):
 
 
         collided_coins = arcade.check_for_collision_with_list(
-            self.player_sprite, 
-            self.coins_list               #Vérifie si le joueur est en contact avec des pièces
+            self.world.player, 
+            self.world.coins_list               #Vérifie si le joueur est en contact avec des pièces
         )
         for coin in collided_coins:
             self.score += len(collided_coins)              #Incrémente le score du nombre de pièces  
@@ -275,22 +234,22 @@ class GameView(arcade.View):
 
         self.score_UI = arcade.Text( x =  70, y = 650, font_size = 20, text = f"Score : {str(self.score)}"    )                                   
         
-        collided_no_go = arcade.check_for_collision_with_list(          #
-            self.player_sprite,                                         #
-            self.no_go_list)                                            #
+        collided_no_go = arcade.check_for_collision_with_list(          
+            self.world.player,                                         
+            self.world.no_go_list)                                            
         collided_monsters = arcade.check_for_collision_with_list(         #Vérifie si le joueur est en contact avec un élément léthal
-            self.player_sprite,                                         # 
-            self.monsters_list)                                           #
+            self.world.player,                                         
+            self.world.monsters_list)                                          
         
         if collided_no_go or  collided_monsters  :    #Si le joueur est en collision avec la lave ou un monstre...
             self.death = True                                                         #...le joueur meurt.
         
 
         #NEXT LEVEL
-        if arcade.check_for_collision_with_list(self.player_sprite, self.exit_list) :
-            if not(self.last_level):
-                from readmap import readmap
-                readmap(self, map = self.Next_map)
+        if arcade.check_for_collision_with_list(self.world.player, self.world.exit_list) :
+            if not(self.world.last_level):           #Si ce n'est pas le dernier niveau, lit la prochaine
+                from create_world import readmap
+                readmap(self.world, map = self.world.Next_map)
             #VICTORY !
             else:
                 self.victory_text = arcade.Text(x = 400, y = 360, font_size = 100, text = "YOU WON" )
@@ -300,7 +259,7 @@ class GameView(arcade.View):
         #GAME OVER SET
         if self.death :
              arcade.play_sound(self.death_sound)
-             self.player_sprite_list.clear()                             # Si le joueur est mort, déclenche l'animation et le son de mort
+             self.world.player_sprite_list.clear()                             # Si le joueur est mort, déclenche l'animation et le son de mort
              time.sleep(0.25)
              self.setup()
     
@@ -310,13 +269,7 @@ class GameView(arcade.View):
     def on_draw(self) -> None:                                 
         self.clear()
         with self.camera.activate():
-            self.arrow_sprite_list.draw()
-            self.wall_list.draw()
-            self.player_sprite_list.draw()
-            self.coins_list.draw()
-            self.no_go_list.draw()
-            self.monsters_list.draw()
-            self.exit_list.draw()
+            self.world.draw()
             if self.mouse_left_pressed:
                 arcade.draw_sprite(self.weapons_list[self.active_weapon])
                 if self.active_weapon == 1:

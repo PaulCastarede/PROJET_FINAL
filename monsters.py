@@ -32,8 +32,6 @@ class Monster(arcade.Sprite):
     def movement(self) -> None:
         ...
     
-    #def kills(self, Player : arcade.Sprite) -> bool:
-
 
 
 

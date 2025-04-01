@@ -1,9 +1,47 @@
 import arcade 
 from monsters import Bat
 from monsters import Slime
-from gameview import GameView
-from gameview import PLAYER_GRAVITY
-def readmap(self : GameView, map : str) -> None:
+from player import *
+from monsters import *
+from weapons import *
+
+class World:
+    player : Player
+    player_sprite_list : arcade.SpriteList[Player]
+    wall_list : arcade.SpriteList[arcade.Sprite]
+    no_go_list : arcade.SpriteList[arcade.Sprite]
+    monsters_list : arcade.SpriteList[Monster]
+    coins_list : arcade.SpriteList[arcade.Sprite]
+    physics_engine : arcade.PhysicsEnginePlatformer
+    exit_list : arcade.SpriteList[arcade.Sprite]
+    arrow_sprite_list : arcade.SpriteList[Arrow]
+    Next_map : str
+    last_level : bool
+    map_width : int
+    map_height : int 
+    
+    def __init__(self)-> None:
+        self.player_sprite_list = arcade.SpriteList()
+        self.wall_list = arcade.SpriteList(use_spatial_hash=True)
+        self.no_go_list = arcade.SpriteList(use_spatial_hash=True)
+        self.monsters_list = arcade.SpriteList()
+        self.coins_list = arcade.SpriteList(use_spatial_hash=True)
+        self.exit_list = arcade.SpriteList(use_spatial_hash=True)
+        self.arrow_sprite_list = arcade.SpriteList()
+        self.map_width = 0  
+        self.map_height = 0
+
+    def draw(self)-> None:
+        self.player_sprite_list.draw()
+        self.wall_list.draw()
+        self.no_go_list.draw()
+        self.monsters_list.draw()
+        self.coins_list.draw()
+        self.exit_list.draw()
+        self.arrow_sprite_list.draw()
+
+
+def readmap(self : World, map : str) -> None:
 
     # Ouvrir le fichier sous l'acronyme 'file'
         with open(f"maps/{map}", "r", encoding="utf-8") as file:
@@ -53,7 +91,7 @@ def readmap(self : GameView, map : str) -> None:
             self.no_go_list.clear()
             self.player_sprite_list.clear()
             self.exit_list.clear()
-            self.test_position_list.clear()
+            self.arrow_sprite_list.clear()
             self.arrow_sprite_list.clear()
 
             # Lire les caractères de la carte après le ("---")
@@ -101,21 +139,22 @@ def readmap(self : GameView, map : str) -> None:
                             lava = arcade.Sprite(":resources:images/tiles/lava.png", scale=0.5, center_x=x, center_y=y)
                             self.no_go_list.append(lava)
                         case "S":  # Player start position
-                            self.player_sprite =  arcade.Sprite( 
+                            self.player =  Player( 
                             ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png",            #Génération du joueur
                             center_x=x,
                             center_y=y, scale=0.5)
-                            self.player_sprite_list.append(self.player_sprite)
+                            self.player_sprite_list.append(self.player)
 
 
                             self.physics_engine = arcade.PhysicsEnginePlatformer(
-                            self.player_sprite, 
+                            self.player, 
                             walls=self.wall_list,                                     #On définit les lois physiques qui s'appliquent sur le sprite Player
                             gravity_constant=PLAYER_GRAVITY)
 
                         case "E":  #Map end
                             exit = arcade.Sprite(":resources:/images/tiles/signExit.png", scale = 0.5, center_x = x, center_y = y)
                             self.exit_list.append(exit)
+
 
             for slimes in [monsters for monsters in self.monsters_list if type(monsters) == Slime] :
                 slimes.wall_list = self.wall_list
