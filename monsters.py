@@ -35,23 +35,23 @@ class Monster(arcade.Sprite):
 
 
 class Bat(Monster): 
-    x_spawn : Final[float]
-    y_spawn : Final[float]
-    time_travel : int
-    theta : float
-    range : int
+    __x_spawn : Final[float]
+    __y_spawn : Final[float]
+    __time_travel : int
+    __theta : float
+    __range : int
 
     def __init__(self, path_or_texture : str, center_x : float, center_y : float, scale : float) -> None:
         super().__init__(path_or_texture,scale, center_x, center_y )
-        self.x_spawn = self.center_x
-        self.y_spawn = self.center_y
-        self.time_travel = 0
-        self.theta = 0
-        self.range = 200
+        self.__x_spawn = self.center_x
+        self.__y_spawn = self.center_y
+        self.__time_travel = 0
+        self.__theta = 0
+        self.__range = 200
     
     #Calcul de la distance entre la position de la bat et son point d'apparition
     def distance_from_spawn(self) -> float: 
-        return math.sqrt((self.center_x - self.x_spawn)**2 + (self.center_y - self.y_spawn)**2) 
+        return math.sqrt((self.center_x - self.__x_spawn)**2 + (self.center_y - self.__y_spawn)**2) 
     
     #DEPLACEMENT DES BATS
     def movement(self) -> None:
@@ -59,36 +59,38 @@ class Bat(Monster):
         self.center_x += self.change_x
         self.center_y += self.change_y
         #vitesse selon x et selon y en fonction de l'angle de leur direction
-        self.change_x = BAT_SPEED*math.cos(self.theta)
-        self.change_y = BAT_SPEED*math.sin(self.theta)
-        self.time_travel += 1       
+        self.change_x = BAT_SPEED*math.cos(self.__theta)
+        self.change_y = BAT_SPEED*math.sin(self.__theta)
+        self.__time_travel += 1       
         #Si la chauve-souris dépasse sa sphère d'action...
-        if  self.distance_from_spawn() > self.range and self.time_travel > 30:
-            self.theta += math.pi   #... elle fait demi-tour
-            self.time_travel = 0
-        if self.time_travel%15 == 0:
-            self.theta = random.normalvariate(self.theta, math.pi/10)
+        if  self.distance_from_spawn() > self.__range and self.__time_travel > 30:
+            self.__theta += math.pi   #... elle fait demi-tour
+            self.__time_travel = 0
+        if self.__time_travel%15 == 0:
+            self.__theta = random.normalvariate(self.__theta, math.pi/10)
 
 
 
 class Slime(Monster):
-    front : arcade.Sprite
-    below : arcade.Sprite
-    wall_list : arcade.SpriteList[arcade.Sprite]
+    __front : arcade.Sprite
+    __below : arcade.Sprite
+    __wall_list : arcade.SpriteList[arcade.Sprite]
 
     def __init__(self, path_or_texture : str, center_x : float, center_y : float, scale : float, wall_list : arcade.SpriteList[arcade.Sprite]) -> None:
         super().__init__(path_or_texture, scale, center_x, center_y)
-        self.wall_list = wall_list
+        self.__wall_list = wall_list
         self.change_x = SLIMES_SPEED
-        self.front = arcade.Sprite(scale = 0.005, center_x= self.center_x + self.change_x * 22 , center_y = self.center_y - 15 )
-        self.below = arcade.Sprite(center_x = self.center_x + self.change_x * 85, center_y = self.center_y - 30 )
+        self.__front = arcade.Sprite(scale = 0.005, center_x= self.center_x + self.change_x * 22 , center_y = self.center_y - 15 )
+        self.__below = arcade.Sprite(center_x = self.center_x + self.change_x * 85, center_y = self.center_y - 30 )
 
     def movement(self) -> None:
         self.center_x += self.change_x 
-        self.below = arcade.Sprite(center_x = self.center_x + self.change_x * 85, center_y = self.center_y - 30 )
-        below_collision = arcade.check_for_collision_with_list(self.below, self.wall_list)                                             #Check s'il y a un wall en dessous de l'endroit ou le slime se dirige                   
-        self.front = arcade.Sprite(scale = 0.005, center_x= self.center_x + self.change_x * 22 , center_y = self.center_y - 15 )
-        front_collision = arcade.check_for_collision_with_list(self.front, self.wall_list)                                             #Check s'il y a un obstacle en face du slime
+        #Checker s'il y a un wall en dessous de l'endroit ou le slime se dirige    
+        self.__below = arcade.Sprite(center_x = self.center_x + self.change_x * 85, center_y = self.center_y - 30 )
+        below_collision = arcade.check_for_collision_with_list(self.__below, self.__wall_list)       
+        #Checker s'il y a un obstacle en face du slime                                                    
+        self.__front = arcade.Sprite(scale = 0.005, center_x= self.center_x + self.change_x * 22 , center_y = self.center_y - 15 )
+        front_collision = arcade.check_for_collision_with_list(self.__front, self.__wall_list)                                             
         if not below_collision or front_collision:
             #S'il y a un obstacle, le slime fait demi-tour
             self.change_x *= -1  

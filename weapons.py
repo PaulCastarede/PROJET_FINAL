@@ -37,25 +37,22 @@ class Weapon(arcade.Sprite):
 class Lethal(arcade.Sprite):
     
     @abstractmethod
-    def kills(self, gameview : gameview.GameView) -> None:
+    def kills_monsters(self, gameview : gameview.GameView) -> None:
         ...
 
 
-class Bow(Weapon):
+#class Bow(Weapon):
 
-    def __init__(self,path_or_texture : str, center_x : float, center_y : float, scale : float, angle : float ) -> None:
-        super().__init__(path_or_texture, center_x, center_y, scale, angle)
-        self.position_respecting_to_player = 0
+    #def __init__(self,path_or_texture : str, center_x : float, center_y : float, scale : float, angle : float ) -> None:
+        #super().__init__(path_or_texture, center_x, center_y, scale, angle)
+        #self.position_respecting_to_player = 0
 
  
 
 class Sword(Weapon, Lethal):
 
-    def __init__(self,path_or_texture : str, center_x : float, center_y : float, scale : float, angle : float) -> None:
-        super().__init__(path_or_texture, center_x, center_y, scale, angle )
-        self.position_respecting_to_player = 0
 
-    def kills(self, gameview : gameview.GameView) -> None:
+    def kills_monsters(self, gameview : gameview.GameView) -> None:
         # Vérifier les collisions avec les monstres
         touched_monsters = arcade.check_for_collision_with_list(self, gameview.world.monsters_list)
         for monster in touched_monsters:
@@ -79,7 +76,7 @@ class Arrow(Lethal):
         self.released = False
 
 
-    def kills(self, gameview : gameview.GameView) -> None:
+    def kills_monsters(self, gameview : gameview.GameView) -> None:
         # Vérifier les collisions avec les monstres
         touched_monsters = arcade.check_for_collision_with_list(self, gameview.world.monsters_list)
         for monster in touched_monsters:
@@ -112,4 +109,12 @@ class Arrow(Lethal):
         else:
             self.change_x+= 15
             self.change_y += 15
+
+    def behavior_before_release(self, bow : Weapon) -> None:
+        # Position statique de la flèche (même centre que l'arc)
+        self.center_x = bow.center_x 
+        self.center_y = bow.center_y 
+        self.charge_level += 0.1
+        # Angle de la flèche 
+        self.angle = bow.angle + 80
         

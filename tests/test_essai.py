@@ -14,9 +14,9 @@ def test_bat_distance() -> None:
 def test_bat_movement() -> None:
     """Test du mouvement de la chauve-souris."""
     bat = Bat("assets/kenney-extended-enemies-png/bat.png", center_x=100, center_y=100, scale=0.5)
-    bat.theta = math.pi / 4  # 45 degrés
-    bat.change_x = 2 * math.cos(bat.theta)
-    bat.change_y = 2 * math.sin(bat.theta)
+    bat.__theta = math.pi / 4  # 45 degrés
+    bat.change_x = 2 * math.cos(bat.__theta)
+    bat.change_y = 2 * math.sin(bat.__theta)
     bat.center_x += bat.change_x
     bat.center_y += bat.change_y
     assert bat.center_x > 100

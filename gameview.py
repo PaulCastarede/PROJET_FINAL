@@ -24,7 +24,7 @@ class GameView(arcade.View):
     score_UI : arcade.Text
     timetravel_UI : arcade.Text
     Victory : bool
-    weapons_list : arcade.SpriteList[weapons.Weapon] 
+    weapons_list : arcade.SpriteList[weapons.Weapon]
     arrow : weapons.Arrow
     # INITIALISATION DE LA PARTIE
     def __init__(self) -> None:
@@ -59,12 +59,11 @@ class GameView(arcade.View):
         """Set up the game here."""
          
         readmap(self.world, "map1.txt")     #Génération de la map
-        self.death = False
         self.Victory = False
         self.score = 0  #Reset du score au début du jeu/ à chaque mort
-        self.arrow = weapons.Arrow("assets/kenney-voxel-items-png/arrow.png", scale=0.5,center_x=0,center_y=0, angle = 0)
-        self.sword = weapons.Sword("assets/kenney-voxel-items-png/sword_silver.png",scale=0.5 * 0.7, center_x=0,center_y=0, angle = 0)
-        self.bow = weapons.Bow("assets/kenney-voxel-items-png/bow.png", scale=0.5, center_x=0,center_y=0, angle = 0)
+        self.arrow = weapons.Arrow("assets/kenney-voxel-items-png/arrow.png", scale=0.4,center_x=0,center_y=0, angle = 0)
+        self.sword = weapons.Sword("assets/kenney-voxel-items-png/sword_silver.png",scale=0.4 * 0.7, center_x=0,center_y=0, angle = 0)
+        self.bow = weapons.Weapon("assets/kenney-voxel-items-png/bow.png", scale=0.4, center_x=0,center_y=0, angle = 0)
         self.weapons_list.append(self.sword)
         self.weapons_list.append(self.bow)
   
@@ -149,52 +148,53 @@ class GameView(arcade.View):
             
 
         if self.mouse_left_pressed:
-            self.arrow = weapons.Arrow("assets/kenney-voxel-items-png/arrow.png", scale=0.5,  center_x=self.world.player_sprite.center_x + self.bow.position_respecting_to_player + 5, center_y=self.world.player_sprite.center_y - 5, angle=self.bow.angle + 55)
-            self.weapons_list[self.active_weapon].adapt_weapon_position
+            self.arrow = weapons.Arrow("assets/kenney-voxel-items-png/arrow.png", scale=0.4,  center_x=self.world.player_sprite.center_x + self.bow.position_respecting_to_player + 5, center_y=self.world.player_sprite.center_y - 5, angle=self.bow.angle + 55)
+            self.weapons_list[self.active_weapon].adapt_weapon_position(self.angle)
             self.weapons_list[self.active_weapon].manage(self)
+            #On adapte l'angle de l'arc (différent de l'épée de par son sprite)
+            self.bow.angle -= 70
             if self.active_weapon == BOW_INDEX:
-                # Position statique de la flèche (même centre que l'arc)
-                self.arrow.center_x = self.world.player_sprite.center_x + self.bow.position_respecting_to_player + 5
-                self.arrow.center_y = self.world.player_sprite.center_y - 5
-                self.arrow.charge_level += 0.1
-                
-                # Angle de la flèche 
-                self.arrow.angle = -math.degrees(self.angle) + 55
+                self.arrow.behavior_before_release(self.bow)
 
         for arrow in self.world.arrow_sprite_list:
             #Trajectoire de la flèche
             arrow.arrows_movement(self.world.wall_list)
             # Tuer les monstres rencontrés
-            arrow.kills(self)
+            arrow.kills_monsters(self)
 
-            if (arrow.bottom > self.camera.viewport_height or arrow.top < 0):
+            if (arrow.center_y < 0):
                 arrow.remove_from_sprite_lists()
             self.arrow_release = False 
  
     
-        self.sword.kills(self)
- 
+        self.sword.kills_monsters(self)
+
+        #Vérifie si le joueur est en contact avec des pièces
         collided_coins = arcade.check_for_collision_with_list(
             self.world.player_sprite, 
-            self.world.coins_list               #Vérifie si le joueur est en contact avec des pièces
+            self.world.coins_list               
         )
+        #Retire les pièces en contact avec le joueur
         for coin in collided_coins:
-            self.score += len(collided_coins)              #Incrémente le score du nombre de pièces  
-            coin.remove_from_sprite_lists()                #Retire les pièces en contact avec le joueur
+            #Incrémente le score du nombre de pièces 
+            self.score += len(collided_coins)               
+            coin.remove_from_sprite_lists()                
             arcade.play_sound(self.coin_sound)
 
 
         self.score_UI = arcade.Text( x =  70, y = 650, font_size = 20, text = f"Score : {str(self.score)}"    )                                   
         
+
+        #Vérifie si le joueur est en contact avec un élément léthal
         collided_no_go = arcade.check_for_collision_with_list(          
             self.world.player_sprite,                                         
             self.world.no_go_list)                                            
-        collided_monsters = arcade.check_for_collision_with_list(         #Vérifie si le joueur est en contact avec un élément léthal
+        collided_monsters = arcade.check_for_collision_with_list(         
             self.world.player_sprite,                                         
             self.world.monsters_list)                                          
         
         if collided_no_go or  collided_monsters  :    #Si le joueur est en collision avec la lave ou un monstre...
-            self.death = True                                                         #...le joueur meurt.
+            self.world.player_sprite.death = True                                                         #...le joueur meurt.
         
 
         #NEXT LEVEL
@@ -208,7 +208,7 @@ class GameView(arcade.View):
                 
 
         #GAME OVER SET
-        if self.death :
+        if self.world.player_sprite.death :
              arcade.play_sound(self.death_sound)
              self.world.player_sprite_list.clear()                             # Si le joueur est mort, déclenche l'animation et le son de mort
              time.sleep(0.25)
@@ -222,7 +222,6 @@ class GameView(arcade.View):
         with self.camera.activate():
             self.world.draw()
             if self.mouse_left_pressed:
-                #arcade.draw_sprite(self.weapons_list[self.active_weapon])
                 arcade.draw_sprite(self.weapons_list[self.active_weapon])
                 if self.active_weapon == BOW_INDEX:
                     arcade.draw_sprite(self.arrow)
