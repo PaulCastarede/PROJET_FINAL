@@ -34,7 +34,6 @@ class Monster(arcade.Sprite):
     
 
 
-
 class Bat(Monster): 
     x_spawn : Final[float]
     y_spawn : Final[float]
@@ -72,14 +71,14 @@ class Bat(Monster):
 
 
 
-
 class Slime(Monster):
     front : arcade.Sprite
     below : arcade.Sprite
     wall_list : arcade.SpriteList[arcade.Sprite]
 
-    def __init__(self, path_or_texture : str, center_x : float, center_y : float, scale : float) -> None:
-        super().__init__(path_or_texture,scale, center_x, center_y )
+    def __init__(self, path_or_texture : str, center_x : float, center_y : float, scale : float, wall_list : arcade.SpriteList[arcade.Sprite]) -> None:
+        super().__init__(path_or_texture, scale, center_x, center_y)
+        self.wall_list = wall_list
         self.change_x = SLIMES_SPEED
         self.front = arcade.Sprite(scale = 0.005, center_x= self.center_x + self.change_x * 22 , center_y = self.center_y - 15 )
         self.below = arcade.Sprite(center_x = self.center_x + self.change_x * 85, center_y = self.center_y - 30 )

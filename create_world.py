@@ -1,20 +1,19 @@
+from __future__ import annotations 
 import arcade 
-from monsters import Bat
-from monsters import Slime
-from player import *
-from monsters import *
-from weapons import *
+import monsters
+import weapons
+import player
 
 class World:
-    player : Player
-    player_sprite_list : arcade.SpriteList[Player]
+    player_sprite : player.Player
+    player_sprite_list : arcade.SpriteList[player.Player]
     wall_list : arcade.SpriteList[arcade.Sprite]
     no_go_list : arcade.SpriteList[arcade.Sprite]
-    monsters_list : arcade.SpriteList[Monster]
+    monsters_list : arcade.SpriteList[monsters.Monster]
     coins_list : arcade.SpriteList[arcade.Sprite]
     physics_engine : arcade.PhysicsEnginePlatformer
     exit_list : arcade.SpriteList[arcade.Sprite]
-    arrow_sprite_list : arcade.SpriteList[Arrow]
+    arrow_sprite_list : arcade.SpriteList[weapons.Arrow]
     Next_map : str
     last_level : bool
     map_width : int
@@ -129,32 +128,30 @@ def readmap(self : World, map : str) -> None:
                             coin = arcade.Sprite(":resources:images/items/coinGold.png", scale=0.5, center_x=x, center_y=y)
                             self.coins_list.append(coin)
                         case "o":  # Slime enemy
-                            slime = Slime("assets/slimeBlue.png", scale=0.5, center_x=x, center_y=y)
+                            slime = monsters.Slime("assets/slimeBlue.png", scale=0.5, center_x=x, center_y=y, wall_list = self.wall_list)
                             self.monsters_list.append(slime)
-                        case "v":  # Bat enemy
-                                
-                            bat = Bat("assets/kenney-extended-enemies-png/bat.png", scale=0.5, center_x=x, center_y=y)
+                        case "v":  # Bat enemy  
+                            bat = monsters.Bat("assets/kenney-extended-enemies-png/bat.png", scale=0.5, center_x=x, center_y=y)
                             self.monsters_list.append(bat)
                         case "£":  # Lava
                             lava = arcade.Sprite(":resources:images/tiles/lava.png", scale=0.5, center_x=x, center_y=y)
                             self.no_go_list.append(lava)
                         case "S":  # Player start position
-                            self.player =  Player( 
+                            self.player_sprite =  player.Player( 
                             ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png",            #Génération du joueur
                             center_x=x,
                             center_y=y, scale=0.5)
-                            self.player_sprite_list.append(self.player)
+                            self.player_sprite_list.append(self.player_sprite)
 
 
                             self.physics_engine = arcade.PhysicsEnginePlatformer(
-                            self.player, 
+                            self.player_sprite, 
                             walls=self.wall_list,                                     #On définit les lois physiques qui s'appliquent sur le sprite Player
-                            gravity_constant=PLAYER_GRAVITY)
+                            gravity_constant=player.PLAYER_GRAVITY)
 
                         case "E":  #Map end
                             exit = arcade.Sprite(":resources:/images/tiles/signExit.png", scale = 0.5, center_x = x, center_y = y)
                             self.exit_list.append(exit)
 
 
-            for slimes in [monsters for monsters in self.monsters_list if type(monsters) == Slime] :
-                slimes.wall_list = self.wall_list
+

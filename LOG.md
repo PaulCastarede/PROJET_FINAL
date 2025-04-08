@@ -1,9 +1,9 @@
 # Journal
 
 A faire :
-Ecrire des tests !!!
-Adapter l'orientation visuelle des fleches en fonction de leur direction.
+Ecrire des tests !!
 Refactorer
+Pouvoir lancer 
 ## Suivi
 
 ### Semaine 2
@@ -48,9 +48,9 @@ Refactorer
 * [x] Amélioration de l'arc                                           30
 * [x] Mise à jour de `README.md`, avec les nouvelles fonctionnalités  10
 * [x] Mise à jour de `ANSWERS.md`                                     15 
-* [x]  Mise à jour de `LOG.md`                                        25
-
-
+* [x] Mise à jour de `LOG.md`                                         25
+* [x] Refactoring des monsters et de create_world                    200                                                  
+* [x] Adapter l'orientation visuelle des fleches selon la direction   60
 
 ### Semaine 7
 
