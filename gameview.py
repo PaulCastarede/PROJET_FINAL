@@ -49,7 +49,6 @@ class GameView(arcade.View):
 
 
         self.coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
-        self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
         self.death_sound = arcade.load_sound(":resources:sounds/gameover1.wav")
         # Setup our game
         self.setup()
@@ -80,10 +79,7 @@ class GameView(arcade.View):
                 self.left_pressed = True
             case arcade.key.UP: 
                 if self.world.physics_engine.can_jump():
-                    # jump by giving an initial vertical speed
-                    self.world.player_sprite_list
-                    self.world.player_sprite.change_y = player.PLAYER_JUMP_SPEED
-                    arcade.play_sound(self.jump_sound)
+                    self.world.player_sprite.jump()
             case arcade.key.ESCAPE:
                 # resets the game
                 self.setup()
@@ -109,7 +105,6 @@ class GameView(arcade.View):
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int) -> None:
         if button == arcade.MOUSE_BUTTON_LEFT:
             self.mouse_left_pressed = True
-            
         if button == arcade.MOUSE_BUTTON_RIGHT:
             if self.active_weapon == SWORD_INDEX:
                 self.active_weapon = BOW_INDEX
@@ -131,13 +126,14 @@ class GameView(arcade.View):
 
         This is where in-world time "advances", or "ticks".
         """
-        #Mouvement du joueur
-        self.world.player_sprite.movement 
-
+ 
         self.world.physics_engine.update()
         #Waiting for a new version mypy
         self.camera.position = self.world.player_sprite.position  #type: ignore
         
+        #Mouvement du joueur
+        self.world.player_sprite.movement(self)
+
         #COMPORTEMENT DES MONSTRES
         for monster in self.world.monsters_list:
             monster.movement()         
@@ -192,8 +188,8 @@ class GameView(arcade.View):
         #GAME OVER SET
         if self.world.player_sprite.death :
              arcade.play_sound(self.death_sound)
-             self.world.player_sprite_list.clear()                             # Si le joueur est mort, déclenche l'animation et le son de mort
-             time.sleep(0.25)
+             self.world.player_sprite_list.clear()                             
+             time.sleep(0.25)  
              self.setup()
         
     
