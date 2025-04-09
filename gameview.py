@@ -131,13 +131,9 @@ class GameView(arcade.View):
 
         This is where in-world time "advances", or "ticks".
         """
+        #Mouvement du joueur
+        self.world.player_sprite.movement 
 
-        self.world.player_sprite.change_x = 0
-        if self.right_pressed:
-            self.world.player_sprite.change_x += player.PLAYER_MOVEMENT_SPEED       #Joueur avance si -> pressed
-        if self.left_pressed:                 
-            self.world.player_sprite.change_x -= player.PLAYER_MOVEMENT_SPEED       #Joueur recule si <- pressed
-        
         self.world.physics_engine.update()
         #Waiting for a new version mypy
         self.camera.position = self.world.player_sprite.position  #type: ignore
@@ -179,17 +175,8 @@ class GameView(arcade.View):
 
         self.score_UI = arcade.Text( x =  70, y = 650, font_size = 20, text = f"Score : {str(self.score)}"    )                                   
         
-
-        #Vérifie si le joueur est en contact avec un élément léthal
-        collided_no_go = arcade.check_for_collision_with_list(          
-            self.world.player_sprite,                                         
-            self.world.no_go_list)                                            
-        collided_monsters = arcade.check_for_collision_with_list(         
-            self.world.player_sprite,                                         
-            self.world.monsters_list)                                          
-        
-        if collided_no_go or  collided_monsters  :    #Si le joueur est en collision avec la lave ou un monstre...
-            self.world.player_sprite.death = True                                                         #...le joueur meurt.
+        #Check if player should die to monsters or lava
+        self.world.player_sprite.dies([self.world.no_go_list, self.world.monsters_list])
         
 
         #NEXT LEVEL
