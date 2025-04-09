@@ -35,7 +35,7 @@ class Weapon(arcade.Sprite):
 
 
 class Lethal(arcade.Sprite):
-    
+
     @abstractmethod
     def kills_monsters(self, gameview : gameview.GameView) -> None:
         ...
@@ -50,7 +50,6 @@ class Lethal(arcade.Sprite):
  
 
 class Sword(Weapon, Lethal):
-
 
     def kills_monsters(self, gameview : gameview.GameView) -> None:
         # Vérifier les collisions avec les monstres
@@ -99,6 +98,8 @@ class Arrow(Lethal):
                 self.angle = math.degrees(math.asin(self.change_y/(math.sqrt((self.change_x)**2 +(self.change_y)**2)))) +225
             # Vérifier les collisions avec les murs
             if arcade.check_for_collision_with_list(self, wall_list):
+                self.remove_from_sprite_lists()
+            if (self.center_y < 0):
                 self.remove_from_sprite_lists()
 
 

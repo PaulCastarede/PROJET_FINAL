@@ -162,11 +162,6 @@ class GameView(arcade.View):
             # Tuer les monstres rencontrés
             arrow.kills_monsters(self)
 
-            if (arrow.center_y < 0):
-                arrow.remove_from_sprite_lists()
-            self.arrow_release = False 
- 
-    
         self.sword.kills_monsters(self)
 
         #Vérifie si le joueur est en contact avec des pièces
@@ -227,5 +222,11 @@ class GameView(arcade.View):
                     arcade.draw_sprite(self.arrow)
         with self.idle_camera.activate():
              self.score_UI.draw()
+
+             #WEAPON UI - affiche l'arme active en bas a gauche de l'ecran
+             if self.active_weapon == BOW_INDEX:
+                    arcade.draw_sprite(arcade.Sprite("assets/kenney-voxel-items-png/bow.png", scale=1, center_x=80,center_y=80, angle = -70))
+             elif self.active_weapon == SWORD_INDEX:
+                    arcade.draw_sprite(arcade.Sprite("assets/kenney-voxel-items-png/sword_silver.png",scale=0.9, center_x=80,center_y=80, angle = 0))
              if self.Victory :                
                  self.victory_text.draw()
