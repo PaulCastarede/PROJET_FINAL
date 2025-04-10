@@ -1,6 +1,5 @@
 from __future__ import annotations
 import arcade
-import math
 import monsters 
 import gameview
 import coins

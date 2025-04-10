@@ -1,7 +1,6 @@
 from __future__ import annotations 
 import arcade 
 import monsters
-import weapons
 import player
 import coins
 
@@ -135,12 +134,9 @@ def readmap(self : World, map : str) -> None:
                         case "S":  # Player start position
                             self.player_sprite =  player.Player(center_x=x, center_y=y,)
                             self.player_sprite_list.append(self.player_sprite)
-
-                            self.physics_engine = arcade.PhysicsEnginePlatformer(
-                            self.player_sprite, 
-                            walls=self.wall_list,                                     #On définit les lois physiques qui s'appliquent sur le sprite Player
-                            gravity_constant=player.PLAYER_GRAVITY)
-
+                            
+                            #On définit le moteur physique qui s'applique sur le player
+                            self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, walls=self.wall_list, gravity_constant=player.PLAYER_GRAVITY)
                         case "E":  #Map end
                             exit = arcade.Sprite(":resources:/images/tiles/signExit.png", scale = 0.5, center_x = x, center_y = y)
                             self.exit_list.append(exit)

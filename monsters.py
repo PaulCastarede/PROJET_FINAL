@@ -1,7 +1,6 @@
 import arcade
 import math
 from typing import Final
-import dataclasses
 import random
 from abc import abstractmethod
 

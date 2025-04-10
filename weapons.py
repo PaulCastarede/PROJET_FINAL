@@ -43,8 +43,7 @@ class Lethal(arcade.Sprite):
 
     def kills_monsters(self, monsters_list : arcade.SpriteList[monsters.Monster]) -> None:
         # Vérifier les collisions avec les monstres
-        touched_monsters = arcade.check_for_collision_with_list(self, monsters_list)
-        for monster in touched_monsters:
+        for monster in arcade.check_for_collision_with_list(self, monsters_list):
             monster.remove_from_sprite_lists()
             arcade.play_sound(self.hit_sound)
             if type(self) is Arrow:
