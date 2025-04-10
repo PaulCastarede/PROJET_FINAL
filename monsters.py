@@ -41,7 +41,7 @@ class Bat(Monster):
     __theta : float
     __range : int
 
-    def __init__(self, path_or_texture : str, center_x : float, center_y : float, scale : float) -> None:
+    def __init__(self, path_or_texture : str = "assets/kenney-extended-enemies-png/bat.png", center_x : float = 0, center_y : float = 0, scale : float = 0.5) -> None:
         super().__init__(path_or_texture,scale, center_x, center_y )
         self.__x_spawn = self.center_x
         self.__y_spawn = self.center_y
@@ -76,7 +76,7 @@ class Slime(Monster):
     __below : arcade.Sprite
     __wall_list : arcade.SpriteList[arcade.Sprite]
 
-    def __init__(self, path_or_texture : str, center_x : float, center_y : float, scale : float, wall_list : arcade.SpriteList[arcade.Sprite]) -> None:
+    def __init__(self,  wall_list : arcade.SpriteList[arcade.Sprite], path_or_texture : str = "assets/slimeBlue.png", center_x : float = 0, center_y : float = 0, scale : float = 0.5) -> None:
         super().__init__(path_or_texture, scale, center_x, center_y)
         self.__wall_list = wall_list
         self.change_x = SLIMES_SPEED

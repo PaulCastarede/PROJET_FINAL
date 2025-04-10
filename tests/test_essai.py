@@ -1,6 +1,10 @@
 import pytest
 import arcade
 from gameview import GameView
+import player
+import weapons
+import monsters
+import create_world
 import math
 from monsters import *
 
@@ -25,15 +29,15 @@ def test_bat_movement() -> None:
 def test_game_setup() -> None:
     """Test l'initialisation du jeu."""
     game = GameView()
-    assert game.score == 0
+    assert game.world.player_sprite.score == 0
     assert game.Victory is False
-    assert game.death is False
-    assert len(game.wall_list) == 0  # Doit être vide avant chargement d'une carte
+    assert game.world.player_sprite.death is False
+    assert len(game.world.wall_list) == 0  # Doit être vide avant chargement d'une carte
 
 def test_player_movement() -> None:
     """Test du déplacement du joueur."""
     game = GameView()
-    game.player_sprite = arcade.Sprite(center_x=100, center_y=100)
+    game.world.player_sprite = player.Player(center_x=100, center_y=100)
     game.right_pressed = True
     game.on_update(1 / 60)
-    assert game.player_sprite.center_x > 100  # Il doit avancer vers la droite
+    assert game.world.player_sprite.center_x > 100  # Il doit avancer vers la droite

@@ -3,6 +3,7 @@ import arcade
 import monsters
 import weapons
 import player
+import coins
 
 class World:
     player_sprite : player.Player
@@ -10,10 +11,9 @@ class World:
     wall_list : arcade.SpriteList[arcade.Sprite]
     no_go_list : arcade.SpriteList[arcade.Sprite]
     monsters_list : arcade.SpriteList[monsters.Monster]
-    coins_list : arcade.SpriteList[arcade.Sprite]
+    coins_list : arcade.SpriteList[coins.Coin]
     physics_engine : arcade.PhysicsEnginePlatformer
     exit_list : arcade.SpriteList[arcade.Sprite]
-    arrow_sprite_list : arcade.SpriteList[weapons.Arrow]
     Next_map : str
     last_level : bool
     map_width : int
@@ -26,7 +26,6 @@ class World:
         self.monsters_list = arcade.SpriteList()
         self.coins_list = arcade.SpriteList(use_spatial_hash=True)
         self.exit_list = arcade.SpriteList(use_spatial_hash=True)
-        self.arrow_sprite_list = arcade.SpriteList()
         self.map_width = 0  
         self.map_height = 0
 
@@ -37,7 +36,6 @@ class World:
         self.monsters_list.draw()
         self.coins_list.draw()
         self.exit_list.draw()
-        self.arrow_sprite_list.draw()
 
 
 def readmap(self : World, map : str) -> None:
@@ -90,8 +88,6 @@ def readmap(self : World, map : str) -> None:
             self.no_go_list.clear()
             self.player_sprite_list.clear()
             self.exit_list.clear()
-            self.arrow_sprite_list.clear()
-            self.arrow_sprite_list.clear()
 
             # Lire les caractères de la carte après le ("---")
             map_lines = []
@@ -125,24 +121,20 @@ def readmap(self : World, map : str) -> None:
                             crate = arcade.Sprite(":resources:images/tiles/boxCrate_double.png", scale=0.5, center_x=x, center_y=y)
                             self.wall_list.append(crate)
                         case "*":  # Coin
-                            coin = arcade.Sprite(":resources:images/items/coinGold.png", scale=0.5, center_x=x, center_y=y)
+                            coin = coins.Coin(center_x=x, center_y=y)
                             self.coins_list.append(coin)
                         case "o":  # Slime enemy
-                            slime = monsters.Slime("assets/slimeBlue.png", scale=0.5, center_x=x, center_y=y, wall_list = self.wall_list)
+                            slime = monsters.Slime(scale=0.5, center_x=x, center_y=y, wall_list = self.wall_list)
                             self.monsters_list.append(slime)
                         case "v":  # Bat enemy  
-                            bat = monsters.Bat("assets/kenney-extended-enemies-png/bat.png", scale=0.5, center_x=x, center_y=y)
+                            bat = monsters.Bat(center_x=x, center_y=y)
                             self.monsters_list.append(bat)
                         case "£":  # Lava
                             lava = arcade.Sprite(":resources:images/tiles/lava.png", scale=0.5, center_x=x, center_y=y)
                             self.no_go_list.append(lava)
                         case "S":  # Player start position
-                            self.player_sprite =  player.Player( 
-                            ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png",            #Génération du joueur
-                            center_x=x,
-                            center_y=y, scale=0.5)
+                            self.player_sprite =  player.Player(center_x=x, center_y=y,)
                             self.player_sprite_list.append(self.player_sprite)
-
 
                             self.physics_engine = arcade.PhysicsEnginePlatformer(
                             self.player_sprite, 

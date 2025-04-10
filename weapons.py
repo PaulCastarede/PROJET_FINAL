@@ -3,7 +3,7 @@ import arcade
 import math
 from player import *
 import gameview
-import create_world
+import monsters
 from abc import abstractmethod
 
 SWORD_LEFT_POSTION = -20
@@ -28,40 +28,36 @@ class Weapon(arcade.Sprite):
         else: 
             self.position_respecting_to_player = 20
 
-    def manage(self, gameview : gameview.GameView) -> None:
+    def weapon_movement(self, gameview : gameview.GameView) -> None:
         self.center_x = gameview.world.player_sprite.center_x + self.position_respecting_to_player
         self.center_y = gameview.world.player_sprite.center_y - 10
         self.angle = -math.degrees(gameview.angle) + 45
 
 
 class Lethal(arcade.Sprite):
+    hit_sound : arcade.Sound
 
-    @abstractmethod
-    def kills_monsters(self, gameview : gameview.GameView) -> None:
-        ...
+    def __init__(self, path_or_texture : str, scale : float, center_x : float, center_y : float, angle :float):
+        super().__init__(path_or_texture, scale, center_x, center_y, angle)
+        self.hit_sound = arcade.load_sound(":resources:/sounds/hit2.wav")
+
+    def kills_monsters(self, monsters_list : arcade.SpriteList[monsters.Monster]) -> None:
+        # Vérifier les collisions avec les monstres
+        touched_monsters = arcade.check_for_collision_with_list(self, monsters_list)
+        for monster in touched_monsters:
+            monster.remove_from_sprite_lists()
+            arcade.play_sound(self.hit_sound)
+            if type(self) is Arrow:
+                self.remove_from_sprite_lists()
 
 
-#class Bow(Weapon):
-
-    #def __init__(self,path_or_texture : str, center_x : float, center_y : float, scale : float, angle : float ) -> None:
-        #super().__init__(path_or_texture, center_x, center_y, scale, angle)
-        #self.position_respecting_to_player = 0
+class Bow(Weapon):
+    ...
 
  
 
 class Sword(Weapon, Lethal):
-
-    def kills_monsters(self, gameview : gameview.GameView) -> None:
-        # Vérifier les collisions avec les monstres
-        touched_monsters = arcade.check_for_collision_with_list(self, gameview.world.monsters_list)
-        for monster in touched_monsters:
-            monster.remove_from_sprite_lists()
-            gameview.score += 1
-            arcade.play_sound(gameview.coin_sound)
-
-
-    
-
+    ...
     
 
 
@@ -69,20 +65,10 @@ class Arrow(Lethal):
     charge_level : float
     released : bool
 
-    def __init__(self,path_or_texture : str, center_x : float, center_y : float, scale : float, angle : float) -> None:
-        super().__init__(path_or_texture,scale, center_x, center_y, angle )
+    def __init__(self, path_or_texture : str = "assets/kenney-voxel-items-png/arrow.png", center_x : float = 0, center_y : float = 0, scale : float = 0.4, angle : float = 0) -> None:
+        super().__init__(path_or_texture,scale, center_x, center_y, angle)
         self.charge_level = 0
         self.released = False
-
-
-    def kills_monsters(self, gameview : gameview.GameView) -> None:
-        # Vérifier les collisions avec les monstres
-        touched_monsters = arcade.check_for_collision_with_list(self, gameview.world.monsters_list)
-        for monster in touched_monsters:
-            monster.remove_from_sprite_lists()
-            self.remove_from_sprite_lists()
-            gameview.score += 1
-            arcade.play_sound(gameview.coin_sound)
 
 
     def arrows_movement(self, wall_list : arcade.SpriteList[arcade.Sprite]) -> None:
