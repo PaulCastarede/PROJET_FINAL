@@ -9,7 +9,6 @@ from monsters import *
 import weapons
 from create_world import *
 
-
 SWORD_INDEX = 0
 BOW_INDEX = 1
 
@@ -108,6 +107,7 @@ class GameView(arcade.View):
         if button == arcade.MOUSE_BUTTON_LEFT:
             self.mouse_left_pressed = True
             self.sword.kills_monsters(self.world.monsters_list)
+            self.arrow = weapons.Arrow( center_x=self.world.player_sprite.center_x + self.bow.position_respecting_to_player + 5, center_y=self.world.player_sprite.center_y - 5, angle=self.bow.angle + 55)
         if button == arcade.MOUSE_BUTTON_RIGHT:
             #Switch the active weapon when mouse right pressed
             if self.active_weapon == SWORD_INDEX:
@@ -120,9 +120,10 @@ class GameView(arcade.View):
             self.mouse_left_pressed = False
             if self.active_weapon == BOW_INDEX :
                 self.arrow.released = True 
+                self.arrow.charge_level_increases_speed()
                 self.arrow_sprite_list.append(self.arrow)
-                self.arrow_sprite_list[-1].change_x = weapons.ARROW_SPEED * math.cos(self.angle)
-                self.arrow_sprite_list[-1].change_y = weapons.ARROW_SPEED * math.sin(self.angle)
+                self.arrow_sprite_list[-1].change_x = self.arrow.ARROW_SPEED * math.cos(self.angle)
+                self.arrow_sprite_list[-1].change_y = self.arrow.ARROW_SPEED * math.sin(self.angle)
     
 
     def on_update(self, delta_time: float) -> None:
@@ -144,13 +145,17 @@ class GameView(arcade.View):
             
 
         if self.mouse_left_pressed:
-            self.arrow = weapons.Arrow( center_x=self.world.player_sprite.center_x + self.bow.position_respecting_to_player + 5, center_y=self.world.player_sprite.center_y - 5, angle=self.bow.angle + 55)
             self.weapons_list[self.active_weapon].adapt_weapon_position(self.angle)
             self.weapons_list[self.active_weapon].weapon_movement(self)
             #On adapte l'angle de l'arc (différent de l'épée de par son sprite)
             self.bow.angle -= 70
             if self.active_weapon == BOW_INDEX:
                 self.arrow.behavior_before_release(self.bow)
+                
+                
+        
+        
+
             
 
         for arrow in self.arrow_sprite_list:

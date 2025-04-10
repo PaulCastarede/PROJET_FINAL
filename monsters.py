@@ -4,12 +4,6 @@ from typing import Final
 import random
 from abc import abstractmethod
 
-BAT_SPEED = 2
-"""Speed of the bats, in pixels per frame"""
-
-SLIMES_SPEED = 1
-"""Speed of the slimes, in pixels per frame"""
-
 
 slime_textures = []
 #On ajoute le sprite du slime qui regarde à gauche
@@ -34,11 +28,15 @@ class Monster(arcade.Sprite):
 
 
 class Bat(Monster): 
+    BAT_SPEED : Final[float] = 1
+    """Speed of the bats, in pixels per frame"""
+    __range : Final[int] = 200
+    """maximal distance between the bat and its spawn point"""
     __x_spawn : Final[float]
     __y_spawn : Final[float]
     __time_travel : int
     __theta : float
-    __range : int
+    
 
     def __init__(self, path_or_texture : str = "assets/kenney-extended-enemies-png/bat.png", center_x : float = 0, center_y : float = 0, scale : float = 0.5) -> None:
         super().__init__(path_or_texture,scale, center_x, center_y )
@@ -46,7 +44,6 @@ class Bat(Monster):
         self.__y_spawn = self.center_y
         self.__time_travel = 0
         self.__theta = 0
-        self.__range = 200
     
     #Calcul de la distance entre la position de la bat et son point d'apparition
     def distance_from_spawn(self) -> float: 
@@ -58,8 +55,8 @@ class Bat(Monster):
         self.center_x += self.change_x
         self.center_y += self.change_y
         #vitesse selon x et selon y en fonction de l'angle de leur direction
-        self.change_x = BAT_SPEED*math.cos(self.__theta)
-        self.change_y = BAT_SPEED*math.sin(self.__theta)
+        self.change_x = self.BAT_SPEED*math.cos(self.__theta)
+        self.change_y = self.BAT_SPEED*math.sin(self.__theta)
         self.__time_travel += 1       
         #Si la chauve-souris dépasse sa sphère d'action...
         if  self.distance_from_spawn() > self.__range and self.__time_travel > 30:
@@ -71,14 +68,16 @@ class Bat(Monster):
 
 
 class Slime(Monster):
+    SLIMES_SPEED : Final[int] = 1
+    """Speed of the slimes, in pixels per frame"""  
     __front : arcade.Sprite
     __below : arcade.Sprite
-    __wall_list : arcade.SpriteList[arcade.Sprite]
+    __wall_list : Final[arcade.SpriteList[arcade.Sprite]]
 
     def __init__(self,  wall_list : arcade.SpriteList[arcade.Sprite], path_or_texture : str = "assets/slimeBlue.png", center_x : float = 0, center_y : float = 0, scale : float = 0.5) -> None:
         super().__init__(path_or_texture, scale, center_x, center_y)
         self.__wall_list = wall_list
-        self.change_x = SLIMES_SPEED
+        self.change_x = self.SLIMES_SPEED
         self.__front = arcade.Sprite(scale = 0.005, center_x= self.center_x + self.change_x * 22 , center_y = self.center_y - 15 )
         self.__below = arcade.Sprite(center_x = self.center_x + self.change_x * 85, center_y = self.center_y - 30 )
 

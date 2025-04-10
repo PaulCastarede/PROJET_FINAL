@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Final
 import arcade
 import math
 from player import *
@@ -6,14 +7,8 @@ import gameview
 import monsters
 from abc import abstractmethod
 
-SWORD_LEFT_POSTION = -20
-SWORD_RIGHT_POSITION = 20
-
-ARROW_SPEED = 15
-"""Speed of the arrows, in pixels per frame"""
-
-ARROW_GRAVITY = 0.3
-"""Lateral speed of the arrows, in pixels per frame"""
+WEAPON_LEFT_POSTION = -20
+WEAPON_RIGHT_POSITION = 20
 
 class Weapon(arcade.Sprite):
     position_respecting_to_player : int
@@ -35,11 +30,7 @@ class Weapon(arcade.Sprite):
 
 
 class Lethal(arcade.Sprite):
-    hit_sound : arcade.Sound
-
-    def __init__(self, path_or_texture : str, scale : float, center_x : float, center_y : float, angle :float):
-        super().__init__(path_or_texture, scale, center_x, center_y, angle)
-        self.hit_sound = arcade.load_sound(":resources:/sounds/hit2.wav")
+    hit_sound : Final[arcade.Sound] = arcade.load_sound(":resources:/sounds/hit2.wav")
 
     def kills_monsters(self, monsters_list : arcade.SpriteList[monsters.Monster]) -> None:
         # Vérifier les collisions avec les monstres
@@ -61,19 +52,24 @@ class Sword(Weapon, Lethal):
 
 
 class Arrow(Lethal):
+    ARROW_SPEED : float = 5
+    """Speed of the arrows, in pixels per frame"""
+    ARROW_GRAVITY : Final[float] = 0.3
+    """Lateral speed of the arrows, in pixels per frame"""
     charge_level : float
+    MAXIMAL_CHARGE : Final[float] = 12
     released : bool
 
     def __init__(self, path_or_texture : str = "assets/kenney-voxel-items-png/arrow.png", center_x : float = 0, center_y : float = 0, scale : float = 0.4, angle : float = 0) -> None:
         super().__init__(path_or_texture,scale, center_x, center_y, angle)
-        self.charge_level = 0
+        self.charge_level = 1
         self.released = False
 
 
     def arrows_movement(self, wall_list : arcade.SpriteList[arcade.Sprite]) -> None:
         if self.released:
             # Appliquer la physique
-            self.change_y -= ARROW_GRAVITY
+            self.change_y -= self.ARROW_GRAVITY
             self.center_x += self.change_x
             self.center_y += self.change_y
             # Orienter la flèche en fonction de sa direction
@@ -89,18 +85,20 @@ class Arrow(Lethal):
 
 
     def charge_level_increases_speed(self) -> None:
-        if self.charge_level < 15:
-            self.change_x+= self.charge_level
-            self.change_y += self.charge_level
+        if self.charge_level < self.MAXIMAL_CHARGE:
+            self.ARROW_SPEED += self.charge_level 
         else:
-            self.change_x+= 15
-            self.change_y += 15
+            self.ARROW_SPEED += self.MAXIMAL_CHARGE
+
 
     def behavior_before_release(self, bow : Weapon) -> None:
         # Position statique de la flèche (même centre que l'arc)
         self.center_x = bow.center_x 
         self.center_y = bow.center_y 
-        self.charge_level += 0.1
         # Angle de la flèche 
         self.angle = bow.angle + 80
+        #Flèche de plus en plus chargée au cours du temps
+        self.charge_level *= 1.05
+
+
         
