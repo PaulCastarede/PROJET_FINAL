@@ -18,11 +18,11 @@ class GameView(arcade.View):
     #DECLARATION DES ATTRIBUTS
     world : World      # --> create_world.py
     score_UI : arcade.Text
-    Victory : bool
     weapons_list : arcade.SpriteList[weapons.Weapon]
     arrow : weapons.Arrow
     arrow_sprite_list : arcade.SpriteList[weapons.Arrow]
     UI : user_interface.UI
+    score : int
 
     # INITIALISATION DE GAMEVIEW
     def __init__(self) -> None:
@@ -39,13 +39,14 @@ class GameView(arcade.View):
         self.left_pressed = False
         self.mouse_left_pressed = False
         self.weapons_list = arcade.SpriteList()
+        self.arrow_sprite_list = arcade.SpriteList()
         self.active_weapon = SWORD_INDEX
         self.mouse_x = 0
         self.mouse_y = 0
         self.angle : float = 0
         self.world_x : float = 0
         self.world_y : float = 0
-        self.arrow_sprite_list = arcade.SpriteList()
+        self.score = 0
 
         # Setup our game
         self.setup()
@@ -56,8 +57,9 @@ class GameView(arcade.View):
         #Reset the eventual previous elements
         self.weapons_list.clear()
         self.arrow_sprite_list.clear()
-        self.Victory = False
+        self.UI.victory = False
         self.active_weapon = SWORD_INDEX
+        self.score = 0
         #MAP SET UP
         readmap(self.world, "map1.txt")    
         #WEAPONS SET UP
@@ -66,6 +68,7 @@ class GameView(arcade.View):
         self.bow = weapons.Bow("assets/kenney-voxel-items-png/bow.png", scale=0.4, center_x=0,center_y=0, angle = 0)
         self.weapons_list.append(self.sword)
         self.weapons_list.append(self.bow)
+        self.UI.update(self)
   
 
     # COMMANDES
@@ -107,13 +110,15 @@ class GameView(arcade.View):
         if button == arcade.MOUSE_BUTTON_LEFT:
             self.mouse_left_pressed = True
             self.sword.kills_monsters(self.world.monsters_list)
-            self.arrow = weapons.Arrow( center_x=self.world.player_sprite.center_x + self.bow.position_respecting_to_player + 5, center_y=self.world.player_sprite.center_y - 5, angle=self.bow.angle + 55)
+            self.arrow = weapons.Arrow()
         if button == arcade.MOUSE_BUTTON_RIGHT:
             #Switch the active weapon when mouse right pressed
             if self.active_weapon == SWORD_INDEX:
                 self.active_weapon = BOW_INDEX
             else : 
                 self.active_weapon = SWORD_INDEX
+            self.UI.update(self)
+            
 
     def on_mouse_release(self, x: int, y: int, button: int, modifiers: int) -> None:
         if button == arcade.MOUSE_BUTTON_LEFT : 
@@ -153,11 +158,6 @@ class GameView(arcade.View):
                 self.arrow.behavior_before_release(self.bow)
                 
                 
-        
-        
-
-            
-
         for arrow in self.arrow_sprite_list:
             #Trajectoire de la flèche
             arrow.arrows_movement(self.world.wall_list)
@@ -166,7 +166,7 @@ class GameView(arcade.View):
         
 
 
-        self.world.player_sprite.collect_coins(self.world.coins_list)                                   
+        self.world.player_sprite.collect_coins(self)                                   
         
         #Check if player should die to monsters or lava
         self.world.player_sprite.dies(self.world.no_go_list, self.world.monsters_list)
@@ -177,9 +177,10 @@ class GameView(arcade.View):
                 #Si ce n'est pas le dernier niveau, lit la prochaine map       
                 readmap(self.world, map = self.world.Next_map)
             else:
-                self.Victory = True
+                self.UI.victory = True
+                self.UI.update(self)
 
-        self.UI.update(self)  
+          
 
         #GAME OVER SET
         if self.world.player_sprite.death :

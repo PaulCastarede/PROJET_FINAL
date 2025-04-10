@@ -92,13 +92,14 @@ class Arrow(Lethal):
 
 
     def behavior_before_release(self, bow : Weapon) -> None:
-        # Position statique de la flèche (même centre que l'arc)
-        self.center_x = bow.center_x 
-        self.center_y = bow.center_y 
         # Angle de la flèche 
         self.angle = bow.angle + 80
+        # Position statique de la flèche (même centre que l'arc)
+        self.center_x = bow.center_x  
+        self.center_y = bow.center_y 
         #Flèche de plus en plus chargée au cours du temps
         self.charge_level *= 1.05
+
 
 
         

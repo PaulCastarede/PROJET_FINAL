@@ -28,7 +28,7 @@ class Monster(arcade.Sprite):
 
 
 class Bat(Monster): 
-    BAT_SPEED : Final[float] = 1
+    BAT_SPEED : Final[float] = 2
     """Speed of the bats, in pixels per frame"""
     __range : Final[int] = 200
     """maximal distance between the bat and its spawn point"""

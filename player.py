@@ -3,6 +3,7 @@ import arcade
 import monsters 
 import gameview
 import coins
+import user_interface
 
 PLAYER_MOVEMENT_SPEED = 5
 """Lateral speed of the player, in pixels per frame."""
@@ -16,7 +17,6 @@ PLAYER_JUMP_SPEED = 18
 
 class Player(arcade.Sprite):   
     player_sprite : arcade.Sprite
-    score : int
     death : bool
     death_sound : arcade.Sound
     jump_sound : arcade.Sound
@@ -47,13 +47,14 @@ class Player(arcade.Sprite):
         self.change_y = PLAYER_JUMP_SPEED
         arcade.play_sound(self.jump_sound)
 
-    def collect_coins(self, coins_list : arcade.SpriteList[coins.Coin]) -> None:
+    def collect_coins(self, gameview : gameview.GameView) -> None:
         #Vérifie si le joueur est en contact avec des pièces
-        collided_coins = arcade.check_for_collision_with_list(self, coins_list)
+        collided_coins = arcade.check_for_collision_with_list(self, gameview.world.coins_list)
         #Retire les pièces en contact avec le joueur
         for coin in collided_coins:
             #Incrémente le score du nombre de pièces 
-            self.score += len(collided_coins)               
+            gameview.score += len(collided_coins)  
+            gameview.UI.update(gameview)             
             coin.remove_from_sprite_lists()                
             arcade.play_sound(coin.coin_sound)
 
