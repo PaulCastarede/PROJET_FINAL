@@ -5,6 +5,11 @@ import player
 import coins
 
 class World:
+    
+    """Une classe qui contient toutes les SpriteLists inhérentes au monde chargé (les monstres, les murs, la lave, les pièces et même le joueur !)
+
+    Args
+    """
     player_sprite : player.Player
     player_sprite_list : arcade.SpriteList[player.Player]
     wall_list : arcade.SpriteList[arcade.Sprite]
@@ -38,6 +43,7 @@ class World:
 
 
 def readmap(self : World, map : str) -> None:
+
 
     # Ouvrir le fichier sous l'acronyme 'file'
         with open(f"maps/{map}", "r", encoding="utf-8") as file:

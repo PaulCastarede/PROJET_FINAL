@@ -127,8 +127,8 @@ class GameView(arcade.View):
                 self.arrow.released = True 
                 self.arrow.charge_level_increases_speed()
                 self.arrow_sprite_list.append(self.arrow)
-                self.arrow_sprite_list[-1].change_x = self.arrow.ARROW_SPEED * math.cos(self.angle)
-                self.arrow_sprite_list[-1].change_y = self.arrow.ARROW_SPEED * math.sin(self.angle)
+                self.arrow_sprite_list[-1].change_x = self.arrow.speed * math.cos(self.angle)
+                self.arrow_sprite_list[-1].change_y = self.arrow.speed * math.sin(self.angle)
     
 
     def on_update(self, delta_time: float) -> None:

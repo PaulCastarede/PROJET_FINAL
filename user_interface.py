@@ -2,10 +2,10 @@ from __future__ import annotations
 import arcade
 import gameview
 class UI:
-    score_UI : arcade.Text
-    weapons_UI : arcade.Sprite
-    victory_UI : arcade.Text
-    victory : bool
+    __score_UI : arcade.Text
+    __weapons_UI : arcade.Sprite
+    __victory_UI : arcade.Text
+    __victory : bool
 
     def __init__(self) -> None:
         self.score_UI = arcade.Text( x =  70, y = 650, font_size = 20, text = f"Score : 0")
@@ -21,7 +21,8 @@ class UI:
         elif game_view.active_weapon == gameview.BOW_INDEX:
             self.weapons_UI = arcade.Sprite("assets/kenney-voxel-items-png/bow.png", scale=1, center_x=80,center_y=80, angle = -70)
     
-
+    #@score_UI.setter
+    #def UI
     
     def draw(self) -> None:
         self.score_UI.draw()

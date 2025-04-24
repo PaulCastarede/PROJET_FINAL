@@ -30,7 +30,7 @@ def test_game_setup() -> None:
     """Test l'initialisation du jeu."""
     game = GameView()
     assert game.world.player_sprite.score == 0
-    assert game.victory is False
+    assert game.UI.victory is False
     assert game.world.player_sprite.death is False
     assert len(game.world.wall_list) == 0  # Doit être vide avant chargement d'une carte
 

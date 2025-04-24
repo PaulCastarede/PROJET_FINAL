@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Final
 import arcade
 import monsters 
 import gameview
@@ -18,8 +19,8 @@ PLAYER_JUMP_SPEED = 18
 class Player(arcade.Sprite):   
     player_sprite : arcade.Sprite
     death : bool
-    death_sound : arcade.Sound
-    jump_sound : arcade.Sound
+    death_sound : Final[arcade.Sound]
+    jump_sound : Final[arcade.Sound]
 
     def __init__(self, path_or_texture : str = ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png", center_x : float = 0, center_y : float = 0, scale : float = 0.5) -> None:
         super().__init__(path_or_texture,scale, center_x, center_y )
@@ -43,7 +44,8 @@ class Player(arcade.Sprite):
             self.change_x -= PLAYER_MOVEMENT_SPEED       #Joueur recule si <- pressed
 
     def jump(self) -> None:
-        # jump by giving an initial vertical speed
+        """Jump by giving an initial vertical speed. Called when user presses "Up Arrow"
+        """
         self.change_y = PLAYER_JUMP_SPEED
         arcade.play_sound(self.jump_sound)
 

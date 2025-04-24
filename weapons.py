@@ -52,24 +52,27 @@ class Sword(Weapon, Lethal):
 
 
 class Arrow(Lethal):
-    ARROW_SPEED : float = 5
+    __ARROW_SPEED : float = 5
     """Speed of the arrows, in pixels per frame"""
-    ARROW_GRAVITY : Final[float] = 0.3
+    __ARROW_GRAVITY : Final[float] = 0.25
     """Lateral speed of the arrows, in pixels per frame"""
-    charge_level : float
-    MAXIMAL_CHARGE : Final[float] = 12
+    __charge_level : float
+    __MAXIMAL_CHARGE : Final[float] = 12
     released : bool
 
     def __init__(self, path_or_texture : str = "assets/kenney-voxel-items-png/arrow.png", center_x : float = 0, center_y : float = 0, scale : float = 0.4, angle : float = 0) -> None:
         super().__init__(path_or_texture,scale, center_x, center_y, angle)
-        self.charge_level = 1
+        self.__charge_level = 1
         self.released = False
 
+    @property 
+    def speed(self) -> float :
+        return self.__ARROW_SPEED
 
     def arrows_movement(self, wall_list : arcade.SpriteList[arcade.Sprite]) -> None:
         if self.released:
             # Appliquer la physique
-            self.change_y -= self.ARROW_GRAVITY
+            self.change_y -= self.__ARROW_GRAVITY
             self.center_x += self.change_x
             self.center_y += self.change_y
             # Orienter la flèche en fonction de sa direction
@@ -85,10 +88,12 @@ class Arrow(Lethal):
 
 
     def charge_level_increases_speed(self) -> None:
-        if self.charge_level < self.MAXIMAL_CHARGE:
-            self.ARROW_SPEED += self.charge_level 
+        """Fait en sorte que plus l'arc est bandé (plus on a gardé le clic gauche appuyé longtemps), plus la flèche est chargée et plus elle part vite
+        """
+        if self.__charge_level < self.__MAXIMAL_CHARGE:
+            self.__ARROW_SPEED += self.__charge_level 
         else:
-            self.ARROW_SPEED += self.MAXIMAL_CHARGE
+            self.__ARROW_SPEED += self.__MAXIMAL_CHARGE
 
 
     def behavior_before_release(self, bow : Weapon) -> None:
@@ -98,7 +103,7 @@ class Arrow(Lethal):
         self.center_x = bow.center_x  
         self.center_y = bow.center_y 
         #Flèche de plus en plus chargée au cours du temps
-        self.charge_level *= 1.05
+        self.__charge_level *= 1.05
 
 
 

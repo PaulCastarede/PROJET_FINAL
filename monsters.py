@@ -46,6 +46,7 @@ class Bat(Monster):
         self.__theta = 0
     
     #Calcul de la distance entre la position de la bat et son point d'apparition
+    @property
     def distance_from_spawn(self) -> float: 
         return math.sqrt((self.center_x - self.__x_spawn)**2 + (self.center_y - self.__y_spawn)**2) 
     
@@ -59,7 +60,7 @@ class Bat(Monster):
         self.change_y = self.BAT_SPEED*math.sin(self.__theta)
         self.__time_travel += 1       
         #Si la chauve-souris dépasse sa sphère d'action...
-        if  self.distance_from_spawn() > self.__range and self.__time_travel > 30:
+        if  self.distance_from_spawn > self.__range and self.__time_travel > 30:
             self.__theta += math.pi   #... elle fait demi-tour
             self.__time_travel = 0
         if self.__time_travel%15 == 0:
