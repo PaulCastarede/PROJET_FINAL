@@ -148,7 +148,6 @@ class GameView(arcade.View):
         for monster in self.world.monsters_list:
             monster.movement()         
             
-
         if self.mouse_left_pressed:
             self.weapons_list[self.active_weapon].adapt_weapon_position(self.angle)
             self.weapons_list[self.active_weapon].weapon_movement(self)
@@ -156,15 +155,13 @@ class GameView(arcade.View):
             self.bow.angle -= 70
             if self.active_weapon == BOW_INDEX:
                 self.arrow.behavior_before_release(self.bow)
-                
-                
+                       
         for arrow in self.arrow_sprite_list:
             #Trajectoire de la flèche
             arrow.arrows_movement(self.world.wall_list)
             # Tuer les monstres rencontrés
             arrow.kills_monsters(self.world.monsters_list)
         
-
 
         self.world.player_sprite.collect_coins(self)                                   
         
