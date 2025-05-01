@@ -3,6 +3,7 @@ import arcade
 import monsters
 import player
 import coins
+import Map_Create.platforms
 
 class World:
     
@@ -12,7 +13,9 @@ class World:
     """
     player_sprite : player.Player
     player_sprite_list : arcade.SpriteList[player.Player]
+    player_set_spawn : bool
     wall_list : arcade.SpriteList[arcade.Sprite]
+    moving_platforms_list : arcade.SpriteList[Map_Create.platforms.Platform]
     no_go_list : arcade.SpriteList[arcade.Sprite]
     monsters_list : arcade.SpriteList[monsters.Monster]
     coins_list : arcade.SpriteList[coins.Coin]
@@ -25,7 +28,9 @@ class World:
     
     def __init__(self)-> None:
         self.player_sprite_list = arcade.SpriteList()
+        self.player_set_spawn = False
         self.wall_list = arcade.SpriteList(use_spatial_hash=True)
+        self.moving_platforms_list = arcade.SpriteList()
         self.no_go_list = arcade.SpriteList(use_spatial_hash=True)
         self.monsters_list = arcade.SpriteList()
         self.coins_list = arcade.SpriteList(use_spatial_hash=True)
@@ -36,6 +41,7 @@ class World:
     def draw(self)-> None:
         self.player_sprite_list.draw()
         self.wall_list.draw()
+        self.moving_platforms_list.draw()
         self.no_go_list.draw()
         self.monsters_list.draw()
         self.coins_list.draw()
@@ -88,11 +94,13 @@ def readmap(self : World, map : str) -> None:
 
             # Effacer les sprites précédents
             self.wall_list.clear()
+            self.moving_platforms_list.clear()
             self.coins_list.clear()
             self.monsters_list.clear()
             self.no_go_list.clear()
             self.player_sprite_list.clear()
             self.exit_list.clear()
+            self.player_set_spawn = False
 
             # Lire les caractères de la carte après le ("---")
             map_lines = []
@@ -103,17 +111,24 @@ def readmap(self : World, map : str) -> None:
                 if len(line) > self.map_width:                
                     raise ValueError(f"La ligne dépasse la longueur de la config {self.map_width}")
 
-                map_lines.append(line)
+                map_lines.append(list(line))
 
             # Vérifier que le fichier se termine par "---"
             end_line = file.readline().strip() # Ligne +1 après dernière ligne de la boucle 
             if end_line != "---":
                 raise ValueError("Le fichier ne se termine pas par :  '---' ")
+            
+            for i, line in enumerate(map_lines): 
+                for j, character in enumerate(line):
+                    if character == "←" or character == "→" or character == "↑" or character == "↓":
+                        Map_Create.platforms.detect_block((j,i), map_lines, trajectory = Map_Create.platforms.Trajectory(), moving_platforms_list=self.moving_platforms_list)
 
             for i, line in enumerate(map_lines): 
                 for j, character in enumerate(line):
-                    x = 64 * j  # (64 pixels par element)
-                    y = 64 * (len(map_lines)-i) # (Car renversé)
+                    row_number = len(map_lines)-i   # (Car renversé)
+                    column_number = j
+                    x = 64 * column_number  # (64 pixels par element)
+                    y = 64 * row_number 
 
                     match character:
                         case "=":  # Grass block
@@ -138,11 +153,19 @@ def readmap(self : World, map : str) -> None:
                             lava = arcade.Sprite(":resources:images/tiles/lava.png", scale=0.5, center_x=x, center_y=y)
                             self.no_go_list.append(lava)
                         case "S":  # Player start position
-                            self.player_sprite =  player.Player(center_x=x, center_y=y,)
-                            self.player_sprite_list.append(self.player_sprite)
-                            
-                            #On définit le moteur physique qui s'applique sur le player
-                            self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, walls=self.wall_list, gravity_constant=player.PLAYER_GRAVITY)
+                            if not(self.player_set_spawn):
+                                self.player_sprite =  player.Player(center_x=x, center_y=y,)
+                                self.player_sprite_list.append(self.player_sprite)
+                                self.player_set_spawn = True
+                                #On définit le moteur physique à partir des sprites
+                                self.physics_engine = arcade.PhysicsEnginePlatformer(
+                                self.player_sprite, 
+                                walls=self.wall_list, 
+                                platforms = self.moving_platforms_list,
+                                gravity_constant=player.PLAYER_GRAVITY)
+                            else:
+                                raise ValueError("Le joueur ne peut avoir qu'un seul spawn")
+
                         case "E":  #Map end
                             exit = arcade.Sprite(":resources:/images/tiles/signExit.png", scale = 0.5, center_x = x, center_y = y)
                             self.exit_list.append(exit)

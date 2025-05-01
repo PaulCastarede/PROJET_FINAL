@@ -7,7 +7,7 @@ import dataclasses
 from typing import Final
 from monsters import *
 import weapons
-from create_world import *
+from Map_Create.create_world import *
 
 SWORD_INDEX = 0
 BOW_INDEX = 1
@@ -147,7 +147,11 @@ class GameView(arcade.View):
         #COMPORTEMENT DES MONSTRES
         for monster in self.world.monsters_list:
             monster.movement()         
-            
+
+        #DEPLACEMENT DES PLATEFORMES  
+        #for platform in self.world.moving_platforms_list:
+            #platform.movement()
+
         if self.mouse_left_pressed:
             self.weapons_list[self.active_weapon].adapt_weapon_position(self.angle)
             self.weapons_list[self.active_weapon].weapon_movement(self)

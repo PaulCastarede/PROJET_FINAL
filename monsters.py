@@ -85,7 +85,7 @@ class Slime(Monster):
     def movement(self) -> None:
         self.center_x += self.change_x 
         #Checker s'il y a un wall en dessous de l'endroit ou le slime se dirige    
-        self.__below = arcade.Sprite(center_x = self.center_x + self.change_x * 85, center_y = self.center_y - 30 )
+        self.__below = arcade.Sprite(center_x = self.center_x + self.change_x * 85, center_y = self.bottom)
         below_collision = arcade.check_for_collision_with_list(self.__below, self.__wall_list)       
         #Checker s'il y a un obstacle en face du slime                                                    
         self.__front = arcade.Sprite(scale = 0.005, center_x= self.center_x + self.change_x * 22 , center_y = self.center_y - 15 )

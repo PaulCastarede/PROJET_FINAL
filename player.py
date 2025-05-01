@@ -32,7 +32,7 @@ class Player(arcade.Sprite):
     def dies(self, no_go : arcade.SpriteList[arcade.Sprite], monsters : arcade.SpriteList[monsters.Monster]) -> None:
         no_go_touched = arcade.check_for_collision_with_list(self, no_go) 
         monsters_touched = arcade.check_for_collision_with_list(self, monsters)
-        if no_go_touched or monsters_touched:
+        if no_go_touched or monsters_touched or self.center_y < -64:
             self.death = True
             arcade.play_sound(self.death_sound)
 
