@@ -2,9 +2,11 @@ from __future__ import annotations
 import arcade 
 import Map_Create.world_sprites
 import monsters
+import platforming.block_detecting
 import player
 import coins
-import Map_Create.platforms
+import platforming.platforms as platforms
+import platforming
 
 class World:
     
@@ -16,7 +18,7 @@ class World:
     player_sprite_list : arcade.SpriteList[player.Player]
     player_set_spawn : bool
     wall_list : arcade.SpriteList[arcade.Sprite]
-    moving_platforms_list : arcade.SpriteList[Map_Create.platforms.Platform]
+    moving_platforms_list : arcade.SpriteList[platforms.Platform]
     no_go_list : arcade.SpriteList[arcade.Sprite]
     monsters_list : arcade.SpriteList[monsters.Monster]
     coins_list : arcade.SpriteList[coins.Coin]
@@ -49,13 +51,13 @@ class World:
         self.exit_list.draw()
 
 
-def readmap(self : World, map : str) -> None:
+def readmap(world : World, map : str) -> None:
 
 
     # Ouvrir le fichier sous l'acronyme 'file'
         with open(f"maps/{map}", "r", encoding="utf-8") as file:
 
-            self.last_level = True
+            world.last_level = True
 
             for line in file:
                 stripped_line = line.strip()  # Supprimer chaque espace / saut
@@ -77,40 +79,40 @@ def readmap(self : World, map : str) -> None:
                                     raise ValueError(f"Valeur invalide pour la clé : {key}: {value}")
 
                             if key == "width":
-                                self.map_width = int(value) # On définit la largeur de la carte
+                                world.map_width = int(value) # On définit la largeur de la carte
 
                             if key == "height":
-                                self.map_height = int(value)  # On définit la longueur de la carte
+                                world.map_height = int(value)  # On définit la longueur de la carte
 
                             if key == "next-map":
-                                self.last_level = False
-                                self.next_map = value        # On définit le niveau suivant 
+                                world.last_level = False
+                                world.next_map = value        # On définit le niveau suivant 
 
                         except ValueError as e: 
                             raise ValueError(f"Valeur invalide pour la clé {key}: {value}") from e
 
             # Vérifier que les dimensions sont des entiers strictement positifs
-            if self.map_width <= 0 or self.map_height <= 0:
+            if world.map_width <= 0 or world.map_height <= 0:
                 raise ValueError("Les dimensions dans la configuration sont invalides")
 
             # Effacer les sprites précédents
-            self.wall_list.clear()
-            self.moving_platforms_list.clear()
-            self.coins_list.clear()
-            self.monsters_list.clear()
-            self.no_go_list.clear()
-            self.player_sprite_list.clear()
-            self.exit_list.clear()
-            self.player_set_spawn = False
+            world.wall_list.clear()
+            world.moving_platforms_list.clear()
+            world.coins_list.clear()
+            world.monsters_list.clear()
+            world.no_go_list.clear()
+            world.player_sprite_list.clear()
+            world.exit_list.clear()
+            world.player_set_spawn = False
 
             # Lire les caractères de la carte après le ("---")
             map_lines = []
 
-            for A in range(self.map_height):
+            for A in range(world.map_height):
                 line = file.readline().rstrip('\n')  # Lire sans sauter une ligne
 
-                if len(line) > self.map_width:                
-                    raise ValueError(f"La ligne dépasse la longueur de la config {self.map_width}")
+                if len(line) > world.map_width:                
+                    raise ValueError(f"La ligne dépasse la longueur de la config {world.map_width}")
 
                 map_lines.append(list(line))
 
@@ -122,9 +124,9 @@ def readmap(self : World, map : str) -> None:
             for i, line in enumerate(map_lines): 
                 for j, character in enumerate(line):
                     if character == "←" or character == "→" or character == "↑" or character == "↓":
-                        Map_Create.platforms.detect_block((j,i), map_lines, trajectory = Map_Create.platforms.Trajectory(), moving_platforms_list=self.moving_platforms_list)
+                        platforming.block_detecting.detect_block((j,i), map_lines, trajectory = platforms.Trajectory(), moving_platforms_list=world.moving_platforms_list)
 
-            for platform in self.moving_platforms_list:
+            for platform in world.moving_platforms_list:
                 platform.define_boundaries()
 
             for i, line in enumerate(map_lines): 
@@ -137,42 +139,42 @@ def readmap(self : World, map : str) -> None:
                     match character:
                         case "=":  # Grass block
                             grass = arcade.Sprite(":resources:images/tiles/grassMid.png", scale=0.5, center_x=x, center_y=y)
-                            self.wall_list.append(grass)
+                            world.wall_list.append(grass)
                         case "-":  # Half grass block
                             half_grass = arcade.Sprite(":resources:images/tiles/grassHalf_mid.png", scale=0.5, center_x=x, center_y=y)
-                            self.wall_list.append(half_grass)
+                            world.wall_list.append(half_grass)
                         case "x":  # Crate
                             crate = arcade.Sprite(":resources:images/tiles/boxCrate_double.png", scale=0.5, center_x=x, center_y=y)
-                            self.wall_list.append(crate)
+                            world.wall_list.append(crate)
                         case "*":  # Coin
                             coin = coins.Coin(center_x=x, center_y=y)
-                            self.coins_list.append(coin)
+                            world.coins_list.append(coin)
                         case "o":  # Slime enemy
-                            slime = monsters.Slime(scale=0.5, center_x=x, center_y=y, wall_list = self.wall_list)
-                            self.monsters_list.append(slime)
+                            slime = monsters.Slime(scale=0.5, center_x=x, center_y=y, wall_list = world.wall_list)
+                            world.monsters_list.append(slime)
                         case "v":  # Bat enemy  
                             bat = monsters.Bat(center_x=x, center_y=y)
-                            self.monsters_list.append(bat)
+                            world.monsters_list.append(bat)
                         case "£":  # Lava
                             lava = arcade.Sprite(":resources:images/tiles/lava.png", scale=0.5, center_x=x, center_y=y)
-                            self.no_go_list.append(lava)
+                            world.no_go_list.append(lava)
                         case "S":  # Player start position
-                            if not(self.player_set_spawn):
-                                self.player_sprite =  player.Player(center_x=x, center_y=y,)
-                                self.player_sprite_list.append(self.player_sprite)
-                                self.player_set_spawn = True
+                            if not(world.player_set_spawn):
+                                world.player_sprite =  player.Player(center_x=x, center_y=y,)
+                                world.player_sprite_list.append(world.player_sprite)
+                                world.player_set_spawn = True
                                 #On définit le moteur physique à partir des sprites
-                                self.physics_engine = arcade.PhysicsEnginePlatformer(
-                                self.player_sprite, 
-                                walls=self.wall_list, 
-                                platforms = self.moving_platforms_list,
+                                world.physics_engine = arcade.PhysicsEnginePlatformer(
+                                world.player_sprite, 
+                                walls=world.wall_list, 
+                                platforms = world.moving_platforms_list,
                                 gravity_constant=player.PLAYER_GRAVITY)
                             else:
                                 raise ValueError("Le joueur ne peut avoir qu'un seul spawn")
 
                         case "E":  #Map end
                             exit = Map_Create.world_sprites.Exit_Sprite(":resources:/images/tiles/signExit.png", scale = 0.5, center_x = x, center_y = y)
-                            self.exit_list.append(exit)
+                            world.exit_list.append(exit)
 
 
 

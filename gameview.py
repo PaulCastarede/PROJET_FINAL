@@ -173,8 +173,7 @@ class GameView(arcade.View):
         self.world.player_sprite.dies(self.world.no_go_list, self.world.monsters_list)
         
         #NEXT LEVEL
-        print(len([exit for exit in self.world.exit_list or [exit for exit in self.world.moving_platforms_list if type(exit) is Map_Create.platforms.Exit_Platform]]))
-        for exit_signs in [exit for exit in self.world.exit_list or [exit for exit in self.world.moving_platforms_list if type(exit) is Map_Create.platforms.Exit_Platform]] :
+        for exit_signs in [exit for exit in self.world.exit_list or [exit for exit in self.world.moving_platforms_list if type(exit) is platforming.platforms.Exit_Platform]] :
             exit_signs.exit(self)
           
 

@@ -16,5 +16,8 @@ class Exit_Sprite(arcade.Sprite):
                 game_view.UI.update(self)
         
 
+class Lava_Sprite(arcade.Sprite):
 
+    def kills(self, game_view : gameview.GameView) -> None:
+        ...
     
