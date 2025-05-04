@@ -28,21 +28,20 @@ def detect_block(position_in_map : tuple[int,int], map_lines : list[list[str]], 
     match map_lines[position_in_map[y]][position_in_map[x]]:
         case "←" : 
             trajectory.left_movement += 1
-            map_lines[position_in_map[y]][position_in_map[x]] = " "
-            detect_right_left((position_in_map[x],position_in_map[y]), map_lines, trajectory, moving_platforms_list)
+            detect_arrows_set((position_in_map[x],position_in_map[y]), map_lines, trajectory, moving_platforms_list, "←")
+            detect_right((position_in_map[x]+trajectory.left_movement-1,position_in_map[y]), map_lines, trajectory, moving_platforms_list)
         case "→" :
             trajectory.right_movement += 1
-            map_lines[position_in_map[y]][position_in_map[x]] = " "
-            detect_right_left((position_in_map[x],position_in_map[y]), map_lines, trajectory, moving_platforms_list)
+            detect_arrows_set((position_in_map[x],position_in_map[y]), map_lines, trajectory, moving_platforms_list, "→")
+            detect_left((position_in_map[x],position_in_map[y]), map_lines, trajectory, moving_platforms_list)
         case "↑" :
             trajectory.up_movement += 1
-            map_lines[position_in_map[y]][position_in_map[x]] = " "
-            detect_up_down((position_in_map[x],position_in_map[y]), map_lines, trajectory, moving_platforms_list)
-
+            detect_arrows_set((position_in_map[x],position_in_map[y]), map_lines, trajectory, moving_platforms_list, "↑")
+            detect_down((position_in_map[x],position_in_map[y]-trajectory.up_movement+1), map_lines, trajectory, moving_platforms_list)
         case "↓" :
             trajectory.down_movement += 1
-            map_lines[position_in_map[y]][position_in_map[x]] = " "
-            detect_up_down((position_in_map[x],position_in_map[y]), map_lines, trajectory, moving_platforms_list)
+            detect_arrows_set((position_in_map[x],position_in_map[y]), map_lines, trajectory, moving_platforms_list, "↓")
+            detect_up((position_in_map[x],position_in_map[y]), map_lines, trajectory, moving_platforms_list)
 
         case "=" :
             Grass = Platform(":resources:images/tiles/grassMid.png", scale=0.5,center_x=position_in_map[x]*64, center_y=(len(map_lines)-position_in_map[y])*64, platform_trajectory = trajectory, angle = 0)
@@ -116,17 +115,48 @@ def detect_surrounding(position_in_map : tuple[int,int], map_lines : list[list[s
         trajectory (Trajectory): _description_
         moving_platforms_list (arcade.SpriteList[Platform]): _description_
     """
-    detect_up_down((position_in_map[x],position_in_map[y]), map_lines, trajectory, moving_platforms_list)
-    detect_right_left((position_in_map[x],position_in_map[y]), map_lines, trajectory, moving_platforms_list)
+    detect_up((position_in_map[x],position_in_map[y]), map_lines, trajectory, moving_platforms_list)
+    detect_down((position_in_map[x],position_in_map[y]), map_lines, trajectory, moving_platforms_list)
+    detect_right((position_in_map[x],position_in_map[y]), map_lines, trajectory, moving_platforms_list)
+    detect_left((position_in_map[x],position_in_map[y]), map_lines, trajectory, moving_platforms_list)
 
-def detect_right_left(position_in_map : tuple[int,int], map_lines : list[list[str]], trajectory : Trajectory, moving_platforms_list : arcade.SpriteList[Platform] ) -> None:
+
+
+def detect_right(position_in_map : tuple[int,int], map_lines : list[list[str]], trajectory : Trajectory, moving_platforms_list : arcade.SpriteList[Platform] ) -> None:
     if position_in_map[x] < len(map_lines[position_in_map[y]]):
         detect_block((position_in_map[x]+1,position_in_map[y]), map_lines, trajectory, moving_platforms_list)
+
+def detect_left(position_in_map : tuple[int,int], map_lines : list[list[str]], trajectory : Trajectory, moving_platforms_list : arcade.SpriteList[Platform] ) -> None:
     if position_in_map[x] > 0:
         detect_block((position_in_map[x]-1,position_in_map[y]), map_lines, trajectory, moving_platforms_list)
 
-def detect_up_down(position_in_map : tuple[int,int], map_lines : list[list[str]], trajectory : Trajectory, moving_platforms_list : arcade.SpriteList[Platform] ) -> None:
-    if position_in_map[y] > 0:
-        detect_block((position_in_map[x],position_in_map[y]-1), map_lines, trajectory, moving_platforms_list)
+def detect_down(position_in_map : tuple[int,int], map_lines : list[list[str]], trajectory : Trajectory, moving_platforms_list : arcade.SpriteList[Platform] ) -> None:
     if position_in_map[y] < len(map_lines):
         detect_block((position_in_map[x],position_in_map[y]+1), map_lines, trajectory, moving_platforms_list)
+
+def detect_up(position_in_map : tuple[int,int], map_lines : list[list[str]], trajectory : Trajectory, moving_platforms_list : arcade.SpriteList[Platform] ) -> None:       
+    if position_in_map[y] > 0:
+        detect_block((position_in_map[x],position_in_map[y]-1), map_lines, trajectory, moving_platforms_list)
+    
+def detect_arrows_set(position_in_map : tuple[int,int], map_lines : list[list[str]], trajectory : Trajectory, moving_platforms_list : arcade.SpriteList[Platform], char : str ) -> None:
+    map_lines[position_in_map[y]][position_in_map[x]] = " "
+    match char: 
+        case "→":
+            if position_in_map[x] < len(map_lines[position_in_map[y]]):
+                if map_lines[position_in_map[y]][position_in_map[x]+1] == "→":
+                    trajectory.right_movement += 1
+                    detect_arrows_set((position_in_map[x]+1,position_in_map[y]), map_lines, trajectory, moving_platforms_list,"→" )
+        case  "←" : 
+            if map_lines[position_in_map[y]][position_in_map[x]+1] == "←":
+                trajectory.left_movement += 1
+                detect_arrows_set((position_in_map[x]+1,position_in_map[y]), map_lines, trajectory, moving_platforms_list,"←" )
+        case "↑" :
+            if map_lines[position_in_map[y]-1][position_in_map[x]] == "↑":
+                trajectory.up_movement += 1
+                detect_arrows_set((position_in_map[x],position_in_map[y]+1), map_lines, trajectory, moving_platforms_list,"↑" )
+        case "↓" :
+            if position_in_map[y] < len(map_lines):
+                if map_lines[position_in_map[y]-1][position_in_map[x]] == "↓":
+                    trajectory.down_movement += 1
+                    detect_arrows_set((position_in_map[x],position_in_map[y]+1), map_lines, trajectory, moving_platforms_list,"↓" )   
+                
