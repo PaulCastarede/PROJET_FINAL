@@ -1,10 +1,12 @@
 from __future__ import annotations
 import arcade
 import math
+import Map_Create.world_sprites
 from enum import Enum
 from enum import auto
+from dataclasses import dataclass
 
-PLATFORM_SPEED = -1.5
+PLATFORM_SPEED = 1.5
 x = 0
 y = 1
 
@@ -64,7 +66,7 @@ def detect_block(position_in_map : tuple[int,int], map_lines : list[list[str]], 
             moving_platforms_list.append(lava)
             detect_surrounding(position_in_map , map_lines, trajectory , moving_platforms_list)
         case "E" :
-            exit = Platform(":resources:/images/tiles/signExit.png",  center_x=position_in_map[x]*64, center_y=(len(map_lines)-position_in_map[y])
+            exit = Exit_Platform(":resources:/images/tiles/signExit.png",  center_x=position_in_map[x]*64, center_y=(len(map_lines)-position_in_map[y])
                             *64, scale = 0.5, platform_trajectory = trajectory, angle = 0)
             map_lines[position_in_map[y]][position_in_map[x]] = " "
             moving_platforms_list.append(exit)
@@ -79,15 +81,19 @@ class Platform(arcade.Sprite):
     def __init__(self,path_or_texture : str, scale : float, center_x : float, center_y : float,  angle : float, platform_trajectory : Trajectory) -> None:
         super().__init__(path_or_texture, scale, center_x, center_y, angle )
         self.platform_trajectory = platform_trajectory
-        self.boundary_right = self.center_x + self.platform_trajectory.right_movement * 64
-        self.boundary_left = self.center_x - self.platform_trajectory.left_movement *64
-        self.boundary_top = self.center_y + self.platform_trajectory.up_movement *64
-        self.boundary_bottom = self.center_y - self.platform_trajectory.down_movement *64
         self.change_x = PLATFORM_SPEED
         self.change_y = PLATFORM_SPEED
 
+    def define_boundaries(self) -> None:
+        self.boundary_right = self.center_x + self.platform_trajectory.right_movement*64
+        self.boundary_left = self.center_x - self.platform_trajectory.left_movement*64
+        self.boundary_top = self.center_y + self.platform_trajectory.up_movement*64
+        self.boundary_bottom = self.center_y - self.platform_trajectory.down_movement*64
+    
+class Exit_Platform(Platform, Map_Create.world_sprites.Exit_Sprite):
+    ...
 
-
+@dataclass
 class Trajectory:
     left_movement : int
     right_movement : int

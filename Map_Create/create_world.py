@@ -1,5 +1,6 @@
 from __future__ import annotations 
 import arcade 
+import Map_Create.world_sprites
 import monsters
 import player
 import coins
@@ -20,8 +21,8 @@ class World:
     monsters_list : arcade.SpriteList[monsters.Monster]
     coins_list : arcade.SpriteList[coins.Coin]
     physics_engine : arcade.PhysicsEnginePlatformer
-    exit_list : arcade.SpriteList[arcade.Sprite]
-    Next_map : str
+    exit_list : arcade.SpriteList[Map_Create.world_sprites.Exit_Sprite]
+    next_map : str
     last_level : bool
     map_width : int
     map_height : int 
@@ -30,7 +31,7 @@ class World:
         self.player_sprite_list = arcade.SpriteList()
         self.player_set_spawn = False
         self.wall_list = arcade.SpriteList(use_spatial_hash=True)
-        self.moving_platforms_list = arcade.SpriteList()
+        self.moving_platforms_list = arcade.SpriteList(use_spatial_hash=True)
         self.no_go_list = arcade.SpriteList(use_spatial_hash=True)
         self.monsters_list = arcade.SpriteList()
         self.coins_list = arcade.SpriteList(use_spatial_hash=True)
@@ -83,7 +84,7 @@ def readmap(self : World, map : str) -> None:
 
                             if key == "next-map":
                                 self.last_level = False
-                                self.Next_map = value        # On définit le niveau suivant 
+                                self.next_map = value        # On définit le niveau suivant 
 
                         except ValueError as e: 
                             raise ValueError(f"Valeur invalide pour la clé {key}: {value}") from e
@@ -122,6 +123,9 @@ def readmap(self : World, map : str) -> None:
                 for j, character in enumerate(line):
                     if character == "←" or character == "→" or character == "↑" or character == "↓":
                         Map_Create.platforms.detect_block((j,i), map_lines, trajectory = Map_Create.platforms.Trajectory(), moving_platforms_list=self.moving_platforms_list)
+
+            for platform in self.moving_platforms_list:
+                platform.define_boundaries()
 
             for i, line in enumerate(map_lines): 
                 for j, character in enumerate(line):
@@ -167,7 +171,7 @@ def readmap(self : World, map : str) -> None:
                                 raise ValueError("Le joueur ne peut avoir qu'un seul spawn")
 
                         case "E":  #Map end
-                            exit = arcade.Sprite(":resources:/images/tiles/signExit.png", scale = 0.5, center_x = x, center_y = y)
+                            exit = Map_Create.world_sprites.Exit_Sprite(":resources:/images/tiles/signExit.png", scale = 0.5, center_x = x, center_y = y)
                             self.exit_list.append(exit)
 
 

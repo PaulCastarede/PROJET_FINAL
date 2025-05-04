@@ -173,14 +173,9 @@ class GameView(arcade.View):
         self.world.player_sprite.dies(self.world.no_go_list, self.world.monsters_list)
         
         #NEXT LEVEL
-        if arcade.check_for_collision_with_list(self.world.player_sprite, self.world.exit_list) :
-            if not(self.world.last_level):    
-                #Si ce n'est pas le dernier niveau, lit la prochaine map       
-                readmap(self.world, map = self.world.Next_map)
-            else:
-                self.UI.victory = True
-                self.UI.update(self)
-
+        print(len([exit for exit in self.world.exit_list or [exit for exit in self.world.moving_platforms_list if type(exit) is Map_Create.platforms.Exit_Platform]]))
+        for exit_signs in [exit for exit in self.world.exit_list or [exit for exit in self.world.moving_platforms_list if type(exit) is Map_Create.platforms.Exit_Platform]] :
+            exit_signs.exit(self)
           
 
         #GAME OVER SET
