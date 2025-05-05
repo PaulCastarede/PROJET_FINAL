@@ -2,6 +2,7 @@ from __future__ import annotations
 import arcade
 import time 
 import math
+import platforming.platforms
 import user_interface
 import dataclasses
 from typing import Final
@@ -144,13 +145,14 @@ class GameView(arcade.View):
         #Mouvement du joueur
         self.world.player_sprite.movement(self)
 
+        #Mouvement des plateformes autres que "wall"
+        print(len([sprite for sprite in self.world.exit_list  if type(sprite) is platforms.Exit_Platform]))
+        for collidable_platforms in [sprite for sprite in self.world.exit_list  if type(sprite) is platforms.Exit_Platform]:
+            collidable_platforms.movement()
+
         #COMPORTEMENT DES MONSTRES
         for monster in self.world.monsters_list:
             monster.movement()         
-
-        #DEPLACEMENT DES PLATEFORMES  
-        #for platform in self.world.moving_platforms_list:
-            #platform.movement()
 
         if self.mouse_left_pressed:
             self.weapons_list[self.active_weapon].adapt_weapon_position(self.angle)
@@ -173,7 +175,7 @@ class GameView(arcade.View):
         self.world.player_sprite.dies(self.world.no_go_list, self.world.monsters_list)
         
         #NEXT LEVEL
-        for exit_signs in [exit for exit in self.world.exit_list or [exit for exit in self.world.moving_platforms_list if type(exit) is platforming.platforms.Exit_Platform]] :
+        for exit_signs in self.world.exit_list:
             exit_signs.exit(self)
           
 

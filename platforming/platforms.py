@@ -6,7 +6,6 @@ import platforming.block_detecting
 PLATFORM_SPEED = 1.5
 
 
-
 class Platform(arcade.Sprite):
     platform_trajectory : Trajectory
 
@@ -17,15 +16,23 @@ class Platform(arcade.Sprite):
         self.change_y = PLATFORM_SPEED
 
     def define_boundaries(self) -> None:
-        self.boundary_right = self.center_x + self.platform_trajectory.right_movement*64
-        self.boundary_left = self.center_x - self.platform_trajectory.left_movement*64
-        self.boundary_top = self.center_y + self.platform_trajectory.up_movement*64
-        self.boundary_bottom = self.center_y - self.platform_trajectory.down_movement*64
+        self.boundary_right = self.center_x + self.platform_trajectory.right_movement*platforming.block_detecting.TILE_SIZE
+        self.boundary_left = self.center_x - self.platform_trajectory.left_movement*platforming.block_detecting.TILE_SIZE
+        self.boundary_top = self.center_y + self.platform_trajectory.up_movement*platforming.block_detecting.TILE_SIZE
+        self.boundary_bottom = self.center_y - self.platform_trajectory.down_movement*platforming.block_detecting.TILE_SIZE
+
+
+class Collidable_Platform(Platform):
     
-class Exit_Platform(Platform, Map_Create.world_sprites.Exit_Sprite):
+    def movement(self) -> None:
+        self.center_x += self.change_x
+        self.center_y += self.change_y
+
+    
+class Exit_Platform(Collidable_Platform, Map_Create.world_sprites.Exit_Sprite):
     ...
 
-class Lava_Platform(Platform, Map_Create.world_sprites.Lava_Sprite):
+class Lava_Platform(Collidable_Platform, Map_Create.world_sprites.Lava_Sprite):
     ...
 
 @dataclass
@@ -42,11 +49,3 @@ class Trajectory:
         self.right_movement = 0
         self.up_movement = 0 
         self.down_movement = 0
-
-
-
-
-
-
-
-    

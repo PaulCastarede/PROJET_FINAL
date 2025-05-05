@@ -53,3 +53,22 @@ Q: Comment avez-vous structuré votre programme pour que les flèches puissent p
 
 Q: Comment gérez-vous le fait que vous avez maintenant deux types de monstres, et deux types d'armes ? Comment faites-vous pour ne pas dupliquer du code entre ceux-ci ?
 A: Pour les monstres, on a créé une classe abstraite monstre et deux sous-classes 'Slime' et 'Bat' qui héritent de cette classe abstraite. On a ainsi pu mettre les blobs et les chauve-souris dans une même liste 'monsters_list'. Les propriétés qui concernent ces deux monstres s'appliquent sur tous les éléments de la liste monsters, et chaque sous classe de type de monstre définit les méthodes qui sont propres au monstre. Par exemple, les slimes et les chauve souris héritent d'une même classe abstraite 'movement', mais qui est ensuite spécifiée différemment pour chaque type de monstre. Pour les armes, le procédé était à peu près similaire mais la classe Weapon dont elles héritent n'est pas abstraite et définit le gros des méthodes que les armes utilisent, ayant plus de similitudes dans leur comportement (la seule différence intrinsèque étant que l'épée tue les monstres en collision)
+
+
+Semaine 10:
+
+Q: Quel algorithme utilisez-vous pour identifier tous les blocs d’une plateformes, et leurs limites de déplacement ?
+
+A: J'utilise un algorithme récursif de pattern matching. Dans le readmap, 
+
+Q:Sur quelle structure travaille cet algorithme ? Quels sont les avantages et inconvénients de votre choix ?
+
+A: Cet algori
+
+Q:Quelle bibliothèque utilisez-vous pour lire les instructions des interrupteurs ? Dites en une ou deux phrases pourquoi vous avez choisi celle-là.
+
+A:
+
+Q:Comment votre design général évolue-t-il pour tenir compte des interrupteurs et des portails ?
+
+A:

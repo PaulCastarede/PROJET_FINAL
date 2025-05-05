@@ -57,8 +57,11 @@ Pouvoir lancer
 ### Semaine 8
 
 ### Semaine 9
-
+Pas d'avance sur le projet ; préparation au midterm
 ### Semaine 10
+[x] Implémentation des plateformes et hard code expérimental           45
+[x] Intégration de détection de bloc de plateformes a partir de map   240
+[x] Refactorisation (encore primitive) du codes des plateformes        60
 
 ### Semaine 11
 

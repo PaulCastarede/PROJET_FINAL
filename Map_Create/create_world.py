@@ -8,6 +8,10 @@ import coins
 import platforming.platforms as platforms
 import platforming
 
+TILE_SIZE = 64
+"""64 pixels par element"""
+
+
 class World:
     
     """Une classe qui contient toutes les SpriteLists inhérentes au monde chargé (les monstres, les murs, la lave, les pièces et même le joueur !)
@@ -17,6 +21,7 @@ class World:
     player_sprite : player.Player
     player_sprite_list : arcade.SpriteList[player.Player]
     player_set_spawn : bool
+    set_exit : bool
     wall_list : arcade.SpriteList[arcade.Sprite]
     moving_platforms_list : arcade.SpriteList[platforms.Platform]
     no_go_list : arcade.SpriteList[arcade.Sprite]
@@ -32,8 +37,9 @@ class World:
     def __init__(self)-> None:
         self.player_sprite_list = arcade.SpriteList()
         self.player_set_spawn = False
+        self.set_exit = False
         self.wall_list = arcade.SpriteList(use_spatial_hash=True)
-        self.moving_platforms_list = arcade.SpriteList(use_spatial_hash=True)
+        self.moving_platforms_list = arcade.SpriteList()
         self.no_go_list = arcade.SpriteList(use_spatial_hash=True)
         self.monsters_list = arcade.SpriteList()
         self.coins_list = arcade.SpriteList(use_spatial_hash=True)
@@ -108,7 +114,7 @@ def readmap(world : World, map : str) -> None:
             # Lire les caractères de la carte après le ("---")
             map_lines = []
 
-            for A in range(world.map_height):
+            for _ in range(world.map_height):
                 line = file.readline().rstrip('\n')  # Lire sans sauter une ligne
 
                 if len(line) > world.map_width:                
@@ -121,20 +127,21 @@ def readmap(world : World, map : str) -> None:
             if end_line != "---":
                 raise ValueError("Le fichier ne se termine pas par :  '---' ")
             
-            for i, line in enumerate(map_lines): 
-                for j, character in enumerate(line):
+            for index_y, line in enumerate(map_lines): 
+                for index_x, character in enumerate(line):
                     if character == "←" or character == "→" or character == "↑" or character == "↓":
-                        platforming.block_detecting.detect_block((j,i), map_lines, trajectory = platforms.Trajectory(), moving_platforms_list=world.moving_platforms_list)
+                        platforming.block_detecting.detect_block((index_x,index_y), map_lines, trajectory = platforms.Trajectory(), world=world)
 
-            for platform in world.moving_platforms_list:
+            for platform in [platform for platform in world.moving_platforms_list or world.exit_list or world.no_go_list if type(platform) is platforms.Platform]:
                 platform.define_boundaries()
 
-            for i, line in enumerate(map_lines): 
-                for j, character in enumerate(line):
-                    row_number = len(map_lines)-i   # (Car renversé)
-                    column_number = j
-                    x = 64 * column_number  # (64 pixels par element)
-                    y = 64 * row_number 
+
+            for index_y, line in enumerate(map_lines): 
+                for index_x, character in enumerate(line):
+                    row_number = len(map_lines)-index_y   # (Car renversé)
+                    column_number = index_x
+                    x = TILE_SIZE * column_number  # Real coord in game
+                    y = TILE_SIZE * row_number 
 
                     match character:
                         case "=":  # Grass block
@@ -170,11 +177,18 @@ def readmap(world : World, map : str) -> None:
                                 platforms = world.moving_platforms_list,
                                 gravity_constant=player.PLAYER_GRAVITY)
                             else:
-                                raise ValueError("Le joueur ne peut avoir qu'un seul spawn")
+                                raise RuntimeError("Le joueur ne peut avoir qu'un seul spawn")
 
                         case "E":  #Map end
                             exit = Map_Create.world_sprites.Exit_Sprite(":resources:/images/tiles/signExit.png", scale = 0.5, center_x = x, center_y = y)
                             world.exit_list.append(exit)
+                            world.set_exit = True
+
+            if not(world.player_set_spawn):
+                raise RuntimeError("Un endroit où le joueur 'spawn' doit être spécifié")
+            if not(world.set_exit):
+                raise RuntimeError("La fin du niveau doit être spécifiée")
+
 
 
 
