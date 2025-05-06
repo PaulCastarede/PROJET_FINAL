@@ -56,7 +56,7 @@ class Player(arcade.Sprite):
         for coin in collided_coins:
             #Incrémente le score du nombre de pièces 
             gameview.score += len(collided_coins)  
-            gameview.UI.update(gameview)             
+            gameview.UI.update_score(gameview)             
             coin.remove_from_sprite_lists()                
             arcade.play_sound(coin.coin_sound)
 

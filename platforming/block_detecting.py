@@ -62,7 +62,7 @@ def detect_block(position_in_map : tuple[int,int],
             world.moving_platforms_list.append(crate)
             detect_surrounding(position_in_map , map_lines, trajectory , world)
         case "£" :
-            lava = platforming.platforms.Platform(":resources:images/tiles/lava.png", scale=0.5, center_x=position_in_map[x]*TILE_SIZE, center_y=(len(map_lines)-position_in_map[y])*TILE_SIZE, platform_trajectory = trajectory, angle = 0 )
+            lava = platforming.platforms.Lava_Platform(":resources:images/tiles/lava.png", scale=0.5, center_x=position_in_map[x]*TILE_SIZE, center_y=(len(map_lines)-position_in_map[y])*TILE_SIZE, platform_trajectory = trajectory, angle = 0 )
             map_lines[position_in_map[y]][position_in_map[x]] = " "
             world.moving_platforms_list.append(lava)
             detect_surrounding(position_in_map , map_lines, trajectory , world)

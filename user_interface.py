@@ -2,6 +2,7 @@ from __future__ import annotations
 import arcade
 import gameview
 class UI:
+    """UI stands for user interface"""
     __score_UI : arcade.Text
     __weapons_UI : arcade.Sprite
     __victory_UI : arcade.Text
@@ -13,9 +14,11 @@ class UI:
         self.__victory_UI = arcade.Text(x = 300, y = 360, font_size = 100, text = "WELL PLAYED")
         self.victory = False
 
-    def update(self, game_view : gameview.GameView) -> None:
+    def update_score(self, game_view : gameview.GameView) -> None:
         #Fait correspondre le score affiché avec le score du joueur 
         self.__score_UI.text = f"Score : {game_view.score}"
+    
+    def update_weapon(self, game_view : gameview.GameView) -> None:
         if game_view.active_weapon == gameview.SWORD_INDEX:
             self.__weapons_UI = arcade.Sprite("assets/kenney-voxel-items-png/sword_silver.png",scale=0.9, center_x=80,center_y=80, angle = 0)
         elif game_view.active_weapon == gameview.BOW_INDEX:

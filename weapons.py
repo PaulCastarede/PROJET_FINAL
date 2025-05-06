@@ -83,7 +83,7 @@ class Arrow(Lethal):
             # Vérifier les collisions avec les murs
             if arcade.check_for_collision_with_list(self, wall_list):
                 self.remove_from_sprite_lists()
-            if (self.center_y < 0):
+            if (self.center_y < -250):
                 self.remove_from_sprite_lists()
 
 

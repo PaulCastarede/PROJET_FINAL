@@ -69,7 +69,7 @@ class GameView(arcade.View):
         self.bow = weapons.Bow("assets/kenney-voxel-items-png/bow.png", scale=0.4, center_x=0,center_y=0, angle = 0)
         self.weapons_list.append(self.sword)
         self.weapons_list.append(self.bow)
-        self.UI.update(self)
+        self.UI.update_score(self)
   
 
     # COMMANDES
@@ -118,7 +118,7 @@ class GameView(arcade.View):
                 self.active_weapon = BOW_INDEX
             else : 
                 self.active_weapon = SWORD_INDEX
-            self.UI.update(self)
+            self.UI.update_weapon(self)
             
 
     def on_mouse_release(self, x: int, y: int, button: int, modifiers: int) -> None:
@@ -147,7 +147,7 @@ class GameView(arcade.View):
 
         #Mouvement des plateformes autres que "wall"
         print(len([sprite for sprite in self.world.exit_list  if type(sprite) is platforms.Exit_Platform]))
-        for collidable_platforms in [sprite for sprite in self.world.exit_list  if type(sprite) is platforms.Exit_Platform]:
+        for collidable_platforms in [sprite for sprite in self.world.exit_list  if type(sprite) is platforms.Collidable_Platform]:
             collidable_platforms.movement()
 
         #COMPORTEMENT DES MONSTRES

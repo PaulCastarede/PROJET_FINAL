@@ -13,7 +13,7 @@ class Exit_Sprite(arcade.Sprite):
                 Map_Create.create_world.readmap(game_view.world, map = game_view.world.next_map)
             else:
                 game_view.UI.victory = True
-                game_view.UI.update(self)
+                game_view.UI.update_score(self)
         
 
 class Lava_Sprite(arcade.Sprite):
