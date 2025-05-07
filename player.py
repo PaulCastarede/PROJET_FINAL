@@ -9,10 +9,10 @@ import user_interface
 PLAYER_MOVEMENT_SPEED = 5
 """Lateral speed of the player, in pixels per frame."""
 
-PLAYER_GRAVITY = 1
+PLAYER_GRAVITY = 1.7
 """Gravity applied to the player, in pixels per frame²."""
 
-PLAYER_JUMP_SPEED = 18
+PLAYER_JUMP_SPEED = 25
 """Instant vertical speed for jumping, in pixels per frame."""
 
 

@@ -146,8 +146,8 @@ class GameView(arcade.View):
         self.world.player_sprite.movement(self)
 
         #Mouvement des plateformes autres que "wall"
-        print(len([sprite for sprite in self.world.exit_list  if type(sprite) is platforms.Exit_Platform]))
-        for collidable_platforms in [sprite for sprite in self.world.exit_list  if type(sprite) is platforms.Collidable_Platform]:
+        print([sprite.boundary_right for sprite in self.world.no_go_list if isinstance(sprite, platforms.Collidable_Platform)])
+        for collidable_platforms in [sprite for sprite in self.world.exit_list or self.world.no_go_list if isinstance(sprite,platforms.Collidable_Platform)]:
             collidable_platforms.movement()
 
         #COMPORTEMENT DES MONSTRES

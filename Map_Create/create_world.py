@@ -24,7 +24,7 @@ class World:
     set_exit : bool
     wall_list : arcade.SpriteList[arcade.Sprite]
     moving_platforms_list : arcade.SpriteList[platforms.Platform]
-    no_go_list : arcade.SpriteList[arcade.Sprite]
+    no_go_list : arcade.SpriteList[Map_Create.world_sprites.Lava_Sprite]
     monsters_list : arcade.SpriteList[monsters.Monster]
     coins_list : arcade.SpriteList[coins.Coin]
     physics_engine : arcade.PhysicsEnginePlatformer
@@ -132,7 +132,8 @@ def readmap(world : World, map : str) -> None:
                     if character == "←" or character == "→" or character == "↑" or character == "↓":
                         platforming.block_detecting.detect_block((index_x,index_y), map_lines, trajectory = platforms.Trajectory(), world=world)
 
-            for platform in [platform for platform in world.moving_platforms_list or world.exit_list or world.no_go_list if type(platform) is platforms.Platform]:
+
+            for platform in [platform for platform in world.moving_platforms_list or world.exit_list or world.no_go_list if isinstance(platform, platforms.Platform)]:
                 platform.define_boundaries()
 
 

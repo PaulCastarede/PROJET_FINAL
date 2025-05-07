@@ -19,5 +19,7 @@ class Exit_Sprite(arcade.Sprite):
 class Lava_Sprite(arcade.Sprite):
 
     def kills(self, game_view : gameview.GameView) -> None:
-        ...
+        no_go_touched = arcade.check_for_collision_with_list(game_view.world.player_sprite_list, self) 
+        if no_go_touched:
+            game_view.world.player_sprite.death = True
     
