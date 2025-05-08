@@ -8,7 +8,7 @@ import coins
 import platforming.platforms as platforms
 import platforming
 
-TILE_SIZE = 64
+TILE_SIZE = 64.0
 """64 pixels par element"""
 
 
@@ -143,8 +143,8 @@ def readmap(world : World, map : str) -> None:
                 for index_x, character in enumerate(line):
                     row_number = len(map_lines)-index_y   # (Car renversé)
                     column_number = index_x
-                    x = TILE_SIZE * column_number  # Real coord in game
-                    y = TILE_SIZE * row_number 
+                    x : float = TILE_SIZE * column_number  # Real coord in game
+                    y : float = TILE_SIZE * row_number 
 
                     match character:
                         case "=":  # Grass block

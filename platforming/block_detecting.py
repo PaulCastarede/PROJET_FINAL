@@ -6,7 +6,7 @@ import platforming.platforms
 import Map_Create
 from dataclasses import dataclass
 
-TILE_SIZE = 64
+TILE_SIZE = 64.0
 """64 pixels par element"""
 
 TOO_MANY_ARROWS_ERROR : RuntimeError = "There is two set of the same arrow linked to the same platform"

@@ -138,7 +138,7 @@ class GameView(arcade.View):
         This is where in-world time "advances", or "ticks".
         """
  
-        self.world.physics_engine.update()
+        
         #Waiting for a new version mypy
         self.camera.position = self.world.player_sprite.position  #type: ignore
         
@@ -152,7 +152,7 @@ class GameView(arcade.View):
                        for sprite in platform_types if isinstance(sprite,platforms.Collidable_Platform)
                     ]:
             sprite.movement()
-            
+
         #COMPORTEMENT DES MONSTRES
         for monster in self.world.monsters_list:
             monster.movement()         
@@ -175,6 +175,7 @@ class GameView(arcade.View):
 
         self.world.player_sprite.collect_coins(self)                                   
         
+       
         #Check if player should die to monsters or lava
         self.world.player_sprite.dies(self.world.no_go_list, self.world.monsters_list)
         
@@ -188,7 +189,11 @@ class GameView(arcade.View):
              self.world.player_sprite_list.clear()                             
              time.sleep(0.25)  
              self.setup()
-        
+        self.world.moving_platforms_list[0].center_y = 256.0
+        self.world.moving_platforms_list[0].change_y = 0.0
+        print("Before update" , self.world.moving_platforms_list[0].center_y, self.world.moving_platforms_list[0].change_y )
+        self.world.physics_engine.update()
+        print("After update" , self.world.moving_platforms_list[0].center_y)
     
     #AFFICHAGE DES SPRITES
     def on_draw(self) -> None:                                 
