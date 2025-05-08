@@ -146,13 +146,17 @@ class GameView(arcade.View):
         self.world.player_sprite.movement(self)
 
         #Mouvement des plateformes autres que "wall"
-        print([sprite.boundary_right for sprite in self.world.no_go_list if isinstance(sprite, platforms.Collidable_Platform)])
-        for collidable_platforms in [sprite for sprite in self.world.exit_list or self.world.no_go_list if isinstance(sprite,platforms.Collidable_Platform)]:
-            collidable_platforms.movement()
-
+        
+        for sprite in [sprite 
+                       for platform_types in [self.world.moving_platforms_list,self.world.exit_list,self.world.no_go_list] 
+                       for sprite in platform_types if isinstance(sprite,platforms.Collidable_Platform)
+                    ]:
+            sprite.movement()
+            
         #COMPORTEMENT DES MONSTRES
         for monster in self.world.monsters_list:
             monster.movement()         
+
 
         if self.mouse_left_pressed:
             self.weapons_list[self.active_weapon].adapt_weapon_position(self.angle)

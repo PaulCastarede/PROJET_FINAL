@@ -131,10 +131,12 @@ def readmap(world : World, map : str) -> None:
                 for index_x, character in enumerate(line):
                     if character == "←" or character == "→" or character == "↑" or character == "↓":
                         platforming.block_detecting.detect_block((index_x,index_y), map_lines, trajectory = platforms.Trajectory(), world=world)
-
-
-            for platform in [platform for platform in world.moving_platforms_list or world.exit_list or world.no_go_list if isinstance(platform, platforms.Platform)]:
+            
+            for platform in [platform 
+                             for platform_types in [world.moving_platforms_list,world.exit_list,world.no_go_list] 
+                             for platform in  platform_types if isinstance(platform, platforms.Platform)]:
                 platform.define_boundaries()
+
 
 
             for index_y, line in enumerate(map_lines): 

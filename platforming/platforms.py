@@ -32,10 +32,14 @@ class Collidable_Platform(Platform):
     def movement(self) -> None:
         """Movement of platforms like Lava, Exit or Interruptors
         """
+        #if not(self.platform_trajectory.left_movement == 0) and not(self.platform_trajectory.right_movement == 0):
         self.center_x += self.change_x
-        self.center_y += self.change_y
-        #if self.center_x > self.boundary_right or self.center_x < self.boundary_left :
-            #self.change_x *= -1
+        if not(self.platform_trajectory.up_movement == 0) and not(self.platform_trajectory.down_movement == 0):    
+            self.center_y += self.change_y
+        if self.center_x > self.boundary_right or self.center_x < self.boundary_left :
+            self.change_x *= -1
+        if self.center_y > self.boundary_top or self.center_y < self.boundary_bottom :
+            self.change_y *= -1
         
 
     
