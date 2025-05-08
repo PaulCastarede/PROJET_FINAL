@@ -105,6 +105,28 @@ class Arrow(Lethal):
         #Flèche de plus en plus chargée au cours du temps
         self.__charge_level *= 1.05
 
+    def draw_trajectory(self, bow: Weapon) -> None:
+        """Dessine une ligne en pointillé représentant la trajectoire estimée de la flèche"""
+        # Initialisation des paramètres de simulation
+        angle_rad = math.radians(self.angle)
+        speed = min(self.__charge_level, self.__MAXIMAL_CHARGE)
+        velocity_x = math.cos(angle_rad) * speed
+        velocity_y = math.sin(angle_rad) * speed
+
+        x, y = bow.center_x, bow.center_y
+        dt = 1  # pas de simulation, en frames
+        gravity = self.__ARROW_GRAVITY
+        num_points = 50  # Nombre de points de la trajectoire à afficher
+
+        for i in range(num_points):
+            # Affiche un point toutes les deux étapes pour un effet pointillé
+            if i % 2 == 0:
+                arcade.draw_circle_filled(x, y, 2, arcade.color.GRAY)
+
+            # Mise à jour des positions (formule basique de cinématique)
+            x += velocity_x * dt
+            y += velocity_y * dt
+            velocity_y -= gravity * dt
 
 
         

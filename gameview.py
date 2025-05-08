@@ -189,11 +189,11 @@ class GameView(arcade.View):
              self.world.player_sprite_list.clear()                             
              time.sleep(0.25)  
              self.setup()
-        self.world.moving_platforms_list[0].center_y = 256.0
-        self.world.moving_platforms_list[0].change_y = 0.0
-        print("Before update" , self.world.moving_platforms_list[0].center_y, self.world.moving_platforms_list[0].change_y )
+        
+
+        #print([platform for platform in self.world.moving_platforms_list if platform.platform_trajectory.up_movement >0][0].platform_trajectory.down_movement   )
         self.world.physics_engine.update()
-        print("After update" , self.world.moving_platforms_list[0].center_y)
+        
     
     #AFFICHAGE DES SPRITES
     def on_draw(self) -> None:                                 
@@ -205,5 +205,7 @@ class GameView(arcade.View):
                 arcade.draw_sprite(self.weapons_list[self.active_weapon])
                 if self.active_weapon == BOW_INDEX:
                     arcade.draw_sprite(self.arrow)
+                if not self.arrow.released:
+                    self.arrow.draw_trajectory(self.bow)
         with self.idle_camera.activate():
              self.UI.draw()

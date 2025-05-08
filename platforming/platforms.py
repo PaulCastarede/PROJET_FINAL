@@ -19,37 +19,26 @@ class Platform(arcade.Sprite):
         self.__y_spawn = self.center_y
         
 
-
     def define_boundaries(self) -> None:
-        if self.platform_trajectory.left_movement > 0 :
-            self.boundary_left = self.__x_spawn - self.platform_trajectory.left_movement*platforming.block_detecting.TILE_SIZE
-            self.change_x = -PLATFORM_SPEED
-        else:
-            self.boundary_left = None
-        if self.platform_trajectory.right_movement > 0:     
-            self.boundary_right = self.__x_spawn + self.platform_trajectory.right_movement*platforming.block_detecting.TILE_SIZE
-            self.change_x = PLATFORM_SPEED
-        else:
-            self.boundary_right = None
-
-        if self.platform_trajectory.down_movement:
-            self.boundary_bottom = self.__y_spawn - self.platform_trajectory.down_movement*platforming.block_detecting.TILE_SIZE
-            self.change_y = -PLATFORM_SPEED
-        else:
-            self.boundary_down = None
-        if self.platform_trajectory.up_movement > 0:
-            self.boundary_top = self.__y_spawn + self.platform_trajectory.up_movement*platforming.block_detecting.TILE_SIZE
-            self.change_y = PLATFORM_SPEED
-        else:
-            self.boundary_up = None
+        self.change_x = PLATFORM_SPEED
+        self.change_y = PLATFORM_SPEED
 
 
         if (self.platform_trajectory.right_movement == 0) and (self.platform_trajectory.left_movement == 0):
             self.change_x = 0.0
+            self.boundary_left = None
+            self.boundary_right = None
+
         if (self.platform_trajectory.up_movement == 0) and (self.platform_trajectory.down_movement == 0):
             self.change_y = 0.0
+            self.boundary_bottom = None
+            self.boundary_top = None
 
-        
+        self.boundary_left = self.__x_spawn - self.platform_trajectory.left_movement*platforming.block_detecting.TILE_SIZE -32
+        self.boundary_right = self.__x_spawn + self.platform_trajectory.right_movement*platforming.block_detecting.TILE_SIZE +32
+        self.boundary_bottom = self.__y_spawn - self.platform_trajectory.down_movement*platforming.block_detecting.TILE_SIZE -32
+        self.boundary_top = self.__y_spawn + self.platform_trajectory.up_movement*platforming.block_detecting.TILE_SIZE +32
+            
 
 
 
@@ -61,17 +50,18 @@ class Collidable_Platform(Platform):
         """
         self.center_x += self.change_x
         self.center_y += self.change_y
-        if self.change_x >= 0 and (self.boundary_right is not None):
-            if self.center_x + 32.0 >= self.boundary_right:
+
+        if self.change_x  >= 0 and (self.boundary_right is not None):
+            if self.center_x  +32 >= self.boundary_right:
                 self.change_x *= -1
         elif (self.boundary_left is not None):
-            if self.center_x  + 32.0 <= self.boundary_left :
+            if self.center_x - 32  <= self.boundary_left :
                 self.change_x *= -1
 
-        if self.change_y >= 0 and (self.boundary_up is not None):
+        if self.change_y >= 0 and (self.boundary_top is not None):
             if self.center_y + 32.0 >= self.boundary_top:
                 self.change_y *= -1
-        elif (self.boundary_down is not None):
+        elif (self.boundary_bottom is not None):
             if self.center_y  + 32.0 <= self.boundary_bottom :
                 self.change_y *= -1
 
@@ -86,10 +76,10 @@ class Lava_Platform(Collidable_Platform, Map_Create.world_sprites.Lava_Sprite):
 class Trajectory:
     """Dataclass that represents how much the platform block moves on each direction 
     """
-    left_movement : int
-    right_movement : int
-    up_movement : int
-    down_movement : int
+    left_movement : float
+    right_movement : float
+    up_movement : float
+    down_movement : float
 
     def __init__(self) -> None:
         self.left_movement = 0

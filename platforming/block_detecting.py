@@ -49,7 +49,7 @@ def detect_block(position_in_map : tuple[int,int],
                 raise TOO_MANY_ARROWS_ERROR
             trajectory.up_movement += 1
             detect_arrows_set((position_in_map[x],position_in_map[y]), map_lines, trajectory, world, "↑")
-            detect_down((position_in_map[x],position_in_map[y]-trajectory.up_movement+1), map_lines, trajectory, world, force_detection=True)
+            detect_down((position_in_map[x],position_in_map[y]+trajectory.up_movement-1), map_lines, trajectory, world, force_detection=True)
         case "↓" :
             if trajectory.down_movement > 0:
                 raise TOO_MANY_ARROWS_ERROR
@@ -85,8 +85,8 @@ def detect_block(position_in_map : tuple[int,int],
             world.set_exit = True
             detect_surrounding(position_in_map , map_lines, trajectory , world)
         case _:
-            #if force_detection and (not(math.sqrt(trajectory.right_movement^2+trajectory.left_movement^2+trajectory.up_movement^2+trajectory.down_movement^2) == trajectory.right_movement + trajectory.down_movement +trajectory.left_movement + trajectory.up_movement) or (trajectory.right_movement + trajectory.down_movement +trajectory.left_movement + trajectory.up_movement==0)):
-                #raise RuntimeError("Some arrow set is not linked to any platform")
+            if force_detection and math.sqrt(trajectory.right_movement^2+trajectory.left_movement^2+trajectory.up_movement^2+trajectory.down_movement^2) == trajectory.right_movement + trajectory.down_movement +trajectory.left_movement + trajectory.up_movement :
+                raise RuntimeError("Some arrow set is not linked to any platform")
             return None
         
 
@@ -95,7 +95,7 @@ def detect_right(position_in_map : tuple[int,int],
                  trajectory : platforming.platforms.Trajectory, 
                  world : Map_Create.create_world.World,
                  force_detection : bool = False ) -> None:
-    if position_in_map[x] < len(map_lines[position_in_map[y]]) and not(map_lines[position_in_map[y]][position_in_map[x]+1] in ("↓","←","↑" )): 
+    if position_in_map[x] < len(map_lines[position_in_map[y]]) - 1 and not(map_lines[position_in_map[y]][position_in_map[x]+1] in ("↓","←","↑" )): 
         detect_block((position_in_map[x]+1,position_in_map[y]), map_lines, trajectory, world, force_detection)
 
 def detect_left(position_in_map : tuple[int,int], 
@@ -111,7 +111,7 @@ def detect_down(position_in_map : tuple[int,int],
                 trajectory : platforming.platforms.Trajectory, 
                 world : Map_Create.create_world.World,
                 force_detection : bool = False  ) -> None:
-    if position_in_map[y] < len(map_lines) and not(map_lines[position_in_map[y]+1][position_in_map[x]] in  ("→", "←" , "↑")): 
+    if position_in_map[y] < len(map_lines) - 1 and not(map_lines[position_in_map[y]+1][position_in_map[x]] in  ("→", "←", "↑")): 
         detect_block((position_in_map[x],position_in_map[y]+1), map_lines, trajectory, world, force_detection)
 
 def detect_up(position_in_map : tuple[int,int], 
@@ -168,12 +168,11 @@ def detect_arrows_set(position_in_map : tuple[int,int],
                 trajectory.left_movement += 1
                 detect_arrows_set((position_in_map[x]+1,position_in_map[y]), map_lines, trajectory, world,"←" )
         case "↑" :
-            if map_lines[position_in_map[y]-1][position_in_map[x]] == "↑":
+            if map_lines[position_in_map[y]+1][position_in_map[x]] == "↑":
                 trajectory.up_movement += 1
                 detect_arrows_set((position_in_map[x],position_in_map[y]+1), map_lines, trajectory, world,"↑" )
         case "↓" :
             if position_in_map[y] < len(map_lines):
-                if map_lines[position_in_map[y]-1][position_in_map[x]] == "↓":
+                if map_lines[position_in_map[y]+1][position_in_map[x]] == "↓":
                     trajectory.down_movement += 1
                     detect_arrows_set((position_in_map[x],position_in_map[y]+1), map_lines, trajectory, world,"↓" )   
-                
