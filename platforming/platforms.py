@@ -17,26 +17,33 @@ class Platform(arcade.Sprite):
         self.platform_trajectory = platform_trajectory
         self.__x_spawn = self.center_x
         self.__y_spawn = self.center_y
-        self.change_x = PLATFORM_SPEED
-        self.change_y = PLATFORM_SPEED
+        
+
 
     def define_boundaries(self) -> None:
-        if self.platform_trajectory.right_movement > 0:     
-            self.boundary_right = self.__x_spawn + self.platform_trajectory.right_movement*platforming.block_detecting.TILE_SIZE
-        else:
-            self.boundary_right = None
         if self.platform_trajectory.left_movement > 0 :
             self.boundary_left = self.__x_spawn - self.platform_trajectory.left_movement*platforming.block_detecting.TILE_SIZE
+            self.change_x = -PLATFORM_SPEED
         else:
             self.boundary_left = None
-        if self.platform_trajectory.up_movement > 0:
-            self.boundary_top = self.__y_spawn + self.platform_trajectory.up_movement*platforming.block_detecting.TILE_SIZE
+        if self.platform_trajectory.right_movement > 0:     
+            self.boundary_right = self.__x_spawn + self.platform_trajectory.right_movement*platforming.block_detecting.TILE_SIZE
+            self.change_x = PLATFORM_SPEED
         else:
-            self.boundary_up = None
+            self.boundary_right = None
+
         if self.platform_trajectory.down_movement:
             self.boundary_bottom = self.__y_spawn - self.platform_trajectory.down_movement*platforming.block_detecting.TILE_SIZE
+            self.change_y = -PLATFORM_SPEED
         else:
             self.boundary_down = None
+        if self.platform_trajectory.up_movement > 0:
+            self.boundary_top = self.__y_spawn + self.platform_trajectory.up_movement*platforming.block_detecting.TILE_SIZE
+            self.change_y = PLATFORM_SPEED
+        else:
+            self.boundary_up = None
+
+
         if (self.platform_trajectory.right_movement == 0) and (self.platform_trajectory.left_movement == 0):
             self.change_x = 0.0
         if (self.platform_trajectory.up_movement == 0) and (self.platform_trajectory.down_movement == 0):
