@@ -10,7 +10,7 @@ slime_textures = []
 texture = arcade.load_texture(":resources:/images/enemies/slimeBlue.png")    
 slime_textures.append(texture)   
 #Et celui du slime regardant a droite                                    
-texture = arcade.load_texture("assets/slimeBlue.png",)
+texture = arcade.load_texture("assets/slimeBlue.png")
 slime_textures.append(texture)
 
 # Index of textures, first element faces left, second faces right

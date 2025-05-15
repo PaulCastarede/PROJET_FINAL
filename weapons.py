@@ -90,10 +90,7 @@ class Arrow(Lethal):
     def charge_level_increases_speed(self) -> None:
         """Fait en sorte que plus l'arc est bandé (plus on a gardé le clic gauche appuyé longtemps), plus la flèche est chargée et plus elle part vite
         """
-        if self.__charge_level < self.__MAXIMAL_CHARGE:
-            self.__ARROW_SPEED += self.__charge_level 
-        else:
-            self.__ARROW_SPEED += self.__MAXIMAL_CHARGE
+        self.__ARROW_SPEED += min(self.__charge_level, self.__MAXIMAL_CHARGE)
 
 
     def behavior_before_release(self, bow : Weapon) -> None:
@@ -126,7 +123,7 @@ class Arrow(Lethal):
         current_change_y = change_y
         
         # Continuer jusqu'à ce que la flèche sorte de l'écran ou touche le sol
-        while y > 0 and len(points) < 1000:  # Limite de sécurité pour éviter une boucle infinie
+        while y > 0 and len(points) < 75:  # Limite de sécurité pour éviter une boucle infinie
             points.append((x, y))
             
             # Appliquer exactement la même physique que dans arrows_movement

@@ -162,7 +162,6 @@ class GameView(arcade.View):
         This is where in-world time "advances", or "ticks".
         """
  
-        
         #Waiting for a new version mypy
         self.camera.position = self.world.player_sprite.position  #type: ignore
         
@@ -203,7 +202,10 @@ class GameView(arcade.View):
         
        
         #Check if player should die to monsters or lava
-        self.world.player_sprite.dies(self.world.no_go_list, self.world.monsters_list)
+        self.world.player_sprite.respawn_or_dies(self)
+
+        for checkpoint in self.world.checkpoint_list:
+            checkpoint.set_respawn(self.world.player_sprite_list)
         
         #NEXT LEVEL
         for exit_signs in self.world.exit_list:
@@ -212,12 +214,10 @@ class GameView(arcade.View):
 
         #GAME OVER SET
         if self.world.player_sprite.death :
-             self.world.player_sprite_list.clear()                             
-             time.sleep(0.25)  
+             self.world.player_sprite_list.clear()      
              self.setup()
         
-
-        #print([platform for platform in self.world.moving_platforms_list if platform.platform_trajectory.up_movement >0][0].platform_trajectory.down_movement   )
+        print(self.world.player_sprite.lives)
         self.world.physics_engine.update()
         
     

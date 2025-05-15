@@ -29,6 +29,7 @@ class World:
     coins_list : arcade.SpriteList[coins.Coin]
     physics_engine : arcade.PhysicsEnginePlatformer
     exit_list : arcade.SpriteList[Map_Create.world_sprites.Exit_Sprite]
+    checkpoint_list : arcade.SpriteList[Map_Create.world_sprites.Checkpoint]
     next_map : str
     last_level : bool
     map_width : int
@@ -47,6 +48,7 @@ class World:
         self.exit_list = arcade.SpriteList(use_spatial_hash=True)
         self.gates_list = arcade.SpriteList(use_spatial_hash=True)
         self.switches_list = arcade.SpriteList(use_spatial_hash=True)
+        self.checkpoint_list = arcade.SpriteList(use_spatial_hash=True)
         self.map_width = 0  
         self.map_height = 0
         self.gates_dict = {}
@@ -61,6 +63,7 @@ class World:
         self.exit_list.draw()
         self.switches_list.draw()
         self.gates_list.draw()
+        self.checkpoint_list.draw()
 
 
 def readmap(world: World, map: str) -> None:
@@ -180,15 +183,20 @@ def readmap(world: World, map: str) -> None:
             case "S":
                 if world.player_set_spawn:
                     raise RuntimeError("Le joueur ne peut avoir qu'un seul spawn")
-                world.player_sprite = player.Player(center_x=x, center_y=y)
-                world.player_sprite_list.append(world.player_sprite)
-                world.player_set_spawn = True
+                if not(world.player_sprite_list):
+                    world.player_sprite = player.Player(center_x=x, center_y=y, respawn_map = map)
+                    world.player_sprite_list.append(world.player_sprite)
+                else :
+                    world.player_sprite_list[0].center_x = x
+                    world.player_sprite_list[0].center_y = y
+
                 world.physics_engine = arcade.PhysicsEnginePlatformer(
-                    world.player_sprite,
-                    walls=world.wall_list,
-                    platforms=world.moving_platforms_list,
-                    gravity_constant=player.PLAYER_GRAVITY
-                )
+                        world.player_sprite,
+                        walls=world.wall_list,
+                        platforms=world.moving_platforms_list,
+                        gravity_constant=player.PLAYER_GRAVITY
+                    )
+                world.player_set_spawn = True
             case "E":
                 world.exit_list.append(Map_Create.world_sprites.Exit_Sprite(
                     ":resources:/images/tiles/signExit.png",
@@ -209,6 +217,8 @@ def readmap(world: World, map: str) -> None:
                 map_x = int(x / TILE_SIZE)
                 map_y = int(y / TILE_SIZE)
                 world.gates_dict[(map_x, map_y)] = gate
+            case "C":
+                world.checkpoint_list.append(Map_Create.world_sprites.Checkpoint(center_x=x,center_y=y-0.5, linked_map = map))
 
     # Chargement du fichier
     with open(f"maps/{map}", "r", encoding="utf-8") as file:
@@ -229,7 +239,7 @@ def readmap(world: World, map: str) -> None:
         world.coins_list.clear()
         world.monsters_list.clear()
         world.no_go_list.clear()
-        world.player_sprite_list.clear()
+        world.checkpoint_list.clear()
         world.exit_list.clear()
         world.switches_list.clear()
         world.gates_list.clear()
