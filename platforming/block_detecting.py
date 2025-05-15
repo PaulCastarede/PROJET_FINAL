@@ -58,28 +58,28 @@ def detect_block(position_in_map : tuple[int,int],
             detect_up((position_in_map[x],position_in_map[y]), map_lines, trajectory, world, force_detection=True)
 
         case "=" :
-            Grass = platforming.platforms.Platform(":resources:images/tiles/grassMid.png", scale=0.5,center_x=position_in_map[x]*TILE_SIZE, center_y=(len(map_lines)-position_in_map[y])*TILE_SIZE, platform_trajectory = trajectory, angle = 0)
+            Grass = platforming.platforms.Platform(":resources:images/tiles/grassMid.png", scale=0.5,center_x=position_in_map[x]*TILE_SIZE, center_y=(len(map_lines)-1-position_in_map[y])*TILE_SIZE, platform_trajectory = trajectory, angle = 0)
             map_lines[position_in_map[y]][position_in_map[x]] = " "
             world.moving_platforms_list.append(Grass)
             detect_surrounding(position_in_map , map_lines, trajectory , world)
 
         case "-" :
-            half_grass = platforming.platforms.Platform(":resources:images/tiles/grassHalf_mid.png", scale=0.5, center_x=position_in_map[x]*TILE_SIZE, center_y=(len(map_lines)-position_in_map[y])*TILE_SIZE, platform_trajectory = trajectory, angle = 0 )
+            half_grass = platforming.platforms.Platform(":resources:images/tiles/grassHalf_mid.png", scale=0.5, center_x=position_in_map[x]*TILE_SIZE, center_y=(len(map_lines)-1-position_in_map[y])*TILE_SIZE, platform_trajectory = trajectory, angle = 0 )
             map_lines[position_in_map[y]][position_in_map[x]] = " "
             world.moving_platforms_list.append(half_grass)
             detect_surrounding(position_in_map , map_lines, trajectory , world)
         case "x" :
-            crate = platforming.platforms.Platform(":resources:images/tiles/boxCrate_double.png", scale=0.5, center_x=position_in_map[x]*TILE_SIZE, center_y=(len(map_lines)-position_in_map[y])*TILE_SIZE, platform_trajectory = trajectory, angle = 0 )
+            crate = platforming.platforms.Platform(":resources:images/tiles/boxCrate_double.png", scale=0.5, center_x=position_in_map[x]*TILE_SIZE, center_y=(len(map_lines)-1-position_in_map[y])*TILE_SIZE, platform_trajectory = trajectory, angle = 0 )
             map_lines[position_in_map[y]][position_in_map[x]] = " "
             world.moving_platforms_list.append(crate)
             detect_surrounding(position_in_map , map_lines, trajectory , world)
         case "£" :
-            lava = platforming.platforms.Lava_Platform(":resources:images/tiles/lava.png", scale=0.5, center_x=position_in_map[x]*TILE_SIZE, center_y=(len(map_lines)-position_in_map[y])*TILE_SIZE, platform_trajectory = trajectory, angle = 0 )
+            lava = platforming.platforms.Lava_Platform(":resources:images/tiles/lava.png", scale=0.5, center_x=position_in_map[x]*TILE_SIZE, center_y=(len(map_lines)-1-position_in_map[y])*TILE_SIZE, platform_trajectory = trajectory, angle = 0 )
             map_lines[position_in_map[y]][position_in_map[x]] = " "
             world.no_go_list.append(lava)
             detect_surrounding(position_in_map , map_lines, trajectory , world)
         case "E" :
-            exit = platforming.platforms.Exit_Platform(":resources:/images/tiles/signExit.png",  center_x=position_in_map[x]*TILE_SIZE, center_y=(len(map_lines)-position_in_map[y])*TILE_SIZE, scale = 0.5, platform_trajectory = trajectory, angle = 0)
+            exit = platforming.platforms.Exit_Platform(":resources:/images/tiles/signExit.png",  center_x=position_in_map[x]*TILE_SIZE, center_y=(len(map_lines)-1-position_in_map[y])*TILE_SIZE, scale = 0.5, platform_trajectory = trajectory, angle = 0)
             map_lines[position_in_map[y]][position_in_map[x]] = " "
             world.exit_list.append(exit)
             world.set_exit = True

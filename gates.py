@@ -15,7 +15,7 @@ class Gate(arcade.Sprite):
         self.visible = not state
         self._wall_list = None
 
-    def set_wall_list(self, wall_list: arcade.SpriteList) -> None:
+    def set_wall_list(self, wall_list: arcade.SpriteList[arcade.Sprite]) -> None:
         """Set the wall list reference for collision handling.
         
         Args:

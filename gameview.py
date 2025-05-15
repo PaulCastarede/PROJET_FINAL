@@ -62,7 +62,7 @@ class GameView(arcade.View):
         #Reset the eventual previous elements
         self.weapons_list.clear()
         self.arrow_sprite_list.clear()
-        self.world.clear()
+        self.world.clear(clear_player=True)
         self.active_weapon = SWORD_INDEX
         #MAP SET UP
         readmap(self.world, "map1.txt")    
@@ -89,7 +89,7 @@ class GameView(arcade.View):
             case arcade.key.UP: 
                 if self.world.physics_engine.can_jump():
                     self.world.player_sprite.jump()
-            case arcade.key.ESCAPE:
+            case arcade.key.ESCAPE | arcade.key.R :
                 # resets the game
                 self.setup()
 
@@ -216,10 +216,9 @@ class GameView(arcade.View):
         #GAME OVER SET
         if self.world.player_sprite.death :
             gameover.gameover(self)
-             #self.world.player_sprite_list.clear()      
-             #self.setup()
+            #self.world.player_sprite_list.clear()      
+            #self.setup()
         
-        print(self.world.player_sprite.lives)
         self.world.physics_engine.update()
         
     
