@@ -93,9 +93,9 @@ class Arrow(Lethal):
         self.__ARROW_SPEED += min(self.__charge_level, self.__MAXIMAL_CHARGE)
 
 
-    def behavior_before_release(self, bow : Weapon) -> None:
+    def behavior_before_release(self, bow : Weapon, angle : float) -> None:
         # Angle de la flèche 
-        self.angle = bow.angle + 80
+        self.angle = -math.degrees(angle) +45
         # Position statique de la flèche (même centre que l'arc)
         self.center_x = bow.center_x  
         self.center_y = bow.center_y 

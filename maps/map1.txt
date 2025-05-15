@@ -1,6 +1,6 @@
 width: 24
 height: 8
-next-map : map3.txt
+next-map : map2.txt
 switches:
   - x: 0
     y: 7
@@ -38,12 +38,12 @@ gates:
     state: open # this gate is open when the game starts
   # the other gates start closed
 ---
-^C    x           x
---    x ^         x
-   C  x-----      |
-   ---x     ←←←£  =
-      x   -----   =
----   x   x   |  x=
+^     x           x
+-- ***x ^         x
+   C**x-----      |
+***---x     ←←←£  =
+***   x   -----   =
+---***x   x   |  x=
  S o  |  xx * x  x=  E
 ========================
 ---

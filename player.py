@@ -75,10 +75,13 @@ class Player(arcade.Sprite):
         for coin in collided_coins:
             #Incrémente le score du nombre de pièces 
             gameview.score += len(collided_coins)  
-            gameview.UI.update_score(gameview)             
             coin.remove_from_sprite_lists()                
             arcade.play_sound(coin.coin_sound)
-
+        if gameview.score >= 10:
+            gameview.score -= 10 
+            self.lives += 1
+            gameview.UI.update_player_lives(self)
+        gameview.UI.update_score(gameview)
     
 
 

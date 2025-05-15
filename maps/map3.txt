@@ -1,13 +1,13 @@
 width: 100
 height: 15
-next-map: map2.txt
+next-map: map4.txt
 --- 
                            E        
                 *       ↑ --- 
                         ↑    
         ----------      ↑    
        -                ↑    
-      -                 ↑    
+   C  -                 ↑    
    =                    ↑    
      =     =£££=      xxx   
       =   -----=      x x   

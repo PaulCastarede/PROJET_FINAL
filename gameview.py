@@ -188,7 +188,7 @@ class GameView(arcade.View):
             #On adapte l'angle de l'arc (différent de l'épée de par son sprite)
             self.bow.angle -= 70
             if self.active_weapon == BOW_INDEX:
-                self.arrow.behavior_before_release(self.bow)
+                self.arrow.behavior_before_release(self.bow, self.angle)
                        
         for arrow in self.arrow_sprite_list:
             #Trajectoire de la flèche
