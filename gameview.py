@@ -5,6 +5,7 @@ import math
 import platforming.platforms
 import user_interface
 import dataclasses
+import gameover
 from typing import Final
 from monsters import *
 import weapons
@@ -61,9 +62,8 @@ class GameView(arcade.View):
         #Reset the eventual previous elements
         self.weapons_list.clear()
         self.arrow_sprite_list.clear()
-        self.UI.victory = False
+        self.world.clear()
         self.active_weapon = SWORD_INDEX
-        self.score = 0
         #MAP SET UP
         readmap(self.world, "map1.txt")    
         #WEAPONS SET UP
@@ -72,7 +72,8 @@ class GameView(arcade.View):
         self.bow = weapons.Bow("assets/kenney-voxel-items-png/bow.png", scale=0.4, center_x=0,center_y=0, angle = 0)
         self.weapons_list.append(self.sword)
         self.weapons_list.append(self.bow)
-        self.UI.update_score(self)
+        #UI SET UP
+        self.UI = user_interface.UI()
   
 
     # COMMANDES
@@ -214,8 +215,9 @@ class GameView(arcade.View):
 
         #GAME OVER SET
         if self.world.player_sprite.death :
-             self.world.player_sprite_list.clear()      
-             self.setup()
+            gameover.gameover(self)
+             #self.world.player_sprite_list.clear()      
+             #self.setup()
         
         print(self.world.player_sprite.lives)
         self.world.physics_engine.update()

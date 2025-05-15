@@ -43,11 +43,13 @@ class Player(arcade.Sprite):
         monsters_touched = arcade.check_for_collision_with_list(self, gameview.world.monsters_list)
         if no_go_touched or monsters_touched or self.center_y < -64:
             self.lives -= 1
-            gameview.UI.update_player_lives(self)
             self.respawn(gameview)
-            if self.lives <= 0:
+            gameview.UI.update_player_lives(self)
+            if self.lives < 0:
                 self.death = True
                 arcade.play_sound(self.death_sound)
+            
+    
 
     def respawn(self, gameview : gameview.GameView) -> None:
         Map_Create.create_world.readmap(gameview.world, self.respawn_map)

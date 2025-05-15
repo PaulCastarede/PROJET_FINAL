@@ -65,6 +65,23 @@ class World:
         self.gates_list.draw()
         self.checkpoint_list.draw()
 
+    def clear(self, clear_player : bool = False) -> None:
+        # Réinitialisation du monde
+        self.wall_list.clear()
+        self.moving_platforms_list.clear()
+        self.coins_list.clear()
+        self.monsters_list.clear()
+        self.no_go_list.clear()
+        self.checkpoint_list.clear()
+        self.exit_list.clear()
+        self.switches_list.clear()
+        self.gates_list.clear()
+        self.player_set_spawn = False
+        self.set_exit = False
+        if clear_player :
+            self.player_sprite_list.clear()
+
+
 
 def readmap(world: World, map: str) -> None:
     """Charge une carte depuis un fichier et initialise le monde.
@@ -233,18 +250,7 @@ def readmap(world: World, map: str) -> None:
         except (KeyError, ValueError) as e:
             raise ValueError(f"Erreur dans la configuration YAML : {e}")
 
-        # Réinitialisation du monde
-        world.wall_list.clear()
-        world.moving_platforms_list.clear()
-        world.coins_list.clear()
-        world.monsters_list.clear()
-        world.no_go_list.clear()
-        world.checkpoint_list.clear()
-        world.exit_list.clear()
-        world.switches_list.clear()
-        world.gates_list.clear()
-        world.player_set_spawn = False
-        world.set_exit = False
+        world.clear()
 
         # Traitement des éléments configurés
         process_gates(config, world)

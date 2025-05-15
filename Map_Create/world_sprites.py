@@ -42,7 +42,7 @@ class Checkpoint(arcade.Sprite):
         self.linked_map = linked_map
 
     def set_respawn(self, player_list : arcade.SpriteList[player.Player]):
-        if arcade.check_for_collision_with_list(self, player_list):
+        if arcade.check_for_collision_with_list(self, player_list):   
             player_list[0].respawn_point = (self.center_x, self.center_y)
             self.texture = checkpoint_textures[1]
 
