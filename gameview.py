@@ -89,7 +89,7 @@ class GameView(arcade.View):
             case arcade.key.UP: 
                 if self.world.physics_engine.can_jump():
                     self.world.player_sprite.jump()
-            case arcade.key.ESCAPE | arcade.key.R :
+            case arcade.key.ESCAPE :
                 # resets the game
                 self.setup()
 
@@ -216,6 +216,7 @@ class GameView(arcade.View):
         #GAME OVER SET
         if self.world.player_sprite.death :
             gameover.gameover(self)
+        
         
         self.world.physics_engine.update()
         
