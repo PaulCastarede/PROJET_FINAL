@@ -21,7 +21,7 @@ class GameOverView(arcade.View):
         arcade.draw_text("GAME OVER", 
                         self.window.width // 2, 
                         self.window.height // 2 + 50,
-                        arcade.csscolor.RED, 
+                        arcade.csscolor.WHITE, 
                         font_size=60, 
                         anchor_x="center")
         
