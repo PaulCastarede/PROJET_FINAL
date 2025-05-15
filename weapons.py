@@ -105,28 +105,44 @@ class Arrow(Lethal):
         #Flèche de plus en plus chargée au cours du temps
         self.__charge_level *= 1.05
 
-    def draw_trajectory(self, bow: Weapon) -> None:
+    def draw_trajectory(self, bow: Weapon, gameview: gameview.GameView) -> None:
         """Dessine une ligne en pointillé représentant la trajectoire estimée de la flèche"""
-        # Initialisation des paramètres de simulation
-        angle_rad = math.radians(self.angle)
-        speed = min(self.__charge_level, self.__MAXIMAL_CHARGE)
-        velocity_x = math.cos(angle_rad) * speed
-        velocity_y = math.sin(angle_rad) * speed
+        # Calculer la vitesse exactement comme dans charge_level_increases_speed
+        if self.__charge_level < self.__MAXIMAL_CHARGE:
+            speed = self.__ARROW_SPEED + self.__charge_level
+        else:
+            speed = self.__ARROW_SPEED + self.__MAXIMAL_CHARGE
 
-        x, y = bow.center_x, bow.center_y
-        dt = 1  # pas de simulation, en frames
-        gravity = self.__ARROW_GRAVITY
-        num_points = 50  # Nombre de points de la trajectoire à afficher
+        # Calculer les composantes de vitesse initiale
+        change_x = speed * math.cos(gameview.angle)
+        change_y = speed * math.sin(gameview.angle)
 
-        for i in range(num_points):
-            # Affiche un point toutes les deux étapes pour un effet pointillé
-            if i % 2 == 0:
-                arcade.draw_circle_filled(x, y, 2, arcade.color.GRAY)
+        # Position initiale
+        x = bow.center_x
+        y = bow.center_y
+        
+        # Dessiner la trajectoire
+        points = []
+        current_change_y = change_y
+        
+        # Continuer jusqu'à ce que la flèche sorte de l'écran ou touche le sol
+        while y > 0 and len(points) < 1000:  # Limite de sécurité pour éviter une boucle infinie
+            points.append((x, y))
+            
+            # Appliquer exactement la même physique que dans arrows_movement
+            current_change_y -= self.__ARROW_GRAVITY
+            x += change_x
+            y += current_change_y
 
-            # Mise à jour des positions (formule basique de cinématique)
-            x += velocity_x * dt
-            y += velocity_y * dt
-            velocity_y -= gravity * dt
+        # Dessiner une ligne pointillée
+        for i in range(0, len(points) - 1, 2):
+            start = points[i]
+            end = points[i + 1]
+            arcade.draw_line(start[0], start[1], end[0], end[1], arcade.color.GRAY, 2)
+
+        # Point d'impact
+        if points:
+            arcade.draw_circle_filled(points[-1][0], points[-1][1], 4, arcade.color.GRAY)
 
 
         

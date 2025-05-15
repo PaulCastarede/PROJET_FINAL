@@ -10,6 +10,9 @@ from monsters import *
 import weapons
 from Map_Create.create_world import *
 
+from switches import Switch
+from gates import Gate
+
 SWORD_INDEX = 0
 BOW_INDEX = 1
 
@@ -111,6 +114,11 @@ class GameView(arcade.View):
         if button == arcade.MOUSE_BUTTON_LEFT:
             self.mouse_left_pressed = True
             self.sword.kills_monsters(self.world.monsters_list)
+            # Check for sword collision with switches when using sword
+            if self.active_weapon == SWORD_INDEX:
+                hit_switches = arcade.check_for_collision_with_list(self.sword, self.world.switches_list)
+                for switch in hit_switches:
+                    switch.on_hit_by_weapon(self.world.gates_dict)
             self.arrow = weapons.Arrow()
         if button == arcade.MOUSE_BUTTON_RIGHT:
             #Switch the active weapon when mouse right pressed
@@ -131,6 +139,22 @@ class GameView(arcade.View):
                 self.arrow_sprite_list[-1].change_x = self.arrow.speed * math.cos(self.angle)
                 self.arrow_sprite_list[-1].change_y = self.arrow.speed * math.sin(self.angle)
     
+    def check_arrow_hits(self):
+    # Vérifie chaque flèche dans arrow_sprite_list
+        for arrow in self.arrow_sprite_list: # <-- CORRECTION
+            # Collision avec les interrupteurs
+            hit_switches = arcade.check_for_collision_with_list(arrow, self.world.switches_list)
+            if hit_switches:
+                arrow.remove_from_sprite_lists()  # Détruit la flèche
+                for switch in hit_switches:
+                    switch.on_hit_by_weapon(self.world.gates_dict)  # Active l'interrupteur
+            
+            # Collision avec les portails fermés
+            hit_gates = arcade.check_for_collision_with_list(arrow, self.world.gates_list)
+            if hit_gates:
+                for gate in hit_gates:
+                    if not gate.state:  # Si le portail est fermé
+                        arrow.remove_from_sprite_lists()
 
     def on_update(self, delta_time: float) -> None:
         """Called once per frame, before drawing.
@@ -146,7 +170,7 @@ class GameView(arcade.View):
         self.world.player_sprite.movement(self)
 
         #Mouvement des plateformes autres que "wall"
-        
+
         for sprite in [sprite 
                        for platform_types in [self.world.moving_platforms_list,self.world.exit_list,self.world.no_go_list] 
                        for sprite in platform_types if isinstance(sprite,platforms.Collidable_Platform)
@@ -171,6 +195,8 @@ class GameView(arcade.View):
             arrow.arrows_movement(self.world.wall_list)
             # Tuer les monstres rencontrés
             arrow.kills_monsters(self.world.monsters_list)
+        
+        self.check_arrow_hits()
         
 
         self.world.player_sprite.collect_coins(self)                                   
@@ -205,7 +231,7 @@ class GameView(arcade.View):
                 arcade.draw_sprite(self.weapons_list[self.active_weapon])
                 if self.active_weapon == BOW_INDEX:
                     arcade.draw_sprite(self.arrow)
-                if not self.arrow.released:
-                    self.arrow.draw_trajectory(self.bow)
+                    if not self.arrow.released:
+                        self.arrow.draw_trajectory(self.bow, self)
         with self.idle_camera.activate():
              self.UI.draw()

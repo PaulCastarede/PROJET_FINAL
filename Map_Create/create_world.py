@@ -1,5 +1,6 @@
 from __future__ import annotations 
 import arcade 
+import yaml
 import Map_Create.world_sprites
 import monsters
 import platforming.block_detecting
@@ -7,17 +8,14 @@ import player
 import coins
 import platforming.platforms as platforms
 import platforming
+import switches
+import gates
 
 TILE_SIZE = 64.0
 """64 pixels par element"""
 
 
 class World:
-    
-    """Une classe qui contient toutes les SpriteLists inhérentes au monde chargé (les monstres, les murs, la lave, les pièces et même le joueur !)
-
-    Args
-    """
     player_sprite : player.Player
     player_sprite_list : arcade.SpriteList[player.Player]
     player_set_spawn : bool
@@ -26,6 +24,8 @@ class World:
     moving_platforms_list : arcade.SpriteList[platforms.Platform]
     no_go_list : arcade.SpriteList[Map_Create.world_sprites.Lava_Sprite]
     monsters_list : arcade.SpriteList[monsters.Monster]
+    switches_list : arcade.SpriteList[switches.Switch]
+    gates_list : arcade.SpriteList[gates.Gate]
     coins_list : arcade.SpriteList[coins.Coin]
     physics_engine : arcade.PhysicsEnginePlatformer
     exit_list : arcade.SpriteList[Map_Create.world_sprites.Exit_Sprite]
@@ -33,6 +33,7 @@ class World:
     last_level : bool
     map_width : int
     map_height : int 
+    gates_dict: dict[tuple[int, int], gates.Gate]
     
     def __init__(self)-> None:
         self.player_sprite_list = arcade.SpriteList()
@@ -44,8 +45,11 @@ class World:
         self.monsters_list = arcade.SpriteList()
         self.coins_list = arcade.SpriteList(use_spatial_hash=True)
         self.exit_list = arcade.SpriteList(use_spatial_hash=True)
+        self.gates_list = arcade.SpriteList(use_spatial_hash=True)
+        self.switches_list = arcade.SpriteList(use_spatial_hash=True)
         self.map_width = 0  
         self.map_height = 0
+        self.gates_dict = {}
 
     def draw(self)-> None:
         self.player_sprite_list.draw()
@@ -55,143 +59,213 @@ class World:
         self.monsters_list.draw()
         self.coins_list.draw()
         self.exit_list.draw()
+        self.switches_list.draw()
+        self.gates_list.draw()
 
 
-def readmap(world : World, map : str) -> None:
+def readmap(world: World, map: str) -> None:
+    """Charge une carte depuis un fichier et initialise le monde.
+    
+    Args:
+        world: Instance de World à initialiser
+        map: Nom du fichier de carte à charger
+    """
+    def load_config(file) -> dict:
+        """Charge la configuration YAML depuis le fichier."""
+        config_lines = []
+        for line in file:
+            if line.strip() == "---":
+                break
+            config_lines.append(line)
+        return yaml.safe_load("".join(config_lines))
 
+    def validate_map_dimensions(map_lines: list[list[str]], width: int, height: int) -> None:
+        """Valide que les dimensions de la carte correspondent à la configuration."""
+        if len(map_lines) != height:
+            raise ValueError(f"La hauteur de la carte ({len(map_lines)}) ne correspond pas à la configuration ({height})")
+        for i, line in enumerate(map_lines):
+            if len(line) > width:
+                raise ValueError(f"Ligne {i+1} dépasse la largeur configurée ({width})")
 
-    # Ouvrir le fichier sous l'acronyme 'file'
-        with open(f"maps/{map}", "r", encoding="utf-8") as file:
-
-            world.last_level = True
-
-            for line in file:
-                stripped_line = line.strip()  # Supprimer chaque espace / saut
-
-                # Lire chaque ligne jusqu'à la premiere "---"
-                if stripped_line == "---":
-                    break  # Fin de la configuration
-
-                if ": " in stripped_line:
-                    key, value = stripped_line.split(": ", 1)  # Diviser en 2 la ligne : clé, valeur
-                    key = key.strip()  # Retirer les espaces
-                    value = value.strip()  # Retirer les espaces
-
-                    # Bloc if, try, except pour ne pas utiliser if, else :
-                    if key in ("width", "height", "next-map"):  # On va convertir en type int la valeur de la clé  
-                        try:
-                            if key in ("width", "height"):
-                                if int(value) <= 0:             # On vérifie que la valeur de la clé est un entier positif
-                                    raise ValueError(f"Valeur invalide pour la clé : {key}: {value}")
-
-                            if key == "width":
-                                world.map_width = int(value) # On définit la largeur de la carte
-
-                            if key == "height":
-                                world.map_height = int(value)  # On définit la longueur de la carte
-
-                            if key == "next-map":
-                                world.last_level = False
-                                world.next_map = value        # On définit le niveau suivant 
-
-                        except ValueError as e: 
-                            raise ValueError(f"Valeur invalide pour la clé {key}: {value}") from e
-
-            # Vérifier que les dimensions sont des entiers strictement positifs
-            if world.map_width <= 0 or world.map_height <= 0:
-                raise ValueError("Les dimensions dans la configuration sont invalides")
-
-            # Effacer les sprites précédents
-            world.wall_list.clear()
-            world.moving_platforms_list.clear()
-            world.coins_list.clear()
-            world.monsters_list.clear()
-            world.no_go_list.clear()
-            world.player_sprite_list.clear()
-            world.exit_list.clear()
-            world.player_set_spawn = False
-
-            # Lire les caractères de la carte après le ("---")
-            map_lines = []
-
-            for _ in range(world.map_height):
-                line = file.readline().rstrip('\n')  # Lire sans sauter une ligne
-
-                if len(line) > world.map_width:                
-                    raise ValueError(f"La ligne dépasse la longueur de la config {world.map_width}")
-
-                map_lines.append(list(line))
-
-            # Vérifier que le fichier se termine par "---"
-            end_line = file.readline().strip() # Ligne +1 après dernière ligne de la boucle 
-            if end_line != "---":
-                raise ValueError("Le fichier ne se termine pas par :  '---' ")
+    def process_gates(config: dict, world: World) -> None:
+        """Process gates defined in the configuration.
+        
+        Args:
+            config: The YAML configuration dictionary
+            world: The World instance to add gates to
+        """
+        world.gates_dict = {}
+        for gate_data in config.get("gates", []):
+            gx, gy = gate_data["x"], gate_data["y"]
+            gate = gates.Gate(
+                center_x=gx * TILE_SIZE,
+                center_y=gy * TILE_SIZE,
+                state=gate_data.get("state") == "open")
             
-            for index_y, line in enumerate(map_lines): 
-                for index_x, character in enumerate(line):
-                    if character == "←" or character == "→" or character == "↑" or character == "↓":
-                        platforming.block_detecting.detect_block((index_x,index_y), map_lines, trajectory = platforms.Trajectory(), world=world)
+            # Set the wall list reference for collision handling
+            gate.set_wall_list(world.wall_list)
             
-            for platform in [platform 
-                             for platform_types in [world.moving_platforms_list,world.exit_list,world.no_go_list] 
-                             for platform in  platform_types if isinstance(platform, platforms.Platform)]:
-                platform.define_boundaries()
+            world.gates_list.append(gate)
+            world.gates_dict[(gx, gy)] = gate
 
+    def process_switches(config: dict, world: World) -> None:
+        """Traite les interrupteurs définis dans la configuration."""
+        for sw_data in config.get("switches", []):
+            sx, sy = sw_data["x"], sw_data["y"]
+            
+            switch = switches.Switch(
+                center_x=sx * TILE_SIZE,
+                center_y=sy * TILE_SIZE,
+                state=sw_data.get("state", "off") == "on"
+            )
+            switch.set_actions(
+                sw_data.get("switch_on", []),
+                sw_data.get("switch_off", [])
+            )
+            world.switches_list.append(switch)
 
+    def process_map_lines(map_lines: list[list[str]], world: World) -> None:
+        """Traite les lignes de la carte pour détecter les plateformes mobiles."""
+        for index_y, line in enumerate(map_lines): 
+            for index_x, character in enumerate(line):
+                if character in ("←", "→", "↑", "↓"):
+                    platforming.block_detecting.detect_block(
+                        (index_x, index_y),
+                        map_lines,
+                        trajectory=platforms.Trajectory(),
+                        world=world
+                    )
 
-            for index_y, line in enumerate(map_lines): 
-                for index_x, character in enumerate(line):
-                    row_number = len(map_lines)-index_y   # (Car renversé)
-                    column_number = index_x
-                    x : float = TILE_SIZE * column_number  # Real coord in game
-                    y : float = TILE_SIZE * row_number 
+    def create_sprite(character: str, x: float, y: float, world: World) -> None:
+        match character:
+            case "=":
+                world.wall_list.append(arcade.Sprite(
+                    ":resources:images/tiles/grassMid.png",
+                    scale=0.5,
+                    center_x=x,
+                    center_y=y
+                ))
+            case "-":
+                world.wall_list.append(arcade.Sprite(
+                    ":resources:images/tiles/grassHalf_mid.png",
+                    scale=0.5,
+                    center_x=x,
+                    center_y=y
+                ))
+            case "x":
+                world.wall_list.append(arcade.Sprite(
+                    ":resources:images/tiles/boxCrate_double.png",
+                    scale=0.5,
+                    center_x=x,
+                    center_y=y
+                ))
+            case "*":
+                world.coins_list.append(coins.Coin(center_x=x, center_y=y))
+            case "o":
+                world.monsters_list.append(monsters.Slime(
+                    scale=0.5,
+                    center_x=x,
+                    center_y=y,
+                    wall_list=world.wall_list
+                ))
+            case "v":
+                world.monsters_list.append(monsters.Bat(center_x=x, center_y=y))
+            case "£":
+                world.no_go_list.append(arcade.Sprite(
+                    ":resources:images/tiles/lava.png",
+                    scale=0.5,
+                    center_x=x,
+                    center_y=y
+                ))
+            case "S":
+                if world.player_set_spawn:
+                    raise RuntimeError("Le joueur ne peut avoir qu'un seul spawn")
+                world.player_sprite = player.Player(center_x=x, center_y=y)
+                world.player_sprite_list.append(world.player_sprite)
+                world.player_set_spawn = True
+                world.physics_engine = arcade.PhysicsEnginePlatformer(
+                    world.player_sprite,
+                    walls=world.wall_list,
+                    platforms=world.moving_platforms_list,
+                    gravity_constant=player.PLAYER_GRAVITY
+                )
+            case "E":
+                world.exit_list.append(Map_Create.world_sprites.Exit_Sprite(
+                    ":resources:/images/tiles/signExit.png",
+                    scale=0.5,
+                    center_x=x,
+                    center_y=y
+                ))
+                world.set_exit = True
+            case "^":
+                # Ne rien faire ici - les interrupteurs sont gérés par la configuration YAML
+                pass
+            case "|":
+                # Gates in the map are always closed by default
+                gate = gates.Gate(center_x=x, center_y=y, state=False)
+                gate.set_wall_list(world.wall_list)
+                world.gates_list.append(gate)
+                # Store in gates_dict for switch actions
+                map_x = int(x / TILE_SIZE)
+                map_y = int(y / TILE_SIZE)
+                world.gates_dict[(map_x, map_y)] = gate
 
-                    match character:
-                        case "=":  # Grass block
-                            grass = arcade.Sprite(":resources:images/tiles/grassMid.png", scale=0.5, center_x=x, center_y=y)
-                            world.wall_list.append(grass)
-                        case "-":  # Half grass block
-                            half_grass = arcade.Sprite(":resources:images/tiles/grassHalf_mid.png", scale=0.5, center_x=x, center_y=y)
-                            world.wall_list.append(half_grass)
-                        case "x":  # Crate
-                            crate = arcade.Sprite(":resources:images/tiles/boxCrate_double.png", scale=0.5, center_x=x, center_y=y)
-                            world.wall_list.append(crate)
-                        case "*":  # Coin
-                            coin = coins.Coin(center_x=x, center_y=y)
-                            world.coins_list.append(coin)
-                        case "o":  # Slime enemy
-                            slime = monsters.Slime(scale=0.5, center_x=x, center_y=y, wall_list = world.wall_list)
-                            world.monsters_list.append(slime)
-                        case "v":  # Bat enemy  
-                            bat = monsters.Bat(center_x=x, center_y=y)
-                            world.monsters_list.append(bat)
-                        case "£":  # Lava
-                            lava = arcade.Sprite(":resources:images/tiles/lava.png", scale=0.5, center_x=x, center_y=y)
-                            world.no_go_list.append(lava)
-                        case "S":  # Player start position
-                            if not(world.player_set_spawn):
-                                world.player_sprite =  player.Player(center_x=x, center_y=y,)
-                                world.player_sprite_list.append(world.player_sprite)
-                                world.player_set_spawn = True
-                                #On définit le moteur physique à partir des sprites
-                                world.physics_engine = arcade.PhysicsEnginePlatformer(
-                                world.player_sprite, 
-                                walls=world.wall_list, 
-                                platforms = world.moving_platforms_list,
-                                gravity_constant=player.PLAYER_GRAVITY)
-                            else:
-                                raise RuntimeError("Le joueur ne peut avoir qu'un seul spawn")
+    # Chargement du fichier
+    with open(f"maps/{map}", "r", encoding="utf-8") as file:
+        # Chargement de la configuration
+        config = load_config(file)
+        
+        try:
+            world.map_width = int(config["width"])
+            world.map_height = int(config["height"])
+            world.next_map = config.get("next-map", "")
+            world.last_level = "next-map" not in config
+        except (KeyError, ValueError) as e:
+            raise ValueError(f"Erreur dans la configuration YAML : {e}")
 
-                        case "E":  #Map end
-                            exit = Map_Create.world_sprites.Exit_Sprite(":resources:/images/tiles/signExit.png", scale = 0.5, center_x = x, center_y = y)
-                            world.exit_list.append(exit)
-                            world.set_exit = True
+        # Réinitialisation du monde
+        world.wall_list.clear()
+        world.moving_platforms_list.clear()
+        world.coins_list.clear()
+        world.monsters_list.clear()
+        world.no_go_list.clear()
+        world.player_sprite_list.clear()
+        world.exit_list.clear()
+        world.switches_list.clear()
+        world.gates_list.clear()
+        world.player_set_spawn = False
+        world.set_exit = False
 
-            if not(world.player_set_spawn):
-                raise RuntimeError("Un endroit où le joueur 'spawn' doit être spécifié")
-            if not(world.set_exit):
-                raise RuntimeError("La fin du niveau doit être spécifiée")
+        # Traitement des éléments configurés
+        process_gates(config, world)
+        process_switches(config, world)
 
+        # Lecture de la carte
+        map_lines = [list(file.readline().rstrip('\n')) for _ in range(world.map_height)]
+        validate_map_dimensions(map_lines, world.map_width, world.map_height)
 
+        # Vérification de la fin de fichier
+        if file.readline().strip() != "---":
+            raise ValueError("Le fichier ne se termine pas par : '---'")
 
+        # Traitement des plateformes mobiles
+        process_map_lines(map_lines, world)
 
+        # Définition des limites des plateformes
+        for platform in [p for lst in [world.moving_platforms_list, world.exit_list, world.no_go_list]
+                        for p in lst if isinstance(p, platforms.Platform)]:
+            platform.define_boundaries()
+
+        # Création des sprites
+        for index_y, line in enumerate(map_lines):
+            for index_x, character in enumerate(line):
+                row_number = len(map_lines) - 1 - index_y
+                x = TILE_SIZE * index_x
+                y = TILE_SIZE * row_number
+                create_sprite(character, x, y, world)
+
+        # Validation finale
+        if not world.player_set_spawn:
+            raise RuntimeError("Un endroit où le joueur 'spawn' doit être spécifié")
+        if not world.set_exit:
+            raise RuntimeError("La fin du niveau doit être spécifiée")
