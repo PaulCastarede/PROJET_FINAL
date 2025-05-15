@@ -216,8 +216,6 @@ class GameView(arcade.View):
         #GAME OVER SET
         if self.world.player_sprite.death :
             gameover.gameover(self)
-            #self.world.player_sprite_list.clear()      
-            #self.setup()
         
         self.world.physics_engine.update()
         

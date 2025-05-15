@@ -285,3 +285,22 @@ def readmap(world: World, map: str) -> None:
             raise RuntimeError("Un endroit où le joueur 'spawn' doit être spécifié")
         if not world.set_exit:
             raise RuntimeError("La fin du niveau doit être spécifiée")
+        
+    for switch in world.switches_list:
+        if switch.state:  # Si l'interrupteur est activé
+            for action in switch.actions_on:
+                if action["action"] == "open-gate" and (action["x"], action["y"]) in world.gates_dict:
+                    world.gates_dict[(action["x"], action["y"])].open()
+                    print(switch.state, world.gates_dict[(action["x"], action["y"])].state)
+                if action["action"] == "close-gate" and (action["x"], action["y"]) in world.gates_dict:
+                    world.gates_dict[(action["x"], action["y"])].close()
+                    print(switch.state, world.gates_dict[(action["x"], action["y"])].state)
+        else:  # Si l'interrupteur est désactivé
+            for action in switch.actions_off:
+                if action["action"] == "open-gate" and (action["x"], action["y"]) in world.gates_dict:
+                    world.gates_dict[(action["x"], action["y"])].open()
+                    print(switch.state,world.gates_dict[(action["x"], action["y"])].state)
+                elif action["action"] == "close-gate" and (action["x"], action["y"]) in world.gates_dict:
+                    world.gates_dict[(action["x"], action["y"])].close()
+                    print(switch.state, world.gates_dict[(action["x"], action["y"])].state)
+        
