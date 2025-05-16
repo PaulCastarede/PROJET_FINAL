@@ -13,6 +13,7 @@ def main() -> None:
     game_view = GameView()
     window.show_view(game_view)
     arcade.run()
+    game_view.profiler.dump_stats("profile.prof")
 
 if __name__ == "__main__":
     main()

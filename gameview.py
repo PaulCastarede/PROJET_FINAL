@@ -1,6 +1,7 @@
 from __future__ import annotations
 import arcade
 import time 
+import cProfile
 import math
 import platforming.platforms
 import user_interface
@@ -28,6 +29,7 @@ class GameView(arcade.View):
     arrow_sprite_list : arcade.SpriteList[weapons.Arrow]
     UI : user_interface.UI
     score : int
+    profiler: cProfile.Profile
 
     # INITIALISATION DE GAMEVIEW
     def __init__(self) -> None:
@@ -52,6 +54,7 @@ class GameView(arcade.View):
         self.world_x : float = 0
         self.world_y : float = 0
         self.score = 0
+        self.profiler = cProfile.Profile()
 
         # Setup our game
         self.setup()
@@ -65,7 +68,9 @@ class GameView(arcade.View):
         self.world.clear(clear_player=True)
         self.active_weapon = SWORD_INDEX
         #MAP SET UP
+        self.profiler.enable()
         readmap(self.world, "map1.txt")    
+        self.profiler.disable()
         #WEAPONS SET UP
         self.arrow = weapons.Arrow(center_x=0, center_y=0)
         self.sword = weapons.Sword("assets/kenney-voxel-items-png/sword_silver.png",scale=0.5 * 0.7, center_x=0,center_y=0, angle = 0)
@@ -162,7 +167,11 @@ class GameView(arcade.View):
 
         This is where in-world time "advances", or "ticks".
         """
- 
+
+        self.profiler.enable()
+        self.do_on_update(delta_time)
+        self.profiler.disable()
+
         #Waiting for a new version mypy
         self.camera.position = self.world.player_sprite.position  #type: ignore
         
@@ -216,7 +225,9 @@ class GameView(arcade.View):
         #GAME OVER SET
         if self.world.player_sprite.death :
             gameover.gameover(self)
-        
+
+       
+    def do_on_update(self, delta_time: float) -> None:
         self.world.physics_engine.update()
         
     

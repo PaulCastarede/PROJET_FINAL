@@ -10,7 +10,7 @@ class Switch(arcade.Sprite):
     When hit by a weapon, it toggles its state and performs configured actions.
     """
     
-    def __init__(self, center_x: int, center_y: int, state: bool = False, enabled: bool = True) -> None:
+    def __init__(self, center_x: int, center_y: int, state: bool = False, enabled: bool = True, path_or_texture : str = ":resources:/images/tiles/leverLeft.png") -> None:
         """Initialize a switch.
         
         Args:
@@ -19,7 +19,7 @@ class Switch(arcade.Sprite):
             state: Initial state of the switch (True = on, False = off)
             enabled: Whether the switch can be toggled (True by default)
         """
-        super().__init__(":resources:/images/tiles/leverLeft.png", scale=0.5, center_x=center_x, center_y=center_y)
+        super().__init__(path_or_texture, scale=0.5, center_x=center_x, center_y=center_y)
         self.state = state
         self.enabled = enabled
         self.actions_on = []  # Actions to perform when switch is turned on
@@ -65,7 +65,7 @@ class Switch(arcade.Sprite):
                     elif action_type == "close-gate":
                         gates_dict[(x, y)].close()
                 else:
-                    print(f"No gate found at ({x}, {adjusted_y})")
+                    print(f"No gate found at ({x}, {y})")
 
     def update_texture(self) -> None:
         """Update the switch texture based on its current state."""

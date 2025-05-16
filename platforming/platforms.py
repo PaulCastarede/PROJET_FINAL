@@ -4,6 +4,7 @@ import arcade
 import Map_Create.world_sprites
 from dataclasses import dataclass
 import platforming.block_detecting
+import switches
 PLATFORM_SPEED = 1.0
 
 
@@ -72,6 +73,9 @@ class Exit_Platform(Collidable_Platform, Map_Create.world_sprites.Exit_Sprite):
 class Lava_Platform(Collidable_Platform, Map_Create.world_sprites.Lava_Sprite):
     ...
 
+class Switch_Platform(Collidable_Platform, switches.Switch):
+    ...
+    
 @dataclass
 class Trajectory:
     """Dataclass that represents how much the platform block moves on each direction 

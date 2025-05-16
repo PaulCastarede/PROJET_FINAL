@@ -4,12 +4,13 @@ import math
 import Map_Create.create_world
 import platforming.platforms
 import Map_Create
+import switches
 from dataclasses import dataclass
 
 TILE_SIZE = 64.0
 """64 pixels par element"""
 
-TOO_MANY_ARROWS_ERROR : RuntimeError = "There is two set of the same arrow linked to the same platform"
+TOO_MANY_ARROWS_ERROR : RuntimeError = "There are two or more sets of the same arrow linked to the same platform"
 
 x = 0
 y = 1
@@ -84,6 +85,7 @@ def detect_block(position_in_map : tuple[int,int],
             world.exit_list.append(exit)
             world.set_exit = True
             detect_surrounding(position_in_map , map_lines, trajectory , world)
+        
         case _:
             if force_detection and math.sqrt(trajectory.right_movement^2+trajectory.left_movement^2+trajectory.up_movement^2+trajectory.down_movement^2) == trajectory.right_movement + trajectory.down_movement +trajectory.left_movement + trajectory.up_movement :
                 raise RuntimeError("Some arrow set is not linked to any platform")
