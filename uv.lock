@@ -173,6 +173,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "arcade" },
+    { name = "mypy" },
     { name = "numpy" },
     { name = "pyyaml" },
 ]
@@ -187,6 +188,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "arcade", specifier = ">=3.1.0" },
+    { name = "mypy", specifier = ">=1.15.0" },
     { name = "numpy", specifier = ">=2.2.5" },
     { name = "pyyaml", specifier = ">=6.0.2" },
 ]

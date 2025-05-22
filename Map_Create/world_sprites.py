@@ -14,14 +14,18 @@ checkpoint_textures.append(texture)
 texture = arcade.load_texture(":resources:/images/items/flagGreen2.png")
 checkpoint_textures.append(texture)
 
-# Index des textures, rouge -> pas encore visité, vert -> visité
+# Index des textures pour le checkpoint
 TEXTURE_RED = 0
+"""Texture of the checkpoint when it has not been yet visited by the player"""
 TEXTURE_GREEN = 1
+"""Texture of the checkpoint when it has been visited by the player"""
 
 
 class Exit_Sprite(arcade.Sprite):
+    """Sprite for the exit signs, represents the end of a level"""
 
     def exit(self, game_view : gameview.GameView) -> None:
+        """Gets the player to the next level when he touches it"""
         if arcade.check_for_collision_with_list(self, game_view.world.player_sprite_list) :
             if not(game_view.world.last_level):    
                 #Si ce n'est pas le dernier niveau, lit la prochaine map       
@@ -31,10 +35,16 @@ class Exit_Sprite(arcade.Sprite):
         
 
 class Lava_Sprite(arcade.Sprite):
+    """Sprite for the lava (no-go) blocks. Deadly for players"""
     ...
     
 
 class Checkpoint(arcade.Sprite):
+    """Class of the Checkpoint Sprite. If visited, the player will respawn there after he dies.
+
+    Args:
+        linked_map (str) : The name of the map to which the checkpoint belongs
+    """
     linked_map : Final[str]
 
     def __init__(self, linked_map, path_or_texture : str = ":resources:/images/items/flagRed1.png", center_x : float = 0, center_y : float = 0, scale : float = 0.4, angle : float = 0) -> None:

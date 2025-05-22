@@ -88,6 +88,9 @@ def detect_block(position_in_map : tuple[int,int],
         
         case _:
             if force_detection and math.sqrt(trajectory.right_movement^2+trajectory.left_movement^2+trajectory.up_movement^2+trajectory.down_movement^2) == trajectory.right_movement + trajectory.down_movement +trajectory.left_movement + trajectory.up_movement :
+                # This ugly boolean is the only way we found to check (in one-line) if there is exactly 0 or 1 trajectory direction different to 0
+                # Indeed, if there is more than 1 direction it means there was a platform that has already been removed due to other arrow sets
+                # Which implies that the arrow set is actually linked to a platform, no more appearing
                 raise RuntimeError("Some arrow set is not linked to any platform")
             return None
         
@@ -97,6 +100,8 @@ def detect_right(position_in_map : tuple[int,int],
                  trajectory : platforming.platforms.Trajectory, 
                  world : Map_Create.create_world.World,
                  force_detection : bool = False ) -> None:
+    """Applies detect_block to the right tile
+    """
     if position_in_map[x] < len(map_lines[position_in_map[y]]) - 1 and not(map_lines[position_in_map[y]][position_in_map[x]+1] in ("↓","←","↑" )): 
         detect_block((position_in_map[x]+1,position_in_map[y]), map_lines, trajectory, world, force_detection)
 
@@ -105,6 +110,7 @@ def detect_left(position_in_map : tuple[int,int],
                 trajectory : platforming.platforms.Trajectory, 
                 world : Map_Create.create_world.World,
                 force_detection : bool = False ) -> None:
+    """Applies detect_block to the left tile"""
     if position_in_map[x] > 0 and not(map_lines[position_in_map[y]][position_in_map[x]-1] in  ("→", "↓" , "↑")): 
         detect_block((position_in_map[x]-1,position_in_map[y]), map_lines, trajectory, world, force_detection)
 
@@ -113,6 +119,8 @@ def detect_down(position_in_map : tuple[int,int],
                 trajectory : platforming.platforms.Trajectory, 
                 world : Map_Create.create_world.World,
                 force_detection : bool = False  ) -> None:
+    """Applies detect_block to the bottom tile
+    """
     if position_in_map[y] < len(map_lines) - 1 and not(map_lines[position_in_map[y]+1][position_in_map[x]] in  ("→", "←", "↑")): 
         detect_block((position_in_map[x],position_in_map[y]+1), map_lines, trajectory, world, force_detection)
 
@@ -120,7 +128,9 @@ def detect_up(position_in_map : tuple[int,int],
               map_lines : list[list[str]], 
               trajectory : platforming.platforms.Trajectory, 
               world : Map_Create.create_world.World,
-              force_detection : bool = False   ) -> None:       
+              force_detection : bool = False   ) -> None:   
+    """Applies detect_block to the top tile
+    """    
     if position_in_map[y] > 0 and not(map_lines[position_in_map[y]-1][position_in_map[x]] in ("→", "←", "↓")):
         detect_block((position_in_map[x],position_in_map[y]-1), map_lines, trajectory, world, force_detection)
 

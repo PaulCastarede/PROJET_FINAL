@@ -157,6 +157,17 @@ def readmap(world: World, map: str) -> None:
                     )
 
     def create_sprite(character: str, x: float, y: float, world: World) -> None:
+        """Tranfsorms the character given at a selected position into the corresponding sprite in the corresponded position
+
+        Args:
+            character (str): Symbol of the sprite
+            x (float): x coordinate
+            y (float): y coordinate
+            world (World): 
+
+        Raises:
+            RuntimeError: _description_
+        """
         match character:
             case "=":
                 world.wall_list.append(arcade.Sprite(

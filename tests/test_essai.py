@@ -4,7 +4,6 @@ from gameview import GameView
 import player
 import weapons
 import monsters
-import create_world
 import math
 from monsters import *
 

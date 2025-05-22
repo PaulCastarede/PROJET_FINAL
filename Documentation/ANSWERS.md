@@ -62,7 +62,7 @@ A: J'utilise un algorithme récursif de pattern matching. Dans la fonction readm
 
 Q:Sur quelle structure travaille cet algorithme ? Quels sont les avantages et inconvénients de votre choix ?
 
-A: Cet algorithme travaille 
+A: Cet algorithme travaille sur la liste de liste (ou "matrice") qui correspond à la map en 
 
 Q:Quelle bibliothèque utilisez-vous pour lire les instructions des interrupteurs ? Dites en une ou deux phrases pourquoi vous avez choisi celle-là.
 

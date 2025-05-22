@@ -16,4 +16,4 @@ def main() -> None:
     game_view.profiler.dump_stats("profile.prof")
 
 if __name__ == "__main__":
-    main()
+    main()  

@@ -23,12 +23,10 @@ class GameView(arcade.View):
     
     #DECLARATION DES ATTRIBUTS
     world : World      # --> create_world.py
-    score_UI : arcade.Text
     weapons_list : arcade.SpriteList[weapons.Weapon]
     arrow : weapons.Arrow
     arrow_sprite_list : arcade.SpriteList[weapons.Arrow]
     UI : user_interface.UI
-    score : int
     profiler: cProfile.Profile
 
     # INITIALISATION DE GAMEVIEW
@@ -53,7 +51,6 @@ class GameView(arcade.View):
         self.angle : float = 0
         self.world_x : float = 0
         self.world_y : float = 0
-        self.score = 0
         self.profiler = cProfile.Profile()
 
         # Setup our game
@@ -107,7 +104,8 @@ class GameView(arcade.View):
                 self.left_pressed = False
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> None:
-        # Mettre à jour les coordonnées de la souris
+        """Met à jour les coordonnées de la souris et l'angle entre le joueur et la souris
+        """
         self.mouse_x = x
         self.mouse_y = y
         world_coords = self.camera.unproject((self.mouse_x, self.mouse_y)) #Coordonnées monde
@@ -232,7 +230,8 @@ class GameView(arcade.View):
         
     
     #AFFICHAGE DES SPRITES
-    def on_draw(self) -> None:                                 
+    def on_draw(self) -> None:    
+        """Draw all the things that should"""                             
         self.clear()
         with self.camera.activate():
             self.world.draw()

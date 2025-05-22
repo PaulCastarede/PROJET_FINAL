@@ -11,26 +11,36 @@ WEAPON_LEFT_POSTION = -20
 WEAPON_RIGHT_POSITION = 20
 
 class Weapon(arcade.Sprite):
+    """The class from which inherit the Sword and Bow Sprites
+    """
     position_respecting_to_player : int
+    """A little shift to the position of the weapon to make it look like it is actually held by the player sprite """
 
     def __init__(self,path_or_texture : str, scale : float, center_x : float, center_y : float,  angle : float) -> None:
         super().__init__(path_or_texture, scale, center_x, center_y, angle )
         self.position_respecting_to_player = 0
 
     def adapt_weapon_position(self, angle : float) -> None:
+        """Shift the position of the weapon to make it look like it is actually held by the player sprite. Will
+         shift it to the left of the player sprite if the cursor is in the left side of the screen and vice-versa for the right
+           """
         if abs(math.degrees(angle)) > 90:
             self.position_respecting_to_player = -20
         else: 
             self.position_respecting_to_player = 20
 
     def weapon_movement(self, gameview : gameview.GameView) -> None:
+        """Sets the position of the weapon and gives its orientation according to the cursor position"""
         self.center_x = gameview.world.player_sprite.center_x + self.position_respecting_to_player
         self.center_y = gameview.world.player_sprite.center_y - 10
         self.angle = -math.degrees(gameview.angle) + 45
 
 
 class Lethal(arcade.Sprite):
+    """Any Sprite that can kill monsters"""
+    
     hit_sound : Final[arcade.Sound] = arcade.load_sound(":resources:/sounds/hit2.wav")
+    """Sound played whenever a monster is killed"""
 
     def kills_monsters(self, monsters_list : arcade.SpriteList[monsters.Monster]) -> None:
         # Vérifier les collisions avec les monstres

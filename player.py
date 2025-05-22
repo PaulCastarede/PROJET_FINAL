@@ -22,6 +22,7 @@ INITIAL_PLAYER_LIVES = 5
 
 class Player(arcade.Sprite):   
     player_sprite : arcade.Sprite
+    score : int
     lives : int
     death : bool
     respawn_point : arcade.Vec2
@@ -35,6 +36,7 @@ class Player(arcade.Sprite):
         self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
         self.death_sound = arcade.load_sound(":resources:sounds/gameover1.wav")
         self.lives = INITIAL_PLAYER_LIVES
+        self.score = 0
         self.respawn_point = (self.center_x,self.center_y)
         self.respawn_map = respawn_map
     
@@ -74,11 +76,11 @@ class Player(arcade.Sprite):
         #Retire les pièces en contact avec le joueur
         for coin in collided_coins:
             #Incrémente le score du nombre de pièces 
-            gameview.score += len(collided_coins)  
+            self.score += len(collided_coins)  
             coin.remove_from_sprite_lists()                
             arcade.play_sound(coin.coin_sound)
-        if gameview.score >= 10:
-            gameview.score -= 10 
+        if self.score >= 10:
+            self.score -= 10 
             self.lives += 1
             gameview.UI.update_player_lives(self)
         gameview.UI.update_score(gameview)

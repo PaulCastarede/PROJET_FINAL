@@ -25,7 +25,7 @@ class UI:
 
     def update_score(self, game_view : gameview.GameView) -> None:
         #Fait correspondre le score affiché avec le score du joueur 
-        self.__score_UI.text = f"X  {game_view.score}"
+        self.__score_UI.text = f"X  {game_view.world.player_sprite.score}"
     
     def update_weapon(self, game_view : gameview.GameView) -> None:
         if game_view.active_weapon == gameview.SWORD_INDEX:
