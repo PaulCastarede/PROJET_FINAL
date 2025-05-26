@@ -2,15 +2,16 @@ from typing import Final
 import arcade
 import gameview
 from gates import Gate
+import platforming.platforms as platforms
         
-class Switch(arcade.Sprite):
+class Switch(platforms.Collidable_Platform):
     """A switch that can be toggled by weapons to control gates.
     
     The switch has two states (on/off) and can be enabled/disabled.
     When hit by a weapon, it toggles its state and performs configured actions.
     """
     
-    def __init__(self, center_x: int, center_y: int, state: bool = False, enabled: bool = True, path_or_texture : str = ":resources:/images/tiles/leverLeft.png") -> None:
+    def __init__(self, center_x: int, center_y: int, state: bool = False, enabled: bool = True, path_or_texture : str = ":resources:/images/tiles/leverLeft.png", platform_trajectory : platforms.Trajectory = platforms.Trajectory(), scale = 0.5, angle = 0) -> None:
         """Initialize a switch.
         
         Args:
@@ -19,7 +20,7 @@ class Switch(arcade.Sprite):
             state: Initial state of the switch (True = on, False = off)
             enabled: Whether the switch can be toggled (True by default)
         """
-        super().__init__(path_or_texture, scale=0.5, center_x=center_x, center_y=center_y)
+        super().__init__(path_or_texture, scale, center_x, center_y, angle,  platform_trajectory )
         self.state = state
         self.enabled = enabled
         self.actions_on = []  # Actions to perform when switch is turned on

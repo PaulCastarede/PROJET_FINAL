@@ -1,15 +1,14 @@
 from __future__ import annotations
 from typing import Final
 import arcade
-import Map_Create.world_sprites
 from dataclasses import dataclass
-import platforming.block_detecting
-import switches
 PLATFORM_SPEED = 1.0
 
 PLATFORM_ARCADE_GAP = 32
 """Looks like there is gap between where the boundary of the platform is and where it really is. Fixing it with this constant"""
 
+TILE_SIZE = 64.0
+"""64 pixels par element"""
 
 class Platform(arcade.Sprite):
     """
@@ -20,7 +19,7 @@ class Platform(arcade.Sprite):
     __y_spawn : Final[float]
     platform_trajectory : Trajectory
 
-    def __init__(self,path_or_texture : str, scale : float, center_x : float, center_y : float,  angle : float, platform_trajectory : Trajectory) -> None:
+    def __init__(self,path_or_texture : str, scale : float, center_x : float, center_y : float,  angle : float, platform_trajectory : Trajectory ) -> None:
         super().__init__(path_or_texture, scale, center_x, center_y, angle )
         self.platform_trajectory = platform_trajectory
         self.__x_spawn = self.center_x
@@ -45,10 +44,10 @@ class Platform(arcade.Sprite):
             self.boundary_bottom = None
             self.boundary_top = None
 
-        self.boundary_left = self.__x_spawn - self.platform_trajectory.left_movement*platforming.block_detecting.TILE_SIZE - PLATFORM_ARCADE_GAP    
-        self.boundary_right = self.__x_spawn + self.platform_trajectory.right_movement*platforming.block_detecting.TILE_SIZE + PLATFORM_ARCADE_GAP
-        self.boundary_bottom = self.__y_spawn - self.platform_trajectory.down_movement*platforming.block_detecting.TILE_SIZE - PLATFORM_ARCADE_GAP  
-        self.boundary_top = self.__y_spawn + self.platform_trajectory.up_movement*platforming.block_detecting.TILE_SIZE + PLATFORM_ARCADE_GAP
+        self.boundary_left = self.__x_spawn - self.platform_trajectory.left_movement*TILE_SIZE - PLATFORM_ARCADE_GAP    
+        self.boundary_right = self.__x_spawn + self.platform_trajectory.right_movement*TILE_SIZE + PLATFORM_ARCADE_GAP
+        self.boundary_bottom = self.__y_spawn - self.platform_trajectory.down_movement*TILE_SIZE - PLATFORM_ARCADE_GAP  
+        self.boundary_top = self.__y_spawn + self.platform_trajectory.up_movement*TILE_SIZE + PLATFORM_ARCADE_GAP
             
 
 
@@ -77,18 +76,12 @@ class Collidable_Platform(Platform):
                 self.change_y *= -1
 
     
-class Exit_Platform(Collidable_Platform, Map_Create.world_sprites.Exit_Sprite):
-    """Moving exit sign"""
-    ...
 
-class Lava_Platform(Collidable_Platform, Map_Create.world_sprites.Lava_Sprite):
-    """Moving lava block"""
-    ...
 
-class Switch_Platform(Collidable_Platform, switches.Switch):
-    """Moving switch"""
-    ...
-    
+
+
+
+
 @dataclass
 class Trajectory:
     """Dataclass that represents how much the platform block moves on each direction 

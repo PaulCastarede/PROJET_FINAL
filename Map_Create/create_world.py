@@ -1,7 +1,7 @@
 from __future__ import annotations 
 import arcade 
 import yaml
-import Map_Create.world_sprites
+import map_create.world_sprites as world_sprites
 import monsters
 import platforming.block_detecting
 import player
@@ -22,14 +22,14 @@ class World:
     set_exit : bool
     wall_list : arcade.SpriteList[arcade.Sprite]
     moving_platforms_list : arcade.SpriteList[platforms.Platform]
-    no_go_list : arcade.SpriteList[Map_Create.world_sprites.Lava_Sprite]
+    no_go_list : arcade.SpriteList[world_sprites.Lava_Sprite]
     monsters_list : arcade.SpriteList[monsters.Monster]
     switches_list : arcade.SpriteList[switches.Switch]
     gates_list : arcade.SpriteList[gates.Gate]
     coins_list : arcade.SpriteList[coins.Coin]
     physics_engine : arcade.PhysicsEnginePlatformer
-    exit_list : arcade.SpriteList[Map_Create.world_sprites.Exit_Sprite]
-    checkpoint_list : arcade.SpriteList[Map_Create.world_sprites.Checkpoint]
+    exit_list : arcade.SpriteList[world_sprites.Exit_Sprite]
+    checkpoint_list : arcade.SpriteList[world_sprites.Checkpoint]
     next_map : str
     last_level : bool
     map_width : int
@@ -150,10 +150,11 @@ def readmap(world: World, map: str) -> None:
             for index_x, character in enumerate(line):
                 if character in ("←", "→", "↑", "↓"):
                     platforming.block_detecting.detect_block(
-                        (index_x, index_y),
-                        map_lines,
+                        position_in_map=(index_x, index_y),
+                        map_lines=map_lines,
                         trajectory=platforms.Trajectory(),
-                        world=world
+                        world=world,
+                        map_path=map
                     )
 
     def create_sprite(character: str, x: float, y: float, world: World) -> None:
@@ -204,7 +205,7 @@ def readmap(world: World, map: str) -> None:
             case "£":
                 world.no_go_list.append(arcade.Sprite(
                     ":resources:images/tiles/lava.png",
-                    scale=0.5,
+                    scale = 0.5,
                     center_x=x,
                     center_y=y
                 ))
@@ -226,9 +227,9 @@ def readmap(world: World, map: str) -> None:
                     )
                 world.player_set_spawn = True
             case "E":
-                world.exit_list.append(Map_Create.world_sprites.Exit_Sprite(
+                world.exit_list.append(world_sprites.Exit_Sprite(
                     ":resources:/images/tiles/signExit.png",
-                    scale=0.5,
+                    scale = 0.5,
                     center_x=x,
                     center_y=y
                 ))
@@ -246,10 +247,10 @@ def readmap(world: World, map: str) -> None:
                 map_y = int(y / TILE_SIZE)
                 world.gates_dict[(map_x, map_y)] = gate
             case "C":
-                world.checkpoint_list.append(Map_Create.world_sprites.Checkpoint(center_x=x,center_y=y-0.5, linked_map = map))
+                world.checkpoint_list.append(world_sprites.Checkpoint(center_x=x,center_y=y-6, linked_map = map))
 
     # Chargement du fichier
-    with open(f"maps/{map}", "r", encoding="utf-8") as file:
+    with open(file = f"maps/{map}", mode = "r", encoding="utf-8") as file:
         # Chargement de la configuration
         config = load_config(file)
         
@@ -279,7 +280,7 @@ def readmap(world: World, map: str) -> None:
         process_map_lines(map_lines, world)
 
         # Définition des limites des plateformes
-        for platform in [p for lst in [world.moving_platforms_list, world.exit_list, world.no_go_list]
+        for platform in [p for lst in [world.moving_platforms_list, world.exit_list, world.no_go_list, world.checkpoint_list]
                         for p in lst if isinstance(p, platforms.Platform)]:
             platform.define_boundaries()
 

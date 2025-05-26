@@ -1,6 +1,5 @@
 from __future__ import annotations
 import arcade
-import time 
 import cProfile
 import math
 import platforming.platforms
@@ -10,7 +9,7 @@ import gameover
 from typing import Final
 from monsters import *
 import weapons
-from Map_Create.create_world import *
+from map_create.create_world import *
 
 from switches import Switch
 from gates import Gate
@@ -28,12 +27,18 @@ class GameView(arcade.View):
     arrow_sprite_list : arcade.SpriteList[weapons.Arrow]
     UI : user_interface.UI
     profiler: cProfile.Profile
+    ambient_music : Final[arcade.Sound] = arcade.load_sound("assets/ambient_music.mp3", streaming=True)
+    
+
+    camera_shake : arcade.camera.grips.ScreenShake2D
 
     # INITIALISATION DE GAMEVIEW
     def __init__(self) -> None:
         super().__init__()
         # Choose a nice comfy background color
         self.background_color = arcade.csscolor.CORNFLOWER_BLUE
+
+        
 
         #Initialisation des Attributs
         self.UI = user_interface.UI()
@@ -52,7 +57,14 @@ class GameView(arcade.View):
         self.world_x : float = 0
         self.world_y : float = 0
         self.profiler = cProfile.Profile()
-
+        
+        self.camera_shake = arcade.camera.grips.ScreenShake2D(
+            self.camera.view_data,
+            max_amplitude=15.0,
+            acceleration_duration=0.1,
+            falloff_time=0.5,
+            shake_frequency=10.0
+        )
         # Setup our game
         self.setup()
     
@@ -76,6 +88,9 @@ class GameView(arcade.View):
         self.weapons_list.append(self.bow)
         #UI SET UP
         self.UI = user_interface.UI()
+        #MUSIC SET UP
+        self.music_playback = arcade.play_sound(self.ambient_music, volume = 0.3, loop = True)
+
   
 
     # COMMANDES
@@ -165,10 +180,12 @@ class GameView(arcade.View):
 
         This is where in-world time "advances", or "ticks".
         """
-
+        self.camera_shake.update(delta_time)
         self.profiler.enable()
         self.do_on_update(delta_time)
         self.profiler.disable()
+
+        
 
         #Waiting for a new version mypy
         self.camera.position = self.world.player_sprite.position  #type: ignore
@@ -179,7 +196,7 @@ class GameView(arcade.View):
         #Mouvement des plateformes autres que "wall"
 
         for sprite in [sprite 
-                       for platform_types in [self.world.moving_platforms_list,self.world.exit_list,self.world.no_go_list] 
+                       for platform_types in [self.world.moving_platforms_list,self.world.exit_list,self.world.no_go_list, self.world.checkpoint_list, self.world.switches_list] 
                        for sprite in platform_types if isinstance(sprite,platforms.Collidable_Platform)
                     ]:
             sprite.movement()
@@ -202,6 +219,8 @@ class GameView(arcade.View):
             arrow.arrows_movement(self.world.wall_list)
             # Tuer les monstres rencontrés
             arrow.kills_monsters(self.world.monsters_list)
+
+    
         
         self.check_arrow_hits()
         
@@ -221,17 +240,19 @@ class GameView(arcade.View):
           
 
         #GAME OVER SET
-        if self.world.player_sprite.death :
-            gameover.gameover(self)
+        if self.world.player_sprite.death:
+            self.window.show_view(gameover.GameOverView(self))
 
        
     def do_on_update(self, delta_time: float) -> None:
         self.world.physics_engine.update()
+
         
     
     #AFFICHAGE DES SPRITES
     def on_draw(self) -> None:    
-        """Draw all the things that should"""                             
+        """Draw all the things that should"""  
+        self.camera_shake.update_camera()                           
         self.clear()
         with self.camera.activate():
             self.world.draw()
@@ -244,3 +265,4 @@ class GameView(arcade.View):
                         self.arrow.draw_trajectory(self.bow, self)
         with self.idle_camera.activate():
              self.UI.draw()
+        self.camera_shake.readjust_camera()

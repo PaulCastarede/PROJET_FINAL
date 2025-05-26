@@ -1,11 +1,8 @@
 from __future__ import annotations
 from typing import Final
 import arcade
-import monsters 
 import gameview
-import Map_Create.create_world
-import coins
-import user_interface
+import map_create.create_world
 
 PLAYER_MOVEMENT_SPEED = 5
 """Lateral speed of the player, in pixels per frame."""
@@ -30,6 +27,7 @@ class Player(arcade.Sprite):
     death_sound : Final[arcade.Sound]
     jump_sound : Final[arcade.Sound]
 
+
     def __init__(self, respawn_map, path_or_texture : str = ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png", center_x : float = 0, center_y : float = 0, scale : float = 0.5) -> None:
         super().__init__(path_or_texture,scale, center_x, center_y )
         self.death = False
@@ -39,6 +37,7 @@ class Player(arcade.Sprite):
         self.score = 0
         self.respawn_point = (self.center_x,self.center_y)
         self.respawn_map = respawn_map
+        
     
     def respawn_or_dies(self, gameview : gameview.GameView) -> None:
         no_go_touched = arcade.check_for_collision_with_list(self, gameview.world.no_go_list) 
@@ -47,14 +46,21 @@ class Player(arcade.Sprite):
             self.lives -= 1
             self.respawn(gameview)
             gameview.UI.update_player_lives(self)
+            #CAMERA SHAKES WHEN PLAYER DIES
+            gameview.camera_shake.duration = 0.5
+            gameview.camera_shake.max_amplitude = 50.0
+            gameview.camera_shake.shake_frequency = 15.0
+            gameview.camera_shake.start()
+            #Play death sound
+            arcade.play_sound(self.death_sound)
             if self.lives < 0:
                 self.death = True
-                arcade.play_sound(self.death_sound)
+                
             
     
 
     def respawn(self, gameview : gameview.GameView) -> None:
-        Map_Create.create_world.readmap(gameview.world, self.respawn_map)
+        map_create.create_world.readmap(gameview.world, self.respawn_map)
         self.center_x, self.center_y = self.respawn_point
 
     def movement(self, gameview : gameview.GameView) -> None:
