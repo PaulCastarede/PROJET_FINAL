@@ -54,6 +54,8 @@ class World:
         self.gates_dict = {}
 
     def draw(self)-> None:
+        """Draw all the sprite lists in the World
+        """
         self.player_sprite_list.draw()
         self.wall_list.draw()
         self.moving_platforms_list.draw()
@@ -66,6 +68,10 @@ class World:
         self.checkpoint_list.draw()
 
     def clear(self, clear_player : bool = False) -> None:
+        """Clears all the sprite lists of the world (player list optionnal)
+        Args:
+            clear_player (bool): Whether the player_list is cleared or not
+        """
         # Réinitialisation du monde
         self.wall_list.clear()
         self.moving_platforms_list.clear()

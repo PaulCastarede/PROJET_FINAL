@@ -20,14 +20,22 @@ TEXTURE_RIGHT = 1
 
 
 class Monster(arcade.Sprite):
+    """Abstract class from which inherit the bat and the slime
 
+
+    """
     @abstractmethod
     def movement(self) -> None:
+        """Manages the movement of monsters
+        """
         ...
     
 
 
 class Bat(Monster): 
+    """ The class for the Bat Sprite. Inherits from the Monster abstract class
+    """
+
     BAT_SPEED : Final[float] = 2
     """Speed of the bats, in pixels per frame"""
     __range : Final[int] = 200

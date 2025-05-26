@@ -63,6 +63,11 @@ class Checkpoint(platforms.Collidable_Platform):
         self.__spawn_y = self.center_y
 
     def set_respawn(self, player_list : arcade.SpriteList[player.Player]):
+        """Set the new respawn point of the player who collides with this checkpoint. Should be called whenever a player hits a Checkpoint, on the very checkpoint.
+
+        Args:
+            player_list (arcade.SpriteList[player.Player]): 
+        """
         if arcade.check_for_collision_with_list(self, player_list):   
             player_list[0].respawn_point = (self.__spawn_x, self.__spawn_y)
             player_list[0].respawn_map = self.linked_map

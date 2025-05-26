@@ -77,6 +77,11 @@ class Player(arcade.Sprite):
         arcade.play_sound(self.jump_sound)
 
     def collect_coins(self, gameview : gameview.GameView) -> None:
+        """ Checks if the player is colliding a coin sprite and increases the score + erases the coin if (s)he does.
+
+        Args:
+            gameview (gameview.GameView): 
+        """
         #Vérifie si le joueur est en contact avec des pièces
         collided_coins = arcade.check_for_collision_with_list(self, gameview.world.coins_list)
         #Retire les pièces en contact avec le joueur
@@ -85,6 +90,7 @@ class Player(arcade.Sprite):
             self.score += len(collided_coins)  
             coin.remove_from_sprite_lists()                
             arcade.play_sound(coin.coin_sound)
+        # When score reaches 10, resets it and increases the number of lives
         if self.score >= 10:
             self.score -= 10 
             self.lives += 1

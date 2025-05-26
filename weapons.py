@@ -82,6 +82,11 @@ class Arrow(Lethal):
         return self.__ARROW_SPEED
 
     def arrows_movement(self, wall_list : arcade.SpriteList[arcade.Sprite]) -> None:
+        """The movement of the arrow when it's released, along its orientation
+
+        Args:
+            wall_list (arcade.SpriteList[arcade.Sprite]): The sprites against which the arrow gets destroyed when it meets those.
+        """
         if self.released:
             # Appliquer la physique
             self.change_y -= self.__ARROW_GRAVITY
@@ -106,6 +111,7 @@ class Arrow(Lethal):
 
 
     def behavior_before_release(self, bow : Weapon, angle : float) -> None:
+        """Adapts arrow's angle, its position and its level of charging before it's released """
         # Angle de la flèche 
         self.angle = -math.degrees(angle) +45
         # Position statique de la flèche (même centre que l'arc)
