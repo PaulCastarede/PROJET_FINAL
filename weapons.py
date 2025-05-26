@@ -5,6 +5,8 @@ import math
 from player import *
 import gameview
 import monsters
+import switches
+import map_create.create_world as create_world
 from abc import abstractmethod
 
 WEAPON_LEFT_POSTION = -20
@@ -111,6 +113,26 @@ class Arrow(Lethal):
         self.center_y = bow.center_y 
         #Flèche de plus en plus chargée au cours du temps
         self.__charge_level *= 1.05
+
+    def check_arrow_hits(self, world : create_world.World) -> None:
+        """Actives the switch if the arrow collides with one
+
+        Args:
+            world (create_world.World): The class that contains the sprite lists
+        """
+        # Collision avec les interrupteurs
+        hit_switches = arcade.check_for_collision_with_list(self, world.switches_list)
+        if hit_switches:
+            self.remove_from_sprite_lists()  # Détruit la flèche
+            for switch in hit_switches:
+                switch.on_hit_by_weapon(world.gates_dict)  # Active l'interrupteur
+        
+        # Collision avec les portails fermés
+        hit_gates = arcade.check_for_collision_with_list(self, world.gates_list)
+        if hit_gates:
+            for gate in hit_gates:
+                if not gate.state:  # Si le portail est fermé
+                    self.remove_from_sprite_lists()
 
     def draw_trajectory(self, bow: Weapon, gameview: gameview.GameView) -> None:
         """Dessine une ligne en pointillé représentant la trajectoire estimée de la flèche"""

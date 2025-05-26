@@ -158,22 +158,6 @@ class GameView(arcade.View):
                 self.arrow_sprite_list[-1].change_x = self.arrow.speed * math.cos(self.angle)
                 self.arrow_sprite_list[-1].change_y = self.arrow.speed * math.sin(self.angle)
     
-    def check_arrow_hits(self):
-    # Vérifie chaque flèche dans arrow_sprite_list
-        for arrow in self.arrow_sprite_list: # <-- CORRECTION
-            # Collision avec les interrupteurs
-            hit_switches = arcade.check_for_collision_with_list(arrow, self.world.switches_list)
-            if hit_switches:
-                arrow.remove_from_sprite_lists()  # Détruit la flèche
-                for switch in hit_switches:
-                    switch.on_hit_by_weapon(self.world.gates_dict)  # Active l'interrupteur
-            
-            # Collision avec les portails fermés
-            hit_gates = arcade.check_for_collision_with_list(arrow, self.world.gates_list)
-            if hit_gates:
-                for gate in hit_gates:
-                    if not gate.state:  # Si le portail est fermé
-                        arrow.remove_from_sprite_lists()
 
     def on_update(self, delta_time: float) -> None:
         """Called once per frame, before drawing.
@@ -184,8 +168,6 @@ class GameView(arcade.View):
         self.profiler.enable()
         self.do_on_update(delta_time)
         self.profiler.disable()
-
-        
 
         #Waiting for a new version mypy
         self.camera.position = self.world.player_sprite.position  #type: ignore
@@ -205,7 +187,6 @@ class GameView(arcade.View):
         for monster in self.world.monsters_list:
             monster.movement()         
 
-
         if self.mouse_left_pressed:
             self.weapons_list[self.active_weapon].adapt_weapon_position(self.angle)
             self.weapons_list[self.active_weapon].weapon_movement(self)
@@ -215,19 +196,17 @@ class GameView(arcade.View):
                 self.arrow.behavior_before_release(self.bow, self.angle)
                        
         for arrow in self.arrow_sprite_list:
-            #Trajectoire de la flèche
+            # Trajectoire de la flèche
             arrow.arrows_movement(self.world.wall_list)
             # Tuer les monstres rencontrés
             arrow.kills_monsters(self.world.monsters_list)
-
-    
-        
-        self.check_arrow_hits()
+            # Active les interrupteurs
+            arrow.check_arrow_hits(self.world)
         
 
         self.world.player_sprite.collect_coins(self)                                   
         
-       
+
         #Check if player should die to monsters or lava
         self.world.player_sprite.respawn_or_dies(self)
 
@@ -257,6 +236,7 @@ class GameView(arcade.View):
         with self.camera.activate():
             self.world.draw()
             self.arrow_sprite_list.draw()
+            #Draw weapons
             if self.mouse_left_pressed:
                 arcade.draw_sprite(self.weapons_list[self.active_weapon])
                 if self.active_weapon == BOW_INDEX:

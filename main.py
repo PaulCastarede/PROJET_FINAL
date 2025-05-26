@@ -1,5 +1,6 @@
 import arcade
 from gameview import GameView
+import endgame
 # Constants
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
