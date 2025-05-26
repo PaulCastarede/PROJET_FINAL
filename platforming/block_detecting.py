@@ -92,6 +92,10 @@ def detect_block(position_in_map : tuple[int,int],
             print(Checkpoint.boundary_left)
             world.checkpoint_list.append(Checkpoint)
             detect_surrounding(position_in_map , map_lines, trajectory , world, map_path)
+        case "^":
+            for switch in world.switches_list:
+                if switch.center_x == position_in_map[x_index]*TILE_SIZE and switch.center_y == (len(map_lines)-1-position_in_map[y_index])*TILE_SIZE:
+                    switch.platform_trajectory = trajectory
         case _:
             if force_detection and math.sqrt(trajectory.right_movement^2+trajectory.left_movement^2+trajectory.up_movement^2+trajectory.down_movement^2) == trajectory.right_movement + trajectory.down_movement +trajectory.left_movement + trajectory.up_movement :
                 # This ugly condition is the only way we found to check (in one-line) if there is exactly 0 or 1 trajectory direction different to 0
