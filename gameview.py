@@ -9,7 +9,7 @@ import gameover
 from typing import Final
 from monsters import *
 import weapons
-from map_create.create_world import *
+from Map_Create.create_world import *
 
 from switches import Switch
 from gates import Gate

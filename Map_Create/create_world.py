@@ -1,7 +1,7 @@
 from __future__ import annotations 
 import arcade 
 import yaml
-import map_create.world_sprites as world_sprites
+import Map_Create.world_sprites as world_sprites
 import monsters
 import platforming.block_detecting
 import player
