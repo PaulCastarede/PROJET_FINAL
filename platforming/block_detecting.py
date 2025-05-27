@@ -10,10 +10,10 @@ from dataclasses import dataclass
 TILE_SIZE = 64.0
 """64 pixels par element"""
 
-TOO_MANY_ARROWS_ERROR : RuntimeError = "There are two or more sets of the same arrow linked to the same platform"
+TOO_MANY_ARROWS_ERROR = RuntimeError("There are two or more sets of the same arrow linked to the same platform")
 
-x_index = 0
-y_index = 1
+x_index: int = 0
+y_index: int = 1
 
 def detect_block(position_in_map : tuple[int,int],
                 map_lines : list[list[str]], 
@@ -39,7 +39,7 @@ def detect_block(position_in_map : tuple[int,int],
                 raise TOO_MANY_ARROWS_ERROR
             trajectory.left_movement += 1
             detect_arrows_set((position_in_map[x_index], position_in_map[y_index]), map_lines, trajectory, world, "←")
-            detect_right((position_in_map[x_index]+trajectory.left_movement-1,position_in_map[y_index]), map_lines, trajectory, world, map_path, force_detection=True)
+            detect_right((int(position_in_map[x_index]+trajectory.left_movement-1), position_in_map[y_index]), map_lines, trajectory, world, map_path, force_detection=True)
         case "→" :
             if trajectory.right_movement > 0:
                 raise TOO_MANY_ARROWS_ERROR
@@ -51,7 +51,7 @@ def detect_block(position_in_map : tuple[int,int],
                 raise TOO_MANY_ARROWS_ERROR
             trajectory.up_movement += 1
             detect_arrows_set((position_in_map[x_index],position_in_map[y_index]), map_lines, trajectory, world, "↑")
-            detect_down((position_in_map[x_index],position_in_map[y_index]+trajectory.up_movement-1), map_lines, trajectory, world, map_path, force_detection=True)
+            detect_down((position_in_map[x_index], int(position_in_map[y_index]+trajectory.up_movement-1)), map_lines, trajectory, world, map_path, force_detection=True)
         case "↓" :
             if trajectory.down_movement > 0:
                 raise TOO_MANY_ARROWS_ERROR
@@ -97,7 +97,7 @@ def detect_block(position_in_map : tuple[int,int],
                 if switch.center_x == position_in_map[x_index]*TILE_SIZE and switch.center_y == (len(map_lines)-1-position_in_map[y_index])*TILE_SIZE:
                     switch.platform_trajectory = trajectory
         case _:
-            if force_detection and math.sqrt(trajectory.right_movement^2+trajectory.left_movement^2+trajectory.up_movement^2+trajectory.down_movement^2) == trajectory.right_movement + trajectory.down_movement +trajectory.left_movement + trajectory.up_movement :
+            if force_detection and math.sqrt(trajectory.right_movement**2 + trajectory.left_movement**2 + trajectory.up_movement**2 + trajectory.down_movement**2) == trajectory.right_movement + trajectory.down_movement + trajectory.left_movement + trajectory.up_movement:
                 # This ugly condition is the only way we found to check (in one-line) if there is exactly 0 or 1 trajectory direction different to 0
                 # Indeed, if there is more than 1 direction it means there was a platform that has already been removed due to other arrow sets
                 # Which implies that the arrow set is actually linked to a platform, no more appearing
