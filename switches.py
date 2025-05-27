@@ -1,4 +1,4 @@
-from typing import Final
+from typing import Final, Tuple, Dict, List, Any
 import arcade
 import gameview
 from gates import Gate
@@ -10,8 +10,12 @@ class Switch(platforms.Collidable_Platform):
     The switch has two states (on/off) and can be enabled/disabled.
     When hit by a weapon, it toggles its state and performs configured actions.
     """
+    state: bool
+    enabled: bool
+    actions_on: List[Dict[str, Any]]
+    actions_off: List[Dict[str, Any]]
     
-    def __init__(self, center_x: int, center_y: int, state: bool = False, enabled: bool = True, path_or_texture : str = ":resources:/images/tiles/leverLeft.png", platform_trajectory : platforms.Trajectory = platforms.Trajectory(), scale = 0.5, angle = 0) -> None:
+    def __init__(self, center_x: int, center_y: int, state: bool = False, enabled: bool = True, path_or_texture: str = ":resources:/images/tiles/leverLeft.png", platform_trajectory: platforms.Trajectory = platforms.Trajectory(), scale: float = 0.5, angle: float = 0) -> None:
         """Initialize a switch.
         
         Args:
@@ -20,18 +24,18 @@ class Switch(platforms.Collidable_Platform):
             state: Initial state of the switch (True = on, False = off)
             enabled: Whether the switch can be toggled (True by default)
         """
-        super().__init__(path_or_texture, scale, center_x, center_y, angle,  platform_trajectory )
+        super().__init__(path_or_texture, scale, center_x, center_y, angle, platform_trajectory)
         self.state = state
         self.enabled = enabled
         self.actions_on = []  # Actions to perform when switch is turned on
         self.actions_off = [] # Actions to perform when switch is turned off
         self.update_texture()
 
-    def _get_texture_path(self) -> str:
+    def __get_texture_path(self) -> str:
         """Get the appropriate texture path based on switch state."""
         return ":resources:/images/tiles/leverRight.png" if self.state else ":resources:/images/tiles/leverLeft.png"
 
-    def toggle(self, gates_dict: dict[tuple[int, int], Gate]) -> None:
+    def toggle(self, gates_dict: Dict[Tuple[int, int], Gate]) -> None:
         """Toggle the switch state and perform associated actions.
         
         Args:
@@ -55,7 +59,7 @@ class Switch(platforms.Collidable_Platform):
                 self.enabled = False
             else:
                 # Only get coordinates for gate-related actions
-                x, y = action["x"], action["y"]
+                x, y = int(action["x"]), int(action["y"])  # Ensure coordinates are integers
                 # Ajustement des coordonnées y pour corriger le décalage
                 print(f"Looking for gate at ({x}, {y})")
                 print(f"Available gates: {list(gates_dict.keys())}")
@@ -70,9 +74,9 @@ class Switch(platforms.Collidable_Platform):
 
     def update_texture(self) -> None:
         """Update the switch texture based on its current state."""
-        self.texture = arcade.load_texture(self._get_texture_path())
+        self.texture = arcade.load_texture(self.__get_texture_path())
 
-    def on_hit_by_weapon(self, gates_dict: dict[tuple[int, int], Gate]) -> None:
+    def on_hit_by_weapon(self, gates_dict: Dict[Tuple[int, int], Gate]) -> None:
         """Handle being hit by a weapon.
         
         Args:
@@ -81,7 +85,7 @@ class Switch(platforms.Collidable_Platform):
         if self.enabled:
             self.toggle(gates_dict)
 
-    def set_actions(self, actions_on: list[dict[str, object]], actions_off: list[dict[str, object]]) -> None:
+    def set_actions(self, actions_on: List[Dict[str, Any]], actions_off: List[Dict[str, Any]]) -> None:
         """Set the actions to perform when the switch is toggled.
         
         Args:
