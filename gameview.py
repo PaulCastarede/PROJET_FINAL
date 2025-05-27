@@ -197,7 +197,7 @@ class GameView(arcade.View):
                        
         for arrow in self.arrow_sprite_list:
             # Trajectoire de la flèche
-            arrow.arrows_movement(self.world.wall_list)
+            arrow.arrows_movement(self.world)
             # Tuer les monstres rencontrés
             arrow.kills_monsters(self.world.monsters_list)
             # Active les interrupteurs
@@ -211,7 +211,7 @@ class GameView(arcade.View):
         self.world.player_sprite.respawn_or_dies(self)
 
         for checkpoint in self.world.checkpoint_list:
-            checkpoint.set_respawn(self.world.player_sprite_list)
+            checkpoint.set_respawn(self.world.player_sprite)
         
         #NEXT LEVEL
         for exit_signs in self.world.exit_list:

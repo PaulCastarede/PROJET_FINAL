@@ -7,6 +7,8 @@ import gameview
 import monsters
 import switches
 import map_create.create_world as create_world
+import map_create.world_sprites as world_sprites
+import platforming.platforms as platforms
 from abc import abstractmethod
 
 WEAPON_LEFT_POSTION = -20
@@ -81,7 +83,7 @@ class Arrow(Lethal):
     def speed(self) -> float :
         return self.__ARROW_SPEED
 
-    def arrows_movement(self, wall_list : arcade.SpriteList[arcade.Sprite]) -> None:
+    def arrows_movement(self, world : create_world.World) -> None:
         if self.released:
             # Appliquer la physique
             self.change_y -= self.__ARROW_GRAVITY
@@ -93,8 +95,9 @@ class Arrow(Lethal):
             elif self.change_x < 0:
                 self.angle = math.degrees(math.asin(self.change_y/(math.sqrt((self.change_x)**2 +(self.change_y)**2)))) +225
             # Vérifier les collisions avec les murs
-            if arcade.check_for_collision_with_list(self, wall_list):
+            if arcade.check_for_collision_with_list(self, world.wall_list) or arcade.check_for_collision_with_list(self, world.no_go_list) or arcade.check_for_collision_with_list(self, world.moving_platforms_list) or arcade.check_for_collision_with_list(self, world.gates_list):
                 self.remove_from_sprite_lists()
+            #Retire la flèche si elle est en dessous des limites de la map
             if (self.center_y < -250):
                 self.remove_from_sprite_lists()
 
@@ -151,7 +154,7 @@ class Arrow(Lethal):
         y = bow.center_y
         
         # Dessiner la trajectoire
-        points = []
+        points : list[tuple[float, float]]  = []
         current_change_y = change_y
         
         # Continuer jusqu'à ce que la flèche sorte de l'écran ou touche le sol
