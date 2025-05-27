@@ -22,13 +22,13 @@ class Player(arcade.Sprite):
     score : int
     lives : int
     death : bool
-    respawn_point : arcade.Vec2
+    respawn_point : tuple[float, float]
     respawn_map : str
     death_sound : Final[arcade.Sound]
     jump_sound : Final[arcade.Sound]
 
 
-    def __init__(self, respawn_map, path_or_texture : str = ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png", center_x : float = 0, center_y : float = 0, scale : float = 0.5) -> None:
+    def __init__(self, respawn_map: str, path_or_texture : str = ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png", center_x : float = 0, center_y : float = 0, scale : float = 0.5) -> None:
         super().__init__(path_or_texture,scale, center_x, center_y )
         self.death = False
         self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
