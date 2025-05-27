@@ -5,7 +5,7 @@ import player
 import gameview
 import endgame
 import platforming.platforms as platforms
-import Map_Create.create_world as create_world
+import map_create.create_world as create_world
 
 
 checkpoint_textures = []

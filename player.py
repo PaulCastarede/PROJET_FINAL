@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Final
 import arcade
 import gameview
-import Map_Create.create_world
+import map_create.create_world
 
 PLAYER_MOVEMENT_SPEED = 5
 """Lateral speed of the player, in pixels per frame."""
@@ -60,7 +60,7 @@ class Player(arcade.Sprite):
     
 
     def respawn(self, gameview : gameview.GameView) -> None:
-        Map_Create.create_world.readmap(gameview.world, self.respawn_map)
+        map_create.create_world.readmap(gameview.world, self.respawn_map)
         self.center_x, self.center_y = self.respawn_point
 
     def movement(self, gameview : gameview.GameView) -> None:

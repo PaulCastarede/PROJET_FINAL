@@ -1,8 +1,8 @@
 from __future__ import annotations
 import arcade
 import math
-import Map_Create.create_world
-import Map_Create.world_sprites
+import map_create.create_world
+import map_create.world_sprites
 import platforming.platforms
 import switches
 from dataclasses import dataclass
@@ -18,7 +18,7 @@ y_index: int = 1
 def detect_block(position_in_map : tuple[int,int],
                 map_lines : list[list[str]], 
                 trajectory : platforming.platforms.Trajectory, 
-                world : Map_Create.create_world.World,
+                world : map_create.create_world.World,
                 map_path : str,
                 force_detection : bool = False ) -> None:       
     """
@@ -27,7 +27,7 @@ def detect_block(position_in_map : tuple[int,int],
         position_in_map (tuple[int,int]): coord (x,y) in the map-matrix
         map_lines (list[list[str]]): the map repr as a matrix of str
         trajectory (Trajectory): How much the platform moves on each direction
-        world (Map_Create.create_world.World)
+        world (map_create.create_world.World)
         force_detection (bool) : Used to make sure the directionnal arrows are linked to a platform (or raises an error)
     Returns:
         Platforms: Adds the platforms block detected to a sprite list
@@ -76,18 +76,18 @@ def detect_block(position_in_map : tuple[int,int],
             world.moving_platforms_list.append(crate)
             detect_surrounding(position_in_map , map_lines, trajectory , world, map_path)
         case "£" :
-            lava = Map_Create.world_sprites.Lava_Sprite(":resources:images/tiles/lava.png", scale=0.5, center_x=position_in_map[x_index]*TILE_SIZE, center_y=(len(map_lines)-1-position_in_map[y_index])*TILE_SIZE, platform_trajectory = trajectory, angle = 0 )
+            lava = map_create.world_sprites.Lava_Sprite(":resources:images/tiles/lava.png", scale=0.5, center_x=position_in_map[x_index]*TILE_SIZE, center_y=(len(map_lines)-1-position_in_map[y_index])*TILE_SIZE, platform_trajectory = trajectory, angle = 0 )
             map_lines[position_in_map[y_index]][position_in_map[x_index]] = " "
             world.no_go_list.append(lava)
             detect_surrounding(position_in_map , map_lines, trajectory , world, map_path)
         case "E" :
-            exit = Map_Create.world_sprites.Exit_Sprite(":resources:/images/tiles/signExit.png",  center_x=position_in_map[x_index]*TILE_SIZE, center_y=(len(map_lines)-1-position_in_map[y_index])*TILE_SIZE, scale = 0.5, platform_trajectory = trajectory, angle = 0)
+            exit = map_create.world_sprites.Exit_Sprite(":resources:/images/tiles/signExit.png",  center_x=position_in_map[x_index]*TILE_SIZE, center_y=(len(map_lines)-1-position_in_map[y_index])*TILE_SIZE, scale = 0.5, platform_trajectory = trajectory, angle = 0)
             map_lines[position_in_map[y_index]][position_in_map[x_index]] = " "
             world.exit_list.append(exit)
             world.set_exit = True
             detect_surrounding(position_in_map , map_lines, trajectory , world, map_path)
         case "C":
-            Checkpoint = Map_Create.world_sprites.Checkpoint(linked_map = map_path, center_x=position_in_map[x_index]*TILE_SIZE, center_y=(len(map_lines)-1-position_in_map[y_index])*TILE_SIZE-6, platform_trajectory = trajectory)
+            Checkpoint = map_create.world_sprites.Checkpoint(linked_map = map_path, center_x=position_in_map[x_index]*TILE_SIZE, center_y=(len(map_lines)-1-position_in_map[y_index])*TILE_SIZE-6, platform_trajectory = trajectory)
             map_lines[position_in_map[y_index]][position_in_map[x_index]] = " "
             print(Checkpoint.boundary_left)
             world.checkpoint_list.append(Checkpoint)
@@ -108,7 +108,7 @@ def detect_block(position_in_map : tuple[int,int],
 def detect_right(position_in_map : tuple[int,int], 
                  map_lines : list[list[str]], 
                  trajectory : platforming.platforms.Trajectory, 
-                 world : Map_Create.create_world.World,
+                 world : map_create.create_world.World,
                  map_path : str,
                  force_detection : bool = False ) -> None:
     """Applies detect_block to the right tile
@@ -119,7 +119,7 @@ def detect_right(position_in_map : tuple[int,int],
 def detect_left(position_in_map : tuple[int,int], 
                 map_lines : list[list[str]], 
                 trajectory : platforming.platforms.Trajectory, 
-                world : Map_Create.create_world.World,
+                world : map_create.create_world.World,
                 map_path : str,
                 force_detection : bool = False ) -> None:
     """Applies detect_block to the left tile"""
@@ -129,7 +129,7 @@ def detect_left(position_in_map : tuple[int,int],
 def detect_down(position_in_map : tuple[int,int], 
                 map_lines : list[list[str]], 
                 trajectory : platforming.platforms.Trajectory, 
-                world : Map_Create.create_world.World,
+                world : map_create.create_world.World,
                 map_path : str,
                 force_detection : bool = False  ) -> None:
     """Applies detect_block to the bottom tile
@@ -140,7 +140,7 @@ def detect_down(position_in_map : tuple[int,int],
 def detect_up(position_in_map : tuple[int,int], 
               map_lines : list[list[str]], 
               trajectory : platforming.platforms.Trajectory, 
-              world : Map_Create.create_world.World,
+              world : map_create.create_world.World,
               map_path : str,
               force_detection : bool = False   ) -> None:   
     """Applies detect_block to the top tile
@@ -152,7 +152,7 @@ def detect_up(position_in_map : tuple[int,int],
 def detect_surrounding(position_in_map : tuple[int,int], 
                        map_lines : list[list[str]], 
                        trajectory : platforming.platforms.Trajectory, 
-                       world : Map_Create.create_world.World,
+                       world : map_create.create_world.World,
                         map_path : str ) -> None:
     """Applies detect_block but on the 4 sides of the sprite
 
@@ -172,7 +172,7 @@ def detect_surrounding(position_in_map : tuple[int,int],
 def detect_arrows_set(position_in_map : tuple[int,int], 
                       map_lines : list[list[str]], 
                       trajectory : platforming.platforms.Trajectory, 
-                      world : Map_Create.create_world.World, 
+                      world : map_create.create_world.World, 
                       char : str ) -> None:
     """Detect how long a set of the same arrow is
 
