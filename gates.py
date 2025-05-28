@@ -3,7 +3,7 @@ import arcade
 
 class Gate(arcade.Sprite):
     __wall_list : None | arcade.SpriteList[arcade.Sprite]
-    def __init__(self, center_x: int, center_y: int, state: bool = False) -> None:
+    def __init__(self, center_x: float, center_y: float, state: bool = False) -> None:
         """Initialize a gate.
         
         Args:
