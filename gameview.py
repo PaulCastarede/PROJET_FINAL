@@ -11,6 +11,8 @@ from monsters import *
 import weapons
 from map_create.create_world import *
 
+import platforming.platforms as platforms
+
 from switches import Switch
 from gates import Gate
 
