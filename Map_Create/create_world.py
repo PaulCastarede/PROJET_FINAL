@@ -90,7 +90,7 @@ def readmap(world: World, map: str) -> None:
         world: Instance de World à initialiser
         map: Nom du fichier de carte à charger
     """
-    def load_config(file) -> dict:
+    def load_config(file : list[list[str]]):
         """Charge la configuration YAML depuis le fichier."""
         config_lines = []
         for line in file:
@@ -128,7 +128,7 @@ def readmap(world: World, map: str) -> None:
             world.gates_list.append(gate)
             world.gates_dict[(gx, gy)] = gate
 
-    def process_switches(config: dict, world: World) -> None:
+    def process_switches(config: dict[str, int], world: World) -> None:
         """Traite les interrupteurs définis dans la configuration."""
         for sw_data in config.get("switches", []):
             sx, sy = sw_data["x"], sw_data["y"]
@@ -203,9 +203,7 @@ def readmap(world: World, map: str) -> None:
             case "v":
                 world.monsters_list.append(monsters.Bat(center_x=x, center_y=y))
             case "£":
-                world.no_go_list.append(arcade.Sprite(
-                    ":resources:images/tiles/lava.png",
-                    scale = 0.5,
+                world.no_go_list.append(world_sprites.Lava_Sprite(
                     center_x=x,
                     center_y=y
                 ))
