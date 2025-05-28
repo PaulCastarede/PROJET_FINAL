@@ -8,10 +8,9 @@ class UI:
     __score_UI : arcade.Text
     __ui_coin : arcade.Sprite
     __weapons_UI : arcade.Sprite
-    __victory_UI : arcade.Text
     __player_lives_ui : arcade.Sprite
     __player_lives_number_UI : arcade.Text
-    victory : bool
+    
 
     def __init__(self) -> None:
         self.__score_UI = arcade.Text( x =  80, y = 650, font_size = 20, text =  " X  0")
@@ -21,10 +20,11 @@ class UI:
         self.__player_lives_number_UI = arcade.Text(x = 1150, y = 630, font_size= 30, text = f"x  {player.INITIAL_PLAYER_LIVES}")
 
         self.__weapons_UI = arcade.Sprite("assets/kenney-voxel-items-png/sword_silver.png",scale=0.9, center_x=80,center_y=80, angle = 0)
-        self.__victory_UI = arcade.Text(x = 300, y = 360, font_size = 100, text = "WELL PLAYED")
-        self.victory = False
+
 
     def update_score(self, game_view : gameview.GameView) -> None:
+        #Fait correspondre le score affiché avec le score du joueur 
+        self.__score_UI.text = f"X  {game_view.world.player_sprite.score}"
         """Fait correspondre le score affiché avec le score du joueur"""
 
         self.__score_UI.text = f"X  {game_view.score}"
@@ -48,5 +48,4 @@ class UI:
         arcade.draw_sprite(self.__weapons_UI)
         arcade.draw_sprite(self.__ui_coin)
         arcade.draw_sprite(self.__player_lives_ui)
-        if self.victory:
-            self.__victory_UI.draw()
+

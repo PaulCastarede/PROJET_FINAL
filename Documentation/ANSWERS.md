@@ -58,12 +58,12 @@ A: Pour les monstres, on a créé une classe abstraite monstre et deux sous-clas
 Semaine 10:
 
 Q: Quel algorithme utilisez-vous pour identifier tous les blocs d’une plateformes, et leurs limites de déplacement ?
-
-A: J'utilise un algorithme récursif de pattern matching. Dans le readmap, 
+A: J'utilise un algorithme récursif de pattern matching. Dans la fonction readmap, je parcours une première fois les caractères de la map pour détecter les blocs de plateforme. Dès qu'une flèche est rencontrée, readmap fait appel à une fonction récursive detect_block qui ajoute tous les sprites appartenant à un même bloc de plateformes et leur donne les mêmes limites de déplacement représentées par la dataclass "trajectory". En fonction du caractère rencontré,  Les limites de déplacement sont déterminées par la longueur des séries de flèches qui partent du bloc de plateformes
 
 Q:Sur quelle structure travaille cet algorithme ? Quels sont les avantages et inconvénients de votre choix ?
 
-A: Cet algori
+A: Cet algorithme travaille sur la liste de liste (ou "matrice") qui correspond à la map en y enlevant les caractères considérés comme faisant partie d'un bloc de plateformes. Il agit également sur les listes moving_platforms_list et d'autres SpriteLists de World en y ajoutant au fur et à mesure les sprites considérés comme des plateformes avant d'effacer le caractère associé à la map.
+L'avantage d'agir directement sur la matrice de caractères qui représente la map en effacant les caractères au fur et à mesure est de garantir qu'on ajoute pas deux fois un même sprite a la liste de plateformes, mais aussi que l'algorithme ne cycle pas, puisque detect_block ne fait rien lorsqu'il rencontre un espace.  
 
 Q:Quelle bibliothèque utilisez-vous pour lire les instructions des interrupteurs ? Dites en une ou deux phrases pourquoi vous avez choisi celle-là.
 

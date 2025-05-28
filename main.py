@@ -1,5 +1,6 @@
 import arcade
 from gameview import GameView
+import endgame
 # Constants
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -13,6 +14,7 @@ def main() -> None:
     game_view = GameView()
     window.show_view(game_view)
     arcade.run()
+    game_view.profiler.dump_stats("profile.prof")
 
 if __name__ == "__main__":
-    main()
+    main()  

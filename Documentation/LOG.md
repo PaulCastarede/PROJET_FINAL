@@ -3,6 +3,7 @@
 A faire :
 Ecrire des tests !!
 Refactorer
+Corriger erreurs Mypy
 Pouvoir lancer 
 ## Suivi
 
@@ -53,19 +54,39 @@ Pouvoir lancer
 * [x] Adapter l'orientation visuelle des fleches selon la direction   60
 
 ### Semaine 7
+* [x] Gestion des armes par une classe mère Weapons                   75
+* [x] Amelioration de l'arc                                           10
+* [x] Amélioration de la trajectoire des flèches                      10
+* [x] Amélioration de l'arc                                            5
 
-### Semaine 8
+### Semaine 8         
+* [x] Amélioration de l'arc                                           10     
+* [x] Implémentation du temps de maintien de la flèche                20
+* [x] Refactoring, et création de tests associés (24)                100
+* [x] Réfléxion sur les plateformes et interrupteurs/portails         15
 
 ### Semaine 9
 Pas d'avance sur le projet ; préparation au midterm
+
 ### Semaine 10
-[x] Implémentation des plateformes et hard code expérimental           45
-[x] Intégration de détection de bloc de plateformes a partir de map   240
-[x] Refactorisation (encore primitive) du codes des plateformes        60
+* [x] Implémentation des plateformes et hard code expérimental           45
+* [x] Intégration de détection de bloc de plateformes a partir des maps  240
+* [x] Refactorisation (encore primitive) du codes des plateformes        60
+* [x] Implémentation des interrupteurs et portails sans les actions      60
 
 ### Semaine 11
+* [x] Implémentation finale des plateformes
+* [x] Correction de certaines erreurs 
+* [x] Implémentation partielle des interrupteurs/portails
+* [x] Refactoring partielle 
+* [x] Implémentation de la possible trajectoire des flèches
 
 ### Semaine 12
+* [x] Implémentation finale des plateformes, interrupteurs/portail avec actions 
+* [x] Refactoring (Lecture de map, plateformes)
+* [x] Implémentation des points de vie, checkpoints, et GameOver (Extensions)
+* [x] Réflexion sur les tests, erreurs mypy
+* [x] 
 
 ### Semaine 13
 

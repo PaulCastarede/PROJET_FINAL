@@ -5,32 +5,46 @@ import math
 from player import *
 import gameview
 import monsters
+import switches
+import map_create.create_world as create_world
+import map_create.world_sprites as world_sprites
+import platforming.platforms as platforms
 from abc import abstractmethod
 
 WEAPON_LEFT_POSTION = -20
 WEAPON_RIGHT_POSITION = 20
 
 class Weapon(arcade.Sprite):
+    """The class from which inherit the Sword and Bow Sprites
+    """
     position_respecting_to_player : int
+    """A little shift to the position of the weapon to make it look like it is actually held by the player sprite """
 
     def __init__(self,path_or_texture : str, scale : float, center_x : float, center_y : float,  angle : float) -> None:
         super().__init__(path_or_texture, scale, center_x, center_y, angle )
         self.position_respecting_to_player = 0
 
     def adapt_weapon_position(self, angle : float) -> None:
+        """Shift the position of the weapon to make it look like it is actually held by the player sprite. Will
+         shift it to the left of the player sprite if the cursor is in the left side of the screen and vice-versa for the right
+           """
         if abs(math.degrees(angle)) > 90:
             self.position_respecting_to_player = -20
         else: 
             self.position_respecting_to_player = 20
 
     def weapon_movement(self, gameview : gameview.GameView) -> None:
+        """Sets the position of the weapon and gives its orientation according to the cursor position"""
         self.center_x = gameview.world.player_sprite.center_x + self.position_respecting_to_player
         self.center_y = gameview.world.player_sprite.center_y - 10
         self.angle = -math.degrees(gameview.angle) + 45
 
 
 class Lethal(arcade.Sprite):
+    """Any Sprite that can kill monsters"""
+    
     hit_sound : Final[arcade.Sound] = arcade.load_sound(":resources:/sounds/hit2.wav")
+    """Sound played whenever a monster is killed"""
 
     def kills_monsters(self, monsters_list : arcade.SpriteList[monsters.Monster]) -> None:
         # Vérifier les collisions avec les monstres
@@ -69,7 +83,7 @@ class Arrow(Lethal):
     def speed(self) -> float :
         return self.__ARROW_SPEED
 
-    def arrows_movement(self, wall_list : arcade.SpriteList[arcade.Sprite]) -> None:
+    def arrows_movement(self, world : create_world.World) -> None:
         if self.released:
             # Appliquer la physique
             self.change_y -= self.__ARROW_GRAVITY
@@ -81,8 +95,9 @@ class Arrow(Lethal):
             elif self.change_x < 0:
                 self.angle = math.degrees(math.asin(self.change_y/(math.sqrt((self.change_x)**2 +(self.change_y)**2)))) +225
             # Vérifier les collisions avec les murs
-            if arcade.check_for_collision_with_list(self, wall_list):
+            if arcade.check_for_collision_with_list(self, world.wall_list) or arcade.check_for_collision_with_list(self, world.no_go_list) or arcade.check_for_collision_with_list(self, world.moving_platforms_list) or arcade.check_for_collision_with_list(self, world.gates_list):
                 self.remove_from_sprite_lists()
+            #Retire la flèche si elle est en dessous des limites de la map
             if (self.center_y < -250):
                 self.remove_from_sprite_lists()
 
@@ -102,6 +117,26 @@ class Arrow(Lethal):
         #Flèche de plus en plus chargée au cours du temps
         self.__charge_level *= 1.05
 
+    def check_arrow_hits(self, world : create_world.World) -> None:
+        """Actives the switch if the arrow collides with one
+
+        Args:
+            world (create_world.World): The class that contains the sprite lists
+        """
+        # Collision avec les interrupteurs
+        hit_switches = arcade.check_for_collision_with_list(self, world.switches_list)
+        if hit_switches:
+            self.remove_from_sprite_lists()  # Détruit la flèche
+            for switch in hit_switches:
+                switch.on_hit_by_weapon(world.gates_dict)  # Active l'interrupteur
+        
+        # Collision avec les portails fermés
+        hit_gates = arcade.check_for_collision_with_list(self, world.gates_list)
+        if hit_gates:
+            for gate in hit_gates:
+                if not gate.state:  # Si le portail est fermé
+                    self.remove_from_sprite_lists()
+
     def draw_trajectory(self, bow: Weapon, gameview: gameview.GameView) -> None:
         """Dessine une ligne en pointillé représentant la trajectoire estimée de la flèche"""
         # Calculer la vitesse exactement comme dans charge_level_increases_speed
@@ -119,7 +154,7 @@ class Arrow(Lethal):
         y = bow.center_y
         
         # Dessiner la trajectoire
-        points = []
+        points : list[tuple[float, float]]  = []
         current_change_y = change_y
         
         # Continuer jusqu'à ce que la flèche sorte de l'écran ou touche le sol
