@@ -9,8 +9,7 @@ from world_sprites_types.lava import Lava_Sprite
 
 from dataclasses import dataclass
 
-from create_world import TILE_SIZE 
-
+from platforming.platforms import TILE_SIZE                                          
 
 TOO_MANY_ARROWS_ERROR = RuntimeError("There are two or more sets of the same arrow linked to the same platform")
 

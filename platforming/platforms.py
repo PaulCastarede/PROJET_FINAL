@@ -2,11 +2,9 @@ from __future__ import annotations
 from typing import Final
 import arcade
 from dataclasses import dataclass
-from create_world import TILE_SIZE
 
-
-
-
+TILE_SIZE = 64.0
+"""64 pixels par element"""
 
 class Platform(arcade.Sprite):
     """
