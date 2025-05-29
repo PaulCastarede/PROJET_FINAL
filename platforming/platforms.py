@@ -31,7 +31,6 @@ class Platform(arcade.Sprite):
         self.change_x = PLATFORM_SPEED
         self.change_y = PLATFORM_SPEED
 
-
         if (self.platform_trajectory.right_movement == 0) and (self.platform_trajectory.left_movement == 0):
             #If the platform has no horizontal movement, has no horizontal speed and no left-right boundaries
             self.change_x = 0.0
@@ -44,6 +43,7 @@ class Platform(arcade.Sprite):
             self.boundary_bottom = None
             self.boundary_top = None
 
+        #Define boundaries according to trajectory attribute
         self.boundary_left = self.__x_spawn - self.platform_trajectory.left_movement*TILE_SIZE - PLATFORM_ARCADE_GAP    
         self.boundary_right = self.__x_spawn + self.platform_trajectory.right_movement*TILE_SIZE + PLATFORM_ARCADE_GAP
         self.boundary_bottom = self.__y_spawn - self.platform_trajectory.down_movement*TILE_SIZE - PLATFORM_ARCADE_GAP  
@@ -51,9 +51,9 @@ class Platform(arcade.Sprite):
             
 
 
-
-
 class Collidable_Platform(Platform):
+    """A class of which inherits every sprite that might move, or not, and that have not spatial hash disabled
+    """
     
     def movement(self) -> None:
         """Movement of platforms like Lava, Exit or Interruptors (not walls)
@@ -76,11 +76,6 @@ class Collidable_Platform(Platform):
                 self.change_y *= -1
 
     
-
-
-
-
-
 
 @dataclass
 class Trajectory:

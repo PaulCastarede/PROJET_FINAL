@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Final
 import arcade
 import gameview
-import map_create.create_world
+import create_world
 
 PLAYER_MOVEMENT_SPEED = 5
 """Lateral speed of the player, in pixels per frame."""
@@ -39,7 +39,7 @@ class Player(arcade.Sprite):
         self.respawn_map = respawn_map
         
     
-    def respawn_or_dies(self, gameview : gameview.GameView) -> None:
+    def dies(self, gameview : gameview.GameView) -> None:
         no_go_touched = arcade.check_for_collision_with_list(self, gameview.world.no_go_list) 
         monsters_touched = arcade.check_for_collision_with_list(self, gameview.world.monsters_list)
         if no_go_touched or monsters_touched or self.center_y < -64:
@@ -60,7 +60,7 @@ class Player(arcade.Sprite):
     
 
     def respawn(self, gameview : gameview.GameView) -> None:
-        map_create.create_world.readmap(gameview.world, self.respawn_map)
+        create_world.readmap(gameview.world, self.respawn_map)
         self.center_x, self.center_y = self.respawn_point
 
     def movement(self, gameview : gameview.GameView) -> None:

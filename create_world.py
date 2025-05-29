@@ -2,15 +2,19 @@ from __future__ import annotations
 import arcade 
 import yaml
 import io
-import map_create.world_sprites as world_sprites
 import monsters
 import platforming.block_detecting
 import player
-import coins
 import platforming.platforms as platforms
 import platforming
-import switches
-import gates
+
+from world_sprites_types.checkpoint import Checkpoint
+from world_sprites_types.switches import Switch
+from world_sprites_types.coins import Coin
+from world_sprites_types.exit import Exit_Sprite
+from world_sprites_types.gates import Gate
+from world_sprites_types.lava import Lava_Sprite
+
 from typing import cast, Any
 
 TILE_SIZE = 64.0
@@ -23,19 +27,19 @@ class World:
     set_exit : bool
     wall_list : arcade.SpriteList[arcade.Sprite]
     moving_platforms_list : arcade.SpriteList[platforms.Platform]
-    no_go_list : arcade.SpriteList[world_sprites.Lava_Sprite]
+    no_go_list : arcade.SpriteList[Lava_Sprite]
     monsters_list : arcade.SpriteList[monsters.Monster]
-    switches_list : arcade.SpriteList[switches.Switch]
-    gates_list : arcade.SpriteList[gates.Gate]
-    coins_list : arcade.SpriteList[coins.Coin]
+    switches_list : arcade.SpriteList[Switch]
+    gates_list : arcade.SpriteList[Gate]
+    coins_list : arcade.SpriteList[Coin]
     physics_engine : arcade.PhysicsEnginePlatformer
-    exit_list : arcade.SpriteList[world_sprites.Exit_Sprite]
-    checkpoint_list : arcade.SpriteList[world_sprites.Checkpoint]
+    exit_list : arcade.SpriteList[Exit_Sprite]
+    checkpoint_list : arcade.SpriteList[Checkpoint]
     next_map : str
     last_level : bool
     map_width : int
     map_height : int 
-    gates_dict: dict[tuple[int, int], gates.Gate]
+    gates_dict: dict[tuple[int, int], Gate]
     
     def __init__(self)-> None:
         self.player_sprite_list = arcade.SpriteList()
@@ -106,7 +110,7 @@ def process_gates(config: dict[str, Any], world: World) -> None:
     world.gates_dict = {}
     for gate_data in config.get("gates", []):
         gx, gy = gate_data["x"], gate_data["y"]
-        gate = gates.Gate(
+        gate = Gate(
             center_x=gx * TILE_SIZE,
             center_y=gy * TILE_SIZE,
             state=gate_data.get("state") == "open")
@@ -123,7 +127,7 @@ def process_switches(config: dict[str, Any], world: World) -> None:
     for sw_data in config.get("switches", []):
         sx, sy = sw_data["x"], sw_data["y"]
             
-        switch = switches.Switch(center_x=sx * TILE_SIZE,center_y=sy * TILE_SIZE, state=sw_data.get("state", "off") == "on")
+        switch = Switch(center_x=sx * TILE_SIZE,center_y=sy * TILE_SIZE, state=sw_data.get("state", "off") == "on")
         switch.set_actions(sw_data.get("switch_on", []),sw_data.get("switch_off", []))
         world.switches_list.append(switch)
 
@@ -202,7 +206,7 @@ def readmap(world: World, map: str) -> None:
                             center_y=y
                         ))
                     case "*":
-                        world.coins_list.append(coins.Coin(center_x=x, center_y=y))
+                        world.coins_list.append(Coin(center_x=x, center_y=y))
                     case "o":
                         world.monsters_list.append(monsters.Slime(
                             scale=0.5,
@@ -213,9 +217,7 @@ def readmap(world: World, map: str) -> None:
                     case "v":
                         world.monsters_list.append(monsters.Bat(center_x=x, center_y=y))
                     case "£":
-                        world.no_go_list.append(world_sprites.Lava_Sprite(
-                            ":resources:images/tiles/lava.png",
-                            scale = 0.5,
+                        world.no_go_list.append(Lava_Sprite(
                             center_x=x,
                             center_y=y
                         ))
@@ -237,9 +239,7 @@ def readmap(world: World, map: str) -> None:
                             )
                         world.player_set_spawn = True
                     case "E":
-                        world.exit_list.append(world_sprites.Exit_Sprite(
-                            ":resources:/images/tiles/signExit.png",
-                            scale = 0.5,
+                        world.exit_list.append(Exit_Sprite(
                             center_x=x,
                             center_y=y
                         ))
@@ -249,7 +249,7 @@ def readmap(world: World, map: str) -> None:
                         pass
                     case "|":
                         # Gates in the map are always closed by default
-                        gate = gates.Gate(center_x=x, center_y=y, state=False)
+                        gate = Gate(center_x=x, center_y=y, state=False)
                         gate.set_wall_list(world.wall_list)
                         world.gates_list.append(gate)
                         # Store in gates_dict for switch actions
@@ -257,7 +257,7 @@ def readmap(world: World, map: str) -> None:
                         map_y = int(y / TILE_SIZE)
                         world.gates_dict[(map_x, map_y)] = gate
                     case "C":
-                        world.checkpoint_list.append(world_sprites.Checkpoint(center_x=x,center_y=y-6, linked_map = map))
+                        world.checkpoint_list.append(Checkpoint(center_x=x,center_y=y-6, linked_map = map))
 
         # Validation finale
         if not world.player_set_spawn:

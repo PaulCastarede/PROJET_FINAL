@@ -1,6 +1,6 @@
 import arcade
 from gameview import GameView
-import endgame
+import alt_game_views.endgame as endgame
 # Constants
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720

@@ -5,11 +5,9 @@ import math
 from player import *
 import gameview
 import monsters
-import switches
-import map_create.create_world as create_world
-import map_create.world_sprites as world_sprites
-import platforming.platforms as platforms
-import coins
+import world_sprites_types.switches as switches
+import create_world as create_world
+import world_sprites_types.coins as coins
 from abc import abstractmethod
 
 WEAPON_LEFT_POSTION = -20

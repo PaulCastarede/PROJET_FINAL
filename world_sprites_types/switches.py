@@ -1,7 +1,7 @@
 from typing import Any, Final, cast
 import arcade
 import gameview
-from gates import Gate
+from world_sprites_types.gates import Gate
 import platforming.platforms as platforms
         
 class Switch(platforms.Collidable_Platform):

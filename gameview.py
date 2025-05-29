@@ -2,20 +2,16 @@ from __future__ import annotations
 import arcade
 import cProfile
 import math
-import platforming.platforms
 import user_interface
-import dataclasses
-import gameover
+import alt_game_views.gameover as gameover
 from typing import Final
 from monsters import *
 import weapons
-from map_create.create_world import *
+from create_world import *
 import pyglet.media
 
 import platforming.platforms as platforms
 
-from switches import Switch
-from gates import Gate
 
 SWORD_INDEX = 0
 BOW_INDEX = 1
@@ -214,7 +210,7 @@ class GameView(arcade.View):
         
 
         #Check if player should die to monsters or lava
-        self.world.player_sprite.respawn_or_dies(self)
+        self.world.player_sprite.dies(self)
 
         for checkpoint in self.world.checkpoint_list:
             checkpoint.set_respawn(self.world.player_sprite)
