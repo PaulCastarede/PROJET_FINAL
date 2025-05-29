@@ -43,7 +43,7 @@ class World:
         self.wall_list = arcade.SpriteList(use_spatial_hash=True)
         self.moving_platforms_list = arcade.SpriteList()
         self.no_go_list = arcade.SpriteList(use_spatial_hash=True)
-        self.monsters_list = arcade.SpriteList()
+        self.monsters_list = arcade.SpriteList(use_spatial_hash=True)
         self.coins_list = arcade.SpriteList(use_spatial_hash=True)
         self.exit_list = arcade.SpriteList(use_spatial_hash=True)
         self.gates_list = arcade.SpriteList(use_spatial_hash=True)
@@ -90,7 +90,7 @@ def readmap(world: World, map: str) -> None:
         world: Instance de World à initialiser
         map: Nom du fichier de carte à charger
     """
-    def load_config(file : list[list[str]]):
+    def load_config(file : list[list[str]]) -> Any :
         """Charge la configuration YAML depuis le fichier."""
         config_lines = []
         for line in file:

@@ -68,7 +68,8 @@ switches:
       - action: disable
   - x: 8
     y: 6
-    state: on # this switch is on by default
+    state: on 
+    # this switch is on by default
     # when we turn it off, we open access to the coin,
     # but we close access to the exit
     switch_off:

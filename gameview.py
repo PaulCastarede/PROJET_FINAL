@@ -52,8 +52,8 @@ class GameView(arcade.View):
         self.right_pressed = False
         self.left_pressed = False
         self.mouse_left_pressed = False
-        self.weapons_list = arcade.SpriteList()
-        self.arrow_sprite_list = arcade.SpriteList()
+        self.weapons_list = arcade.SpriteList(use_spatial_hash=True)
+        self.arrow_sprite_list = arcade.SpriteList(use_spatial_hash=True)
         self.active_weapon = SWORD_INDEX
         self.mouse_x = 0
         self.mouse_y = 0
@@ -204,10 +204,10 @@ class GameView(arcade.View):
                        
         for arrow in self.arrow_sprite_list:
             # Trajectoire de la flèche
-            arrow.arrows_movement(self.world)
+            arrow.arrows_movement()
             # Tuer les monstres rencontrés
             arrow.kills_monsters(self.world.monsters_list, self.world.coins_list)
-            # Active les interrupteurs
+            # Vérifie les collisions de la flèche
             arrow.check_arrow_hits(self.world)
         
 

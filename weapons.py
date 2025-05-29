@@ -85,7 +85,7 @@ class Arrow(Lethal):
     def speed(self) -> float :
         return self.__ARROW_SPEED
 
-    def arrows_movement(self, world : create_world.World) -> None:
+    def arrows_movement(self) -> None:
         if self.released:
             # Appliquer la physique
             self.change_y -= self.__ARROW_GRAVITY
@@ -96,9 +96,6 @@ class Arrow(Lethal):
                 self.angle = math.degrees(math.acos(self.change_y/(math.sqrt((self.change_x)**2 +(self.change_y)**2)))) -45
             elif self.change_x < 0:
                 self.angle = math.degrees(math.asin(self.change_y/(math.sqrt((self.change_x)**2 +(self.change_y)**2)))) +225
-            # Vérifier les collisions avec les murs
-            if arcade.check_for_collision_with_list(self, world.wall_list) or arcade.check_for_collision_with_list(self, world.no_go_list) or arcade.check_for_collision_with_list(self, world.moving_platforms_list):
-                self.remove_from_sprite_lists()
             #Retire la flèche si elle est en dessous des limites de la map
             if (self.center_y < -250):
                 self.remove_from_sprite_lists()
@@ -138,6 +135,9 @@ class Arrow(Lethal):
             for gate in hit_gates:
                 if not gate.state:  # Si le portail est fermé
                     self.remove_from_sprite_lists()
+        # Vérifier les collisions avec les murs
+        if arcade.check_for_collision_with_list(self, world.wall_list) or arcade.check_for_collision_with_list(self, world.no_go_list) or arcade.check_for_collision_with_list(self, world.moving_platforms_list):
+            self.remove_from_sprite_lists()
 
     def draw_trajectory(self, bow: Weapon, gameview: gameview.GameView) -> None:
         """Dessine une ligne en pointillé représentant la trajectoire estimée de la flèche"""
