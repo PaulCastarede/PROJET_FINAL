@@ -177,7 +177,7 @@ class GameView(arcade.View):
 
         platforms_list_list : list[arcade.SpriteSequence[platforms.Collidable_Platform]] = [ self.world.exit_list, self.world.no_go_list, self.world.checkpoint_list, self.world.switches_list]
         for platform in [platform for platform_list  in  platforms_list_list
-                        for platform in platform_list if isinstance(platform, platforms.Collidable_Platform)]:
+                        for platform in platform_list ]:
             platform.movement()
 
         #COMPORTEMENT DES MONSTRES
