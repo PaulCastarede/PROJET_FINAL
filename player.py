@@ -60,7 +60,7 @@ class Player(arcade.Sprite):
                 if gameview.music_playback:
                     #If the music is playing, stop it
                     arcade.stop_sound(gameview.music_playback)
-                gameview.window.show_view(gameover.GameOverView(self))
+                gameview.window.show_view(gameover.GameOverView(gameview))
                     
 
     def respawn(self, gameview : gameview.GameView) -> None:

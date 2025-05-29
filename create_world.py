@@ -20,6 +20,10 @@ from typing import cast, Any
 TILE_SIZE = 64.0
 """64 pixels par element"""
 
+class InvalidMapFormat(Exception):
+    """Exception raised when the map format is invalid"""
+    pass
+
 class World:
     player_sprite : player.Player
     player_sprite_list : arcade.SpriteList[player.Player]
@@ -94,13 +98,13 @@ def load_config(file:io.TextIOWrapper) -> dict[str, Any]:
             break # When a "---" line is found, we add the config lines to the YAML parser"
         config_lines.append(line)
     if yaml.safe_load("".join(config_lines)) is None or not isinstance(yaml.safe_load("".join(config_lines)), dict) or not config_lines:
-        raise ValueError("")
+        raise InvalidMapFormat(f"La configuration YAML du fichier est n'est pas correcte")
     return cast(dict[str, Any], yaml.safe_load("".join(config_lines)))
         
 def validate_map_dimensions(map_lines: list[list[str]], width: int, height: int) -> None:
     """Verify that the map dimensions match to these given in the config part"""
     if len(map_lines) != height:
-        raise ValueError(f"La hauteur de la carte ({len(map_lines)}) ne correspond pas à la configuration ({height})")
+        raise InvalidMapFormat(f"La hauteur de la carte ({len(map_lines)}) ne correspond pas à la configuration ({height})")
     for i, line in enumerate(map_lines):
         if len(line) > width:
             raise ValueError(f"Ligne {i+1} dépasse la largeur configurée ({width})")
@@ -143,15 +147,42 @@ def process_map_lines(map_lines: list[list[str]], world: World, map:str) -> None
                     world=world,
                     map_path=map)
 
+def validate_map_switches_gates(map_lines: list[list[str]], config: dict[str, Any], height: int) -> None:
+    """Verify that switches and gates defined in the configuration match those in the map."""
+    map_switches: set[tuple[int, int]] = set()
+    map_gates: set[tuple[int, int]] = set()
+
+    config_gates: set[tuple[int, int]] = set()
+    config_switches: set[tuple[int, int]] = set()
+
+    for y, line in enumerate(map_lines):
+        for x, char in enumerate(line):
+            if char == '^':
+                map_switches.add((x, height - 1 - y))  
+            elif char == '|':
+                map_gates.add((x, height - 1 - y))
+
+    for gate in config.get('gates', []):
+        config_gates.add((gate['x'], gate['y']))
+    
+    for switch in config.get('switches', []):
+        config_switches.add((switch['x'], switch['y']))
+        # There also gates defined in the actions of the switches.
+        for action in switch.get('switch_on', []):
+            if action.get('action') in ('open-gate', 'close-gate'):
+                config_gates.add((action['x'], action['y']))
+        for action in switch.get('switch_off', []):
+            if action.get('action') in ('open-gate', 'close-gate'):
+                config_gates.add((action['x'], action['y']))
+    
+    if config_switches != map_switches:
+        raise InvalidMapFormat(f"Les interrupteurs définis dans la config ({config_switches}) ne correspondent pas à ceux de la map ({map_switches})")
+
+    if config_gates != map_gates:
+        raise InvalidMapFormat(f"Les portails définies dans la config ({config_gates}) ne correspondent pas à ceux de la map ({map_gates})")
+
 def readmap(world: World, map: str) -> None:
-    """Loads the .txt corresponding to the str into a world, ie all the sprite Lists that belong to the level.
-
-    Args:
-        world (World): 
-        map (str): the name of your .txt in the maps folder
-
-
-    """
+    """Loads the .txt map corresponding to the map, and the world created"""
     with open(file = f"maps/{map}", mode = "r", encoding="utf-8") as file: #file: io.TextIOWrapper
         config = load_config(file)
         try:
@@ -171,6 +202,7 @@ def readmap(world: World, map: str) -> None:
         # Lecture de la carte
         map_lines = [list(file.readline().rstrip('\n')) for _ in range(world.map_height)]
         validate_map_dimensions(map_lines, world.map_width, world.map_height)
+        validate_map_switches_gates(map_lines, config, world.map_height)
 
         # Vérification de la fin de fichier
         if file.readline().strip() != "---":
