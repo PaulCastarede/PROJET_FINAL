@@ -134,9 +134,11 @@ class GameView(arcade.View):
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int) -> None:
         if button == arcade.MOUSE_BUTTON_LEFT:
             self.mouse_left_pressed = True
-            self.sword.kills_monsters(self.world.monsters_list)
-            # Check for sword collision with switches when using sword
+            # Position the weapon before checking for collisions
+            self.weapons_list[self.active_weapon].adapt_weapon_position(self.angle)
+            self.weapons_list[self.active_weapon].weapon_movement(self)
             if self.active_weapon == SWORD_INDEX:
+                self.sword.kills_monsters(self.world.monsters_list)
                 hit_switches = arcade.check_for_collision_with_list(self.sword, self.world.switches_list)
                 for switch in hit_switches:
                     switch.on_hit_by_weapon(self.world.gates_dict)
