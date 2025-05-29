@@ -181,11 +181,10 @@ class GameView(arcade.View):
 
         #Mouvement des plateformes autres que "wall"
 
-        for sprite in [sprite 
-                       for platform_types in [self.world.moving_platforms_list,self.world.exit_list,self.world.no_go_list, self.world.checkpoint_list, self.world.switches_list] 
-                       for sprite in platform_types if isinstance(sprite,platforms.Collidable_Platform)
-                    ]:
-            sprite.movement()
+        platforms_list_list : list[arcade.SpriteSequence[platforms.Collidable_Platform]] = [ self.world.exit_list, self.world.no_go_list, self.world.checkpoint_list, self.world.switches_list]
+        for platform in [platform for platform_list  in  platforms_list_list
+                        for platform in platform_list if isinstance(platform, platforms.Collidable_Platform)]:
+            platform.movement()
 
         #COMPORTEMENT DES MONSTRES
         for monster in self.world.monsters_list:

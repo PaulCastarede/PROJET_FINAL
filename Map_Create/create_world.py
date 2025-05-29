@@ -168,7 +168,8 @@ def readmap(world: World, map: str) -> None:
         process_map_lines(map_lines, world, map)
 
         # Définition des limites des plateformes
-        for platform in [p for lst in [world.moving_platforms_list, world.exit_list, world.no_go_list, world.checkpoint_list, world.switches_list]
+        platforms_list : list[arcade.SpriteSequence[platforms.Platform]] = [world.moving_platforms_list, world.exit_list, world.no_go_list, world.checkpoint_list, world.switches_list]
+        for platform in [p for lst  in  platforms_list
                         for p in lst if isinstance(p, platforms.Platform)]:
             platform.define_boundaries()
 

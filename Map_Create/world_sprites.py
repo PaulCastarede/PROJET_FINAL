@@ -36,7 +36,7 @@ class Exit_Sprite(platforms.Collidable_Platform):
                 #Si ce n'est pas le dernier niveau, lit la prochaine map       
                 create_world.readmap(game_view.world, map = game_view.world.next_map)
             else:
-                if game_view.music_playback:
+                if game_view.music_playback is not None:
                     #If the music is playing, stop it
                     arcade.stop_sound(game_view.music_playback)
                 game_view.window.show_view(endgame.EndGame())
