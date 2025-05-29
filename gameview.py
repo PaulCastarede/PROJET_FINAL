@@ -10,6 +10,7 @@ from typing import Final
 from monsters import *
 import weapons
 from map_create.create_world import *
+import pyglet.media
 
 import platforming.platforms as platforms
 
@@ -30,6 +31,7 @@ class GameView(arcade.View):
     UI : user_interface.UI
     profiler: cProfile.Profile
     ambient_music : Final[arcade.Sound] = arcade.load_sound("assets/ambient_music.mp3", streaming=True)
+    music_playback : pyglet.media.Player
     
 
     camera_shake : arcade.camera.grips.ScreenShake2D
@@ -59,6 +61,7 @@ class GameView(arcade.View):
         self.world_x : float = 0
         self.world_y : float = 0
         self.profiler = cProfile.Profile()
+        self.music_playback = pyglet.media.Player()
         
         self.camera_shake = arcade.camera.grips.ScreenShake2D(
             self.camera.view_data,
@@ -74,6 +77,7 @@ class GameView(arcade.View):
     def setup(self) -> None:
         """Set up the game here."""
         #Reset the eventual previous elements
+        arcade.stop_sound(self.music_playback)
         self.weapons_list.clear()
         self.arrow_sprite_list.clear()
         self.world.clear(clear_player=True)
@@ -91,7 +95,8 @@ class GameView(arcade.View):
         #UI SET UP
         self.UI = user_interface.UI()
         #MUSIC SET UP
-        self.music_playback = arcade.play_sound(self.ambient_music, volume = 0.3, loop = True)
+        self.music_playback = self.ambient_music.play( volume = 0.3, loop = True)
+        self.music_playback.seek(0)
 
   
 
@@ -134,7 +139,7 @@ class GameView(arcade.View):
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int) -> None:
         if button == arcade.MOUSE_BUTTON_LEFT:
             self.mouse_left_pressed = True
-            self.sword.kills_monsters(self.world.monsters_list)
+            self.sword.kills_monsters(self.world.monsters_list, self.world.coins_list)
             # Check for sword collision with switches when using sword
             if self.active_weapon == SWORD_INDEX:
                 hit_switches = arcade.check_for_collision_with_list(self.sword, self.world.switches_list)
@@ -201,7 +206,7 @@ class GameView(arcade.View):
             # Trajectoire de la flèche
             arrow.arrows_movement(self.world)
             # Tuer les monstres rencontrés
-            arrow.kills_monsters(self.world.monsters_list)
+            arrow.kills_monsters(self.world.monsters_list, self.world.coins_list)
             # Active les interrupteurs
             arrow.check_arrow_hits(self.world)
         
@@ -222,6 +227,9 @@ class GameView(arcade.View):
 
         #GAME OVER SET
         if self.world.player_sprite.death:
+            if self.music_playback:
+                #If the music is playing, stop it
+                arcade.stop_sound(self.music_playback)
             self.window.show_view(gameover.GameOverView(self))
 
        

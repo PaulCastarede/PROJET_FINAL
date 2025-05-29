@@ -1,26 +1,32 @@
 from __future__ import annotations
+from typing import Final
 import arcade
 import gameview
+import pyglet.media
 
 class GameOverView(arcade.View):
     """Vue affichée lorsque le joueur perd toutes ses vies"""
+    __gameover_music : Final[arcade.Sound] = arcade.load_sound("Assets/Game_over_music.mp3", streaming = True)
+    __gameover_music_player : pyglet.media.Player
 
     def __init__(self, game_view: gameview.GameView) -> None:
         super().__init__()
         self.game_view = game_view
-        
+        self.__gameover_music_player = self.__gameover_music.play()
+        self.__gameover_music_player.seek(0)
+
     @property
     def game_over_text(self) -> arcade.Text:
         return arcade.Text("GAME OVER", 
                             self.window.width // 2, 
                             self.window.height // 2 + 50,
-                            arcade.csscolor.WHITE, 
+                            arcade.csscolor.DARK_RED, 
                             font_size=60, 
                             anchor_x="center")
     
     @property 
     def restart_text(self) -> arcade.Text:
-        return arcade.Text("Appuyez sur ENTER pour recommencer", 
+        return arcade.Text("Press ENTER to restart", 
                         self.window.width // 2, 
                         self.window.height // 2 - 50,
                         arcade.csscolor.WHITE, 
@@ -45,6 +51,7 @@ class GameOverView(arcade.View):
             # Réinitialiser le jeu et revenir à la vue du jeu
             game_view = gameview.GameView()
             self.window.show_view(game_view)
+            arcade.stop_sound(self.__gameover_music_player)
 
       
 

@@ -19,15 +19,6 @@ class EndGame(arcade.View):
         self.__escape_text =  arcade.Text(x = 20, y = 20, font_size = 20, text = "Press Esc. to leave the game", color = arcade.csscolor.BLACK)
 
     @property
-    def __end_roll(self) -> list[arcade.Text]:
-        credit_1 = arcade.Text(x = 1100, y = 700, font_size=15, text = "Game by Paul Castarède and Mikail Bulut", anchor_x="center" )
-        credit_2 = arcade.Text(x = 1300, y = 830, font_size=10, text = "Thanks to arcade python for providing us a free use library", anchor_x="center")
-        credit_3 = arcade.Text(x = 1300, y = 860, font_size=10, text = "Thanks too to our CS teacher Sebastien Doerane", anchor_x="center" )
-        credit_4 = arcade.Text(x = 1300, y = 890, font_size=7, text = "Credit to HeatleyBros - Royalty Free Video Game Music,  for the ambient music and Kenney voxel assets", anchor_x="center" )
-        end_roll = [credit_1, credit_2, credit_3, credit_4]
-        return end_roll
-
-    @property
     def __victory_sprite_list(self) -> arcade.SpriteList[arcade.Sprite]:
         victory_sprite_list : arcade.SpriteList[arcade.Sprite] = arcade.SpriteList()
         #AJOUTE UNE PLATEFORME DE FIN DE JEU
@@ -43,22 +34,13 @@ class EndGame(arcade.View):
         """Gère les touches pressées sur l'écran de fin"""
         if key == arcade.key.ESCAPE:
             arcade.exit()
-    
-    def on_update(self, delta_time: float) -> None:
-        """Called once per frame, before drawing.
-
-        This is where in-world time "advances", or "ticks".
-        """
-        for credit in self.__end_roll:
-            credit.y  -= 100
 
     def on_draw(self) -> None:
         self.clear()
         self.__victory_sprite_list.draw()
         self.__victory_text.draw()
         self.__escape_text.draw()
-        for credit in self.__end_roll:
-            credit.draw()
+
 
     
 

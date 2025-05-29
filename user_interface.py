@@ -27,7 +27,7 @@ class UI:
         self.__score_UI.text = f"X  {game_view.world.player_sprite.score}"
         """Fait correspondre le score affiché avec le score du joueur"""
 
-        self.__score_UI.text = f"X  {game_view.score}"
+        self.__score_UI.text = f"X  {game_view.world.player_sprite.score}"
     
     def update_weapon(self, game_view : gameview.GameView) -> None:
         """Fait correspondre l'arme affichée avec l'arme équipée"""

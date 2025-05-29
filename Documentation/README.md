@@ -105,4 +105,6 @@ gates:
 
 
 Credit :
-"HeatleyBros - Royalty Free Video Game Music",  for the ambient music
+"HeatleyBros - Royalty Free Video Game Music",  for the ambient music.
+All sounds and sprites are under free to use license.
+This game is not for commercial purposes.

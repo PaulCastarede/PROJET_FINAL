@@ -89,7 +89,6 @@ def detect_block(position_in_map : tuple[int,int],
         case "C":
             Checkpoint = map_create.world_sprites.Checkpoint(linked_map = map_path, center_x=position_in_map[x_index]*TILE_SIZE, center_y=(len(map_lines)-1-position_in_map[y_index])*TILE_SIZE-6, platform_trajectory = trajectory)
             map_lines[position_in_map[y_index]][position_in_map[x_index]] = " "
-            print(Checkpoint.boundary_left)
             world.checkpoint_list.append(Checkpoint)
             detect_surrounding(position_in_map , map_lines, trajectory , world, map_path)
         case "^":

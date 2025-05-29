@@ -9,6 +9,7 @@ import switches
 import map_create.create_world as create_world
 import map_create.world_sprites as world_sprites
 import platforming.platforms as platforms
+import coins
 from abc import abstractmethod
 
 WEAPON_LEFT_POSTION = -20
@@ -46,9 +47,10 @@ class Lethal(arcade.Sprite):
     hit_sound : Final[arcade.Sound] = arcade.load_sound(":resources:/sounds/hit2.wav")
     """Sound played whenever a monster is killed"""
 
-    def kills_monsters(self, monsters_list : arcade.SpriteList[monsters.Monster]) -> None:
+    def kills_monsters(self, monsters_list : arcade.SpriteList[monsters.Monster], coins_list : arcade.SpriteList[coins.Coin]) -> None:
         # Vérifier les collisions avec les monstres
         for monster in arcade.check_for_collision_with_list(self, monsters_list):
+            coins_list.append(coins.Coin(center_x=monster.center_x, center_y=monster.center_y-15))
             monster.remove_from_sprite_lists()
             arcade.play_sound(self.hit_sound)
             if type(self) is Arrow:
@@ -95,7 +97,7 @@ class Arrow(Lethal):
             elif self.change_x < 0:
                 self.angle = math.degrees(math.asin(self.change_y/(math.sqrt((self.change_x)**2 +(self.change_y)**2)))) +225
             # Vérifier les collisions avec les murs
-            if arcade.check_for_collision_with_list(self, world.wall_list) or arcade.check_for_collision_with_list(self, world.no_go_list) or arcade.check_for_collision_with_list(self, world.moving_platforms_list) or arcade.check_for_collision_with_list(self, world.gates_list):
+            if arcade.check_for_collision_with_list(self, world.wall_list) or arcade.check_for_collision_with_list(self, world.no_go_list) or arcade.check_for_collision_with_list(self, world.moving_platforms_list):
                 self.remove_from_sprite_lists()
             #Retire la flèche si elle est en dessous des limites de la map
             if (self.center_y < -250):
