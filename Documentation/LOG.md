@@ -75,19 +75,29 @@ Pas d'avance sur le projet ; préparation au midterm
 * [x] Implémentation des interrupteurs et portails sans les actions      60
 
 ### Semaine 11
-* [x] Implémentation finale des plateformes
-* [x] Correction de certaines erreurs 
-* [x] Implémentation partielle des interrupteurs/portails
-* [x] Refactoring partielle 
-* [x] Implémentation de la possible trajectoire des flèches
+* [x] Implémentation finale des plateformes                              60
+* [x] Correction de certaines erreurs                                    30
+* [x] Implémentation partielle des interrupteurs/portails                90
+* [x] Refactoring                                                        60                                              
+* [x] Implémentation de la possible trajectoire des flèches              60
 
 ### Semaine 12
-* [x] Implémentation finale des plateformes, interrupteurs/portail avec actions 
-* [x] Refactoring (Lecture de map, plateformes)
-* [x] Implémentation des points de vie, checkpoints, et GameOver (Extensions)
+* [x] Implémentation finale des interrupteurs/portail avec actions    
+* [x] Refactoring (Lecture de map)
+* [x] Implémentation des vies, checkpoints, et GameOver(Extensions)
 * [x] Réflexion sur les tests, erreurs mypy
-* [x] 
+
 
 ### Semaine 13
+Pas vraiment d'avance cette semaine (midterm), ajout de documentation et  
+début de la complétion du fichier Design + quelques refactos.             40
 
 ### Semaine 14
+* [x] Correction des erreurs mypy                                         50
+* [x] Ajout de documentation                                              20
+* [x] Ajout d'une fenêtre de victoire (endgame)                           60
+* [x] Ajout de musique de playback (in-game, gameover et endgame)         30
+* [x] Ajout d'un camera shake lors de la mort                             30
+* []  Ultimes refactorings
+* [] Complétion du fichier Design + performances                          90
+* [] Fichier Log terminé                                                  10

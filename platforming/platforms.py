@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Final
 import arcade
 from dataclasses import dataclass
-PLATFORM_SPEED = 1.0
+PLATFORM_SPEED = 1.5
 
 PLATFORM_ARCADE_GAP = 32
 """Looks like there is gap between where the boundary of the platform is and where it really is. Fixing it with this constant"""

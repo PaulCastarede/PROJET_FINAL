@@ -42,35 +42,27 @@ class Switch(platforms.Collidable_Platform):
             gates_dict: Dictionary mapping (x,y) coordinates to Gate objects
         """
         if not self.enabled:
-            print("Switch is disabled")
-            return
+            return None
 
         self.state = not self.state
-        print(f"Switch toggled to state: {self.state}")
         self.update_texture()
 
         actions = self.actions_on if self.state else self.actions_off
-        print(f"Actions to perform: {actions}")
         for action in actions:
             action_type = action["action"]
             
             if action_type == "disable":
-                print("Disabling switch")
                 self.enabled = False
             else:
                 # Only get coordinates for gate-related actions
                 x, y = int(action["x"]), int(action["y"])  # Ensure coordinates are integers
                 # Ajustement des coordonnées y pour corriger le décalage
-                print(f"Looking for gate at ({x}, {y})")
-                print(f"Available gates: {list(gates_dict.keys())}")
                 if (x, y) in gates_dict:
-                    print(f"Found gate at ({x}, {y})")
                     if action_type == "open-gate":
                         gates_dict[(x, y)].open()
                     elif action_type == "close-gate":
                         gates_dict[(x, y)].close()
-                else:
-                    print(f"No gate found at ({x}, {y})")
+   
 
     def update_texture(self) -> None:
         """Update the switch texture based on its current state."""
