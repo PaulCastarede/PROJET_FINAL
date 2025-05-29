@@ -144,6 +144,14 @@ def process_map_lines(map_lines: list[list[str]], world: World, map:str) -> None
                     map_path=map)
 
 def readmap(world: World, map: str) -> None:
+    """Loads the .txt corresponding to the str into a world, ie all the sprite Lists that belong to the level.
+
+    Args:
+        world (World): 
+        map (str): the name of your .txt in the maps folder
+
+
+    """
     with open(file = f"maps/{map}", mode = "r", encoding="utf-8") as file: #file: io.TextIOWrapper
         config = load_config(file)
         try:

@@ -3,7 +3,6 @@ import arcade
 import cProfile
 import math
 import user_interface
-import alt_game_views.gameover as gameover
 from typing import Final
 from monsters import *
 import weapons
@@ -38,8 +37,7 @@ class GameView(arcade.View):
         # Choose a nice comfy background color
         self.background_color = arcade.csscolor.CORNFLOWER_BLUE
 
-        
-
+    
         #Initialisation des Attributs
         self.UI = user_interface.UI()
         self.world = World()
@@ -98,7 +96,6 @@ class GameView(arcade.View):
 
     # COMMANDES
     def on_key_press(self, key: int, modifiers: int) -> None:
-        """Called when the user presses a key on the keyboard."""
         match key:
             case arcade.key.RIGHT:
                 # start moving to the right
@@ -122,8 +119,6 @@ class GameView(arcade.View):
                 self.left_pressed = False
 
     def on_mouse_motion(self, x: int, y: int, dx: int, dy: int) -> None:
-        """Met à jour les coordonnées de la souris et l'angle entre le joueur et la souris
-        """
         self.mouse_x = x
         self.mouse_y = y
         world_coords = self.camera.unproject((self.mouse_x, self.mouse_y)) #Coordonnées monde
@@ -220,22 +215,14 @@ class GameView(arcade.View):
             exit_signs.exit(self)
           
 
-        #GAME OVER SET
-        if self.world.player_sprite.death:
-            if self.music_playback:
-                #If the music is playing, stop it
-                arcade.stop_sound(self.music_playback)
-            self.window.show_view(gameover.GameOverView(self))
 
-       
     def do_on_update(self, delta_time: float) -> None:
         self.world.physics_engine.update()
 
         
     
     #AFFICHAGE DES SPRITES
-    def on_draw(self) -> None:    
-        """Draw all the things that should"""  
+    def on_draw(self) -> None:     
         self.camera_shake.update_camera()                           
         self.clear()
         with self.camera.activate():

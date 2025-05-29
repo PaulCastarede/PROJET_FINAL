@@ -1,7 +1,6 @@
 from __future__ import annotations
-from typing import Final
 import arcade
-from pyglet.graphics import Batch
+
 
 characters_texture_list = [":resources:/images/animated_characters/female_person/femalePerson_walk7.png",":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png",":resources:/images/animated_characters/male_adventurer/maleAdventurer_walk0.png" ]
 

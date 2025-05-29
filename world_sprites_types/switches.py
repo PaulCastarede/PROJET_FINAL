@@ -1,6 +1,5 @@
-from typing import Any, Final, cast
+from typing import Any,  cast
 import arcade
-import gameview
 from world_sprites_types.gates import Gate
 import platforming.platforms as platforms
         

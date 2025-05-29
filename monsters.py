@@ -23,6 +23,7 @@ class Monster(arcade.Sprite):
 
     @abstractmethod
     def movement(self) -> None:
+        """Method that manages the monsters' movement. Should be called in the on_update method of your GameView"""
         ...
     
 

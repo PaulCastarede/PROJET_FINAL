@@ -2,6 +2,8 @@ from typing import Final
 import arcade
 
 class Gate(arcade.Sprite):
+    """The Sprite class for gates. Gates are walls that can be opened or closed when you activated or disactivate the linked switch
+    """
     __wall_list : None | arcade.SpriteList[arcade.Sprite]
     def __init__(self, center_x: float, center_y: float, state: bool = False) -> None:
         """Initialize a gate.
