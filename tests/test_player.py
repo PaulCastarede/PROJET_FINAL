@@ -33,16 +33,28 @@ class TestPlayer:
         
         
     def test_player_movement(self) -> None:
+        # Test du mouvement vers la droite
         initial_x: float = self.player.center_x
         self.gameview.right_pressed = True
-        self.player.movement(self.gameview)
-        assert self.player.change_x > 0
-        assert self.player.center_x == initial_x
         
+        for _ in range(5):  
+            self.player.movement(self.gameview)
+            self.gameview.world.physics_engine.update()  # Important : mettre à jour le moteur physique
+        
+        assert self.player.change_x > 0  
+        assert self.player.center_x > initial_x  
+        
+        # Test du mouvement vers la gauche
+        initial_x = self.player.center_x
         self.gameview.right_pressed = False
         self.gameview.left_pressed = True
-        self.player.movement(self.gameview)
+        
+        for _ in range(5):
+            self.player.movement(self.gameview)
+            self.gameview.world.physics_engine.update()
+        
         assert self.player.change_x < 0
+        assert self.player.center_x < initial_x 
         
     def test_player_jump(self) -> None:
         initial_change_y: float = self.player.change_y
