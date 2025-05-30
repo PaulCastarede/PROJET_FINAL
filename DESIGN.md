@@ -78,3 +78,6 @@ Au global, la méthode on_update est en Θ(n) avec n le nombre d'ennemis chargé
 
 
 Benchmarks :
+
+Voir les fichiers .jpeg en annexe dans le dossier du projet.
+On peut voir que les temps d'exécution des fonctions croient suivant une fonction affine en fonction du facteur étudié. Cela correspond à la complexité théorique que nous avions calculé.

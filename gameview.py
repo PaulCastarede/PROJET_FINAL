@@ -24,7 +24,6 @@ class GameView(arcade.View):
     arrow : weapons.Arrow
     arrow_sprite_list : arcade.SpriteList[weapons.Arrow]
     UI : user_interface.UI
-    profiler: cProfile.Profile
     ambient_music : Final[arcade.Sound] = arcade.load_sound("assets/ambient_music.mp3", streaming=True)
     music_playback : pyglet.media.Player
     
@@ -168,9 +167,7 @@ class GameView(arcade.View):
         This is where in-world time "advances", or "ticks".
         """
         self.camera_shake.update(delta_time)
-        self.profiler.enable()
         self.do_on_update(delta_time)
-        self.profiler.disable()
 
         #Waiting for a new version mypy
         self.camera.position = self.world.player_sprite.position  #type: ignore

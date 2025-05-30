@@ -97,6 +97,7 @@ début de la complétion du fichier Design + quelques refactos.             40
 * [x] Ajout d'une fenêtre de victoire (endgame)                           60
 * [x] Ajout de musique de playback (in-game, gameover et endgame)         30
 * [x] Ajout d'un camera shake lors de la mort                             30
-* []  Ultimes refactorings
-* [] Complétion du fichier Design + performances                          90
-* [] Fichier Log terminé                                                  10
+* [x] Tests complétés                                                    120
+* [x] Ultimes refactorings                                                60
+* [x] Complétion du fichier Design + performances                        180
+* [x] Fichier Log terminé                                                 10

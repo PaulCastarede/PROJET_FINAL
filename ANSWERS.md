@@ -82,7 +82,10 @@ En y repensant, j'ai réalisé que la question faisait probablement référence 
 
 Q:Quelle bibliothèque utilisez-vous pour lire les instructions des interrupteurs ? Dites en une ou deux phrases pourquoi vous avez choisi celle-là.
 
-A:Nous avons décidé d'utiliser Pyyaml pour sa simplicité. Elle détécte automatiquement les dictionnaires dans la partie config (avant --- ), et nous retourne un dictionnaire de listes de dictionnaires (i.e map1.txt).
+A:Nous avons décidé d'utiliser Pyyaml pour sa simplicité. Elle détécte automatiquement les dictionnaires dans la partie config (avant --- ), et nous retourne un dictionnaires avec des clés de types str 
+Par exemple : map1.txt nous avons les clés de types str (weight, height, next-map, switches, gates) ; et des valeurs de différents types  (int, int, str, list[dict], dict) (Raison pour laquelle nous avons mis Any).
+L'avantage est qu'une fois dans le dictionnaire config, on peut accéder à n'importe quelle élément (et ainsi dans les dict de Switch et aussi Gates)
+
 
 Q:Comment votre design général évolue-t-il pour tenir compte des interrupteurs et des portails ?
-A:Nous avons rencontré des difficultés pour modéliser les actions, raison pour laquelle nous avons commencé par créer une classe 
+A:Nous avons rencontré des difficultés pour modéliser les dictionnaires d'actions, nous avons donc décidé de "hard-coder" et omettre le type pour les dictionnaires de la partie config. En revanche pour le reste, nous avons créée deux classes : -Switch qui hérite de classe Collidable Platform (car c'est une plateforme mobile), et une classe Gate statique.
