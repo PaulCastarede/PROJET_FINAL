@@ -21,9 +21,37 @@ Un autre attribut important de la classe GameView est l'attribut qui représente
 En parlant de modularisation, nous avons cherché à organiser nos fichiers de manière cohérente et en séparant bien les différents aspects du jeu mais sans multiplier les fichiers pour rien. Par exemple, il nous paraissait utile de séparer les worlds_sprites en plusieurs modules car nous ne trouvions pas vraiment de sous-division vraiment cohérente (a part switch et gate mais leur codes respectifs était suffisamment verbeux pour ne pas les mettre dans un même fichier). En revanche, nous avons pensé à mettre les monsters dans différentes classes mais cela aurait vite fait beaucoup de modules pour pas grand chose et nous désirions éviter de nous perdre dans un océan de fichiers et de dossiers.
 
 
-Enfin, GameView n'est pas notre seule classe héritant de arcade.View. En effet, nous avons dégagé deux autres situations aux propriétés trop différentes pour simplement les implémenter comme une extension de GameView : le GameOver et l'écran de fin. Ainsi, parallèlement à GameView nous avons deux autres classes, EndGame et GameOver (cf dossier alt_game_views), qui possèdent leur propre logique. En effet, il est prévu que dans ces deux écrans, la joueuse ne puisse pas intéragir avec le monde in-game, voire qu'il n'y ait pas du tout de monde (dans le cas de GameOver). Ces écrans sont donc en vue seule, et la seule interaction avec l'utilisateur se limite à sa possibilité de quitter l'écran en appuyant sur une touche précise. Cette logique différente justifiait l'utilisation de classes qui, bien qu'elles soient accédées à travers des méthodes de GameView, sont complètement externes à GameView. A noter toutefois que le GameOver s'initialise à travers le GameView originel puisque l'on veut pouvoir retourner au GameView une fois dans le GameOver, ce qui n'est pas le cas de EndGame. Pour le reste, les attributs d'EndGame et de GameOver servent uniquement pour l'interface visuelle et sonore.
+Enfin, GameView n'est pas notre seule classe héritant de arcade.View. En effet, nous avons dégagé deux autres situations aux propriétés trop différentes pour simplement les implémenter comme une extension de GameView : le GameOver et l'écran de fin. Ainsi, parallèlement à GameView nous avons deux autres classes, EndGame et GameOverView (cf dossier alt_game_views), qui possèdent leur propre logique. En effet, il est prévu que dans ces deux écrans, la joueuse ne puisse pas intéragir avec le monde in-game, voire qu'il n'y ait pas du tout de monde (dans le cas de GameOver). Ces écrans sont donc en vue seule, et la seule interaction avec l'utilisateur se limite à sa possibilité de quitter l'écran en appuyant sur une touche précise. Cette logique différente justifiait l'utilisation de classes qui, bien qu'elles soient accédées à travers des méthodes de GameView, sont complètement externes à GameView. A noter toutefois que le GameOver s'initialise à travers le GameView originel puisque l'on veut pouvoir retourner au GameView une fois dans le GameOver, ce qui n'est pas le cas de EndGame. Pour le reste, les attributs d'EndGame et de GameOver servent uniquement pour l'interface visuelle et sonore.
 
 
+En résumé on a les relations de classe :
+-arcade.View:
+    -GameView
+    -EndGame
+    -GameOverView
+
+-arcade.Sprite :
+    -Player
+    -Coin
+    -Gate
+    -Monster(abstract):
+        -Slime
+        -Bat
+    -Platform:
+        -Collidable_Platform:
+            -Checkpoint
+            -Switch
+            -Exit
+            -Lava
+    -Weapons(interface):
+        -Bow
+        -Sword  <---------Lethal (hérite de arcade.Sprite, se contente de définir la méthode kills)
+                            /
+    -Arrow <_______________/
+
+-World 
+
+-UI
 
 
 -------------------------------------------
