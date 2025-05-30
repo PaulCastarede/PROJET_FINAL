@@ -1,7 +1,8 @@
 width: 3
 height: 4
 ---
-ZRD
+
+→ 
+
 S E
-CVRT
 ---

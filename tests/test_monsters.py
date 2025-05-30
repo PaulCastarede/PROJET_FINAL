@@ -95,23 +95,30 @@ class TestMonsters:
         )
         bat = Bat(
             path_or_texture="assets/kenney-extended-enemies-png/bat.png",
-            center_x=102,
+            center_x=100,
             center_y=100
         )
-        self.gameview.world.monsters_list.extend([slime, bat])
+        self.gameview.world.monsters_list.clear()
+
+        self.gameview.world.monsters_list.append(slime)
+        self.gameview.world.monsters_list.append(bat)
         
         sword = Sword(
             path_or_texture="assets/kenney-voxel-items-png/sword_silver.png",
             scale=0.5,
-            center_x=99,
+            center_x=100,
             center_y=100,
             angle=0
         )
         
         initial_monsters = len(self.gameview.world.monsters_list)
+        assert initial_monsters == 2  
+
         sword.kills_monsters(self.gameview.world.monsters_list, self.gameview.world.coins_list)
         
         assert len(self.gameview.world.monsters_list) < initial_monsters
+        assert len(self.gameview.world.monsters_list) == 0
+
     
     def teardown_method(self) -> None:
         self.window.close()

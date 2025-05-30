@@ -3,9 +3,11 @@ import arcade
 from typing import Final
 from player import Player
 import gameview
-from world_sprites_types.coins import Coin
+import world_sprites_types
 from monsters import Bat, Slime
 from gameview import GameView
+import world_sprites_types.checkpoint
+
 
 class TestPlayer:
     window: arcade.Window
@@ -63,7 +65,7 @@ class TestPlayer:
         
     def test_player_collect_coins(self) -> None:
         self.gameview.world.coins_list.clear()
-        coin: Coin = Coin(center_x=self.player.center_x, center_y=self.player.center_y)
+        coin: world_sprites_types.coins.Coin = world_sprites_types.coins.Coin(center_x=self.player.center_x, center_y=self.player.center_y)
         self.gameview.world.coins_list.append(coin)
         initial_coins: int = self.player.coins_possessed
         
@@ -95,13 +97,27 @@ class TestPlayer:
         
     def test_player_lives_from_coins(self) -> None:
         self.player.coins_possessed = 9
-        coin: Coin = Coin(center_x=self.player.center_x, center_y=self.player.center_y)
+        coin: world_sprites_types.coins.Coin = world_sprites_types.coins.Coin(center_x=self.player.center_x, center_y=self.player.center_y)
         self.gameview.world.coins_list.append(coin)
         initial_lives: int = self.player.lives
         
         self.player.collect_coins(self.gameview)
         assert self.player.lives > initial_lives
         assert self.player.coins_possessed == 0
+
+    def test_player_checkpoint(self) -> None:
+        checkpoint = world_sprites_types.checkpoint.Checkpoint(
+            linked_map="map1.txt",
+            center_x=50,
+            center_y=50
+        )
+        checkpoint.set_respawn(self.player)
+        
+        assert self.player.respawn_map == checkpoint.linked_map
+        assert self.player.respawn_point == (checkpoint.center_x, checkpoint.center_y)
+
+        assert checkpoint.texture == arcade.load_texture(":resources:/images/items/flagGreen2.png")
+
 
     def teardown_method(self) -> None:
         self.window.close()

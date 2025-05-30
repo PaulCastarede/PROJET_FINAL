@@ -136,15 +136,20 @@ def process_switches(config: dict[str, Any], world: World) -> None:
 
 def process_map_lines(map_lines: list[list[str]], world: World, map:str) -> None:
     """Traite les lignes de la carte pour détecter les plateformes mobiles."""
-    for index_y, line in enumerate(map_lines): 
-        for index_x, character in enumerate(line):
-            if character in ("←", "→", "↑", "↓"):
-                platforming.block_detecting.detect_block(
-                    position_in_map=(index_x, index_y),
-                    map_lines=map_lines,
-                    trajectory=platforms.Trajectory(),
-                    world=world,
-                    map_path=map)
+    try : 
+        for index_y, line in enumerate(map_lines): 
+            for index_x, character in enumerate(line):
+                if character in ("←", "→", "↑", "↓"):
+                    platforming.block_detecting.detect_block(
+                        position_in_map=(index_x, index_y),
+                        map_lines=map_lines,
+                        trajectory=platforms.Trajectory(),
+                        world=world,
+                        map_path=map)
+    except IndexError as InvalidMapFormatError:
+        raise InvalidMapFormat(f"Erreur dans les plateformes mobiles")
+    except RuntimeError as InvalidMapFormatError:
+        raise InvalidMapFormat(f"Erreur dans les plateformes mobiles")
 
 def validate_map_switches_gates(map_lines: list[list[str]], config: dict[str, Any], height: int) -> None:
     """Verify that switches and gates defined in the configuration match those in the map."""
@@ -205,7 +210,7 @@ def readmap(world: World, map: str) -> None:
 
             # Vérification de la fin de fichier
             if file.readline().strip() != "---":
-                raise InvalidMapFormat("Le fichier ne se termine pas par : '---'")
+                raise InvalidMapFormat("Le fichier ne se termine pas par : '---'. Vérifiez également que les dimensions sont bien définies, elles peuvent affecter la gestion.")
 
             # Traitement des plateformes mobiles
             process_map_lines(map_lines, world, map)

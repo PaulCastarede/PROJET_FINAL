@@ -115,6 +115,8 @@ def detect_right(position_in_map : tuple[int,int],
     """
     if position_in_map[x_index] < len(map_lines[position_in_map[y_index]]) - 1 and not(map_lines[position_in_map[y_index]][position_in_map[x_index]+1] in ("↓","←","↑" )): 
         detect_block((position_in_map[x_index]+1,position_in_map[y_index]), map_lines, trajectory, world, map_path, force_detection)
+    elif force_detection:
+        raise RuntimeError("Some arrow set is not linked to any platform")
 
 def detect_left(position_in_map : tuple[int,int], 
                 map_lines : list[list[str]], 
@@ -125,7 +127,9 @@ def detect_left(position_in_map : tuple[int,int],
     """Applies detect_block to the left tile"""
     if position_in_map[x_index] > 0 and not(map_lines[position_in_map[y_index]][position_in_map[x_index]-1] in  ("→", "↓" , "↑")): 
         detect_block((position_in_map[x_index]-1,position_in_map[y_index]), map_lines, trajectory, world, map_path, force_detection)
-
+    elif force_detection:
+        raise RuntimeError("Some arrow set is not linked to any platform")
+    
 def detect_down(position_in_map : tuple[int,int], 
                 map_lines : list[list[str]], 
                 trajectory : platforming.platforms.Trajectory, 
@@ -136,7 +140,9 @@ def detect_down(position_in_map : tuple[int,int],
     """
     if position_in_map[y_index] < len(map_lines) - 1 and not(map_lines[position_in_map[y_index]+1][position_in_map[x_index]] in  ("→", "←", "↑")): 
         detect_block((position_in_map[x_index],position_in_map[y_index]+1), map_lines, trajectory, world, map_path, force_detection)
-
+    elif force_detection:
+        raise RuntimeError("Some arrow set is not linked to any platform")
+    
 def detect_up(position_in_map : tuple[int,int], 
               map_lines : list[list[str]], 
               trajectory : platforming.platforms.Trajectory, 
@@ -147,7 +153,8 @@ def detect_up(position_in_map : tuple[int,int],
     """    
     if position_in_map[y_index] > 0 and not(map_lines[position_in_map[y_index]-1][position_in_map[x_index]] in ("→", "←", "↓")):
         detect_block((position_in_map[x_index],position_in_map[y_index]-1), map_lines, trajectory, world, map_path, force_detection)
-
+    elif force_detection:
+        raise RuntimeError("Some arrow set is not linked to any platform")
 
 def detect_surrounding(position_in_map : tuple[int,int], 
                        map_lines : list[list[str]], 
