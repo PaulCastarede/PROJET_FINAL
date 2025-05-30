@@ -175,10 +175,10 @@ def validate_map_switches_gates(map_lines: list[list[str]], config: dict[str, An
                 config_gates.add((action['x'], action['y']))
     
     if config_switches != map_switches:
-        raise InvalidMapFormat(f"Les interrupteurs définis dans la config ({config_switches}) ne correspondent pas à ceux de la map ({map_switches})")
+        raise InvalidMapFormat(f"Les interrupteurs définis dans la config ({config_switches}) ne correspondent pas à ceux de la map ({map_switches}). Vérifiez également que les dimensions sont bien définies, elles peuvent affecter la position des interrupteurs dans la map.")
 
     if config_gates != map_gates:
-        raise InvalidMapFormat(f"Les portails définies dans la config ({config_gates}) ne correspondent pas à ceux de la map ({map_gates})")
+        raise InvalidMapFormat(f"Les portails définies dans la config ({config_gates}) ne correspondent pas à ceux de la map ({map_gates}). Vérifiez également que les dimensions sont bien définies, elles peuvent affecter la position des interrupteurs dans la map.")
 
 def readmap(world: World, map: str) -> None:
     """Loads the .txt map corresponding to the map, and the world created"""

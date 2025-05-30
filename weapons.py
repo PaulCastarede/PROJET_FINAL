@@ -115,11 +115,7 @@ class Arrow(Lethal):
         self.__charge_level *= 1.05
 
     def check_arrow_hits(self, world : create_world.World) -> None:
-        """Actives the switch if the arrow collides with one
-
-        Args:
-            world (create_world.World): The class that contains the sprite lists
-        """
+        """Actives the switch if the arrow collides with one"""
         # Collision avec les interrupteurs
         hit_switches = arcade.check_for_collision_with_list(self, world.switches_list)
         if hit_switches:
