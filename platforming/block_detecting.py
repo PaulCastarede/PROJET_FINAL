@@ -77,12 +77,12 @@ def detect_block(position_in_map : tuple[int,int],
             world.moving_platforms_list.append(crate)
             detect_surrounding(position_in_map , map_lines, trajectory , world, map_path)
         case "£" :
-            lava = Lava_Sprite(":resources:images/tiles/lava.png", scale=0.5, center_x=position_in_map[x_index]*TILE_SIZE, center_y=(len(map_lines)-1-position_in_map[y_index])*TILE_SIZE, platform_trajectory = trajectory, angle = 0 )
+            lava = Lava_Sprite(center_x=position_in_map[x_index]*TILE_SIZE, center_y=(len(map_lines)-1-position_in_map[y_index])*TILE_SIZE, platform_trajectory = trajectory, angle = 0 )
             map_lines[position_in_map[y_index]][position_in_map[x_index]] = " "
             world.no_go_list.append(lava)
             detect_surrounding(position_in_map , map_lines, trajectory , world, map_path)
         case "E" :
-            exit = Exit_Sprite(":resources:/images/tiles/signExit.png",  center_x=position_in_map[x_index]*TILE_SIZE, center_y=(len(map_lines)-1-position_in_map[y_index])*TILE_SIZE, scale = 0.5, platform_trajectory = trajectory, angle = 0)
+            exit = Exit_Sprite(  center_x=position_in_map[x_index]*TILE_SIZE, center_y=(len(map_lines)-1-position_in_map[y_index])*TILE_SIZE,  platform_trajectory = trajectory, angle = 0)
             map_lines[position_in_map[y_index]][position_in_map[x_index]] = " "
             world.exit_list.append(exit)
             world.set_exit = True
