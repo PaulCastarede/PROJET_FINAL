@@ -14,13 +14,18 @@ class Exit_Sprite(platforms.Collidable_Platform):
 
     def exit(self, game_view : gameview.GameView) -> None:
         """Gets the player to the next level when he touches it"""
-        if arcade.check_for_collision_with_list(self, game_view.world.player_sprite_list) :
-            if not(game_view.world.last_level):    
-                #Si ce n'est pas le dernier niveau, lit la prochaine map       
-                create_world.readmap(game_view.world, map = game_view.world.next_map)
-            else:
-                if game_view.music_playback is not None:
-                    #If the music is playing, stop it
-                    arcade.stop_sound(game_view.music_playback)
-                game_view.window.show_view(endgame.EndGame())
-        
+        try : 
+            if arcade.check_for_collision_with_list(self, game_view.world.player_sprite_list) :
+                if not(game_view.world.last_level):    
+                    #Si ce n'est pas le dernier niveau, lit la prochaine map       
+                    create_world.readmap(game_view.world, map = game_view.world.next_map)
+                else:
+                    if game_view.music_playback is not None:
+                        #If the music is playing, stop it
+                        arcade.stop_sound(game_view.music_playback)
+                    game_view.window.show_view(endgame.EndGame())
+
+        except (create_world.InvalidMapFormat, TypeError, ValueError, Exception) as e:
+        # On capture toutes les erreurs possibles lors du chargement de la map
+            print(f"Erreur lors du chargement de la map suivante : {str(e)}")
+            
