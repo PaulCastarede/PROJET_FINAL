@@ -95,7 +95,7 @@ class Arrow(Lethal):
             elif self.change_x < 0:
                 self.angle = math.degrees(math.asin(self.change_y/(math.sqrt((self.change_x)**2 +(self.change_y)**2)))) +225
             #Retire la flèche si elle est en dessous des limites de la map
-            if (self.center_y < -250):
+            if (self.center_y < -300):
                 self.remove_from_sprite_lists()
 
 
@@ -158,7 +158,7 @@ class Arrow(Lethal):
         current_change_y = change_y
         
         # Continuer jusqu'à ce que la flèche sorte de l'écran ou touche le sol
-        while y > 0 and len(points) < 75:  # Limite de sécurité pour éviter une boucle infinie
+        while y > -300 and len(points) < 75:  # Limite de sécurité pour éviter une boucle infinie
             points.append((x, y))
             
             # Appliquer exactement la même physique que dans arrows_movement
