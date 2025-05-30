@@ -72,8 +72,8 @@ En y repensant, j'ai réalisé que la question faisait probablement référence 
 
 Q:Quelle bibliothèque utilisez-vous pour lire les instructions des interrupteurs ? Dites en une ou deux phrases pourquoi vous avez choisi celle-là.
 
-A:
+A:Nous avons décidé d'utiliser Pyyaml pour sa simplicité. Elle détécte automatiquement les dictionnaires dans la partie config (avant --- ), et nous retourne un dictionnaire de listes de dictionnaires (i.e map1.txt).
 
 Q:Comment votre design général évolue-t-il pour tenir compte des interrupteurs et des portails ?
 
-A:
+A:Nous avons rencontré des difficultés pour modéliser les actions, raison pour laquelle nous avons commencés par créer une classe 

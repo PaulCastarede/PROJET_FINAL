@@ -2,11 +2,12 @@ from typing import Any,  cast
 import arcade
 from world_sprites_types.gates import Gate
 import platforming.platforms as platforms
+import create_world
         
 class Switch(platforms.Collidable_Platform):
     """A switch that can be toggled by weapons to control gates.
     
-    The switch has two states (on/off) and can be enabled/disabled.
+    The switch has two states (True/False) and can be enabled/disabled.
     When hit by a weapon, it toggles its state and performs configured actions.
     """
     state: bool
@@ -15,14 +16,7 @@ class Switch(platforms.Collidable_Platform):
     actions_off: list[dict[str, Any]]
     
     def __init__(self, center_x: int, center_y: int, state: bool = False, enabled: bool = True, path_or_texture: str = ":resources:/images/tiles/leverLeft.png", platform_trajectory: platforms.Trajectory = platforms.Trajectory(), scale: float = 0.5, angle: float = 0) -> None:
-        """Initialize a switch.
-        
-        Args:
-            center_x: X coordinate of the switch
-            center_y: Y coordinate of the switch
-            state: Initial state of the switch (True = on, False = off)
-            enabled: Whether the switch can be toggled (True by default)
-        """
+        """Initialize a switch"""
         super().__init__(path_or_texture, scale, center_x, center_y, angle, platform_trajectory)
         self.state = state
         self.enabled = enabled
@@ -35,11 +29,7 @@ class Switch(platforms.Collidable_Platform):
         return ":resources:/images/tiles/leverRight.png" if self.state else ":resources:/images/tiles/leverLeft.png"
 
     def toggle(self, gates_dict: dict[tuple[int, int], Gate]) -> None:
-        """Toggle the switch state and perform associated actions.
-        
-        Args:
-            gates_dict: Dictionary mapping (x,y) coordinates to Gate objects
-        """
+        """Toggle the switch state and perform associated actions. gates_dict: Dictionary mapping (x,y) coordinates to Gate objects"""
         if not self.enabled:
             return None
 
@@ -54,13 +44,14 @@ class Switch(platforms.Collidable_Platform):
                 self.enabled = False
             else:
                 # Only get coordinates for gate-related actions
-                x, y = int(action["x"]), int(action["y"])  # Ensure coordinates are integers
-                # Ajustement des coordonnées y pour corriger le décalage
+                x, y = int(action["x"]), int(action["y"])  #Pour être sur que les coordonnées sont des entiers
                 if (x, y) in gates_dict:
                     if action_type == "open-gate":
                         gates_dict[(x, y)].open()
                     elif action_type == "close-gate":
                         gates_dict[(x, y)].close()
+                else:
+                    raise create_world.InvalidMapFormat(f"Portail non trouvé aux coordonnées ({x}, {y}) pour l'action '{action_type}'.")
    
 
     def update_texture(self) -> None:
@@ -68,11 +59,7 @@ class Switch(platforms.Collidable_Platform):
         self.texture = arcade.load_texture(self.__get_texture_path())
 
     def on_hit_by_weapon(self, gates_dict: dict[tuple[int, int], Gate]) -> None:
-        """Handle being hit by a weapon.
-        
-        Args:
-            gates_dict: Dictionary mapping (x,y) coordinates to Gate objects
-        """
+        """Switch being hit by a weapon."""
         if self.enabled:
             self.toggle(gates_dict)
 

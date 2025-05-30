@@ -93,4 +93,5 @@ class TestWeapons:
         
   
         
-    
+    def teardown_method(self) -> None:
+        self.window.close()

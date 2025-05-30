@@ -3,7 +3,6 @@ import arcade
 from typing import Final
 from player import Player
 import gameview
-import create_world
 from world_sprites_types.coins import Coin
 from monsters import Bat, Slime
 from gameview import GameView

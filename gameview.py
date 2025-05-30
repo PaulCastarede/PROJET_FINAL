@@ -6,7 +6,7 @@ import user_interface
 from typing import Final
 from monsters import *
 import weapons
-from create_world import *
+import create_world
 import pyglet.media
 
 import platforming.platforms as platforms
@@ -19,7 +19,7 @@ class GameView(arcade.View):
     """Main in-game view."""
     
     #DECLARATION DES ATTRIBUTS
-    world : World      # --> create_world.py
+    world : create_world.World      # --> create_world.py
     weapons_list : arcade.SpriteList[weapons.Weapon]
     arrow : weapons.Arrow
     arrow_sprite_list : arcade.SpriteList[weapons.Arrow]
@@ -40,7 +40,7 @@ class GameView(arcade.View):
     
         #Initialisation des Attributs
         self.UI = user_interface.UI()
-        self.world = World()
+        self.world = create_world.World()
         self.camera = arcade.camera.Camera2D()
         self.idle_camera = arcade.camera.Camera2D()
         self.right_pressed = False
@@ -78,7 +78,7 @@ class GameView(arcade.View):
         self.active_weapon = SWORD_INDEX
         #MAP SET UP
         self.profiler.enable()
-        readmap(self.world, "map1.txt")    
+        create_world.readmap(self.world, "map1.txt")    
         self.profiler.disable()
         #WEAPONS SET UP
         self.arrow = weapons.Arrow(center_x=0, center_y=0)

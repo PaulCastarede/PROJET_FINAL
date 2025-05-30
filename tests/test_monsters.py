@@ -5,7 +5,7 @@ import pytest
 
 from monsters import Bat, Slime, Monster
 from weapons import Arrow, Weapon, Sword
-from gameview import GameView
+from gameview import GameView as GameView
 import create_world
 from world_sprites_types.coins import Coin
 
@@ -112,4 +112,6 @@ class TestMonsters:
         sword.kills_monsters(self.gameview.world.monsters_list, self.gameview.world.coins_list)
         
         assert len(self.gameview.world.monsters_list) < initial_monsters
-
+    
+    def teardown_method(self) -> None:
+        self.window.close()

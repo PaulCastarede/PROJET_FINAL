@@ -106,7 +106,7 @@ def validate_map_dimensions(map_lines: list[list[str]], width: int, height: int)
         raise InvalidMapFormat(f"La hauteur de la carte ({len(map_lines)}) ne correspond pas à la configuration ({height})")
     for i, line in enumerate(map_lines):
         if len(line) > width:
-            raise ValueError(f"Ligne {i+1} dépasse la largeur configurée ({width})")
+            raise InvalidMapFormat(f"Ligne {i+1} dépasse la largeur configurée ({width})")
 
 def process_gates(config: dict[str, Any], world: World) -> None:
     """Process gates defined in the configuration"""
@@ -190,131 +190,134 @@ def readmap(world: World, map: str) -> None:
             world.next_map = config.get("next-map", "")
             world.last_level = "next-map" not in config
         except (KeyError, ValueError) as e:
-            raise ValueError(f"Erreur dans la configuration YAML : {e}")
+            raise InvalidMapFormat(f"Erreur dans la configuration YAML : {e}")
+        try:
+            world.clear()
 
-        world.clear()
+            # Traitement des éléments configurés
+            process_gates(config, world)
+            process_switches(config, world)
 
-        # Traitement des éléments configurés
-        process_gates(config, world)
-        process_switches(config, world)
+            # Lecture de la carte
+            map_lines = [list(file.readline().rstrip('\n')) for _ in range(world.map_height)]
+            validate_map_dimensions(map_lines, world.map_width, world.map_height)
+            validate_map_switches_gates(map_lines, config, world.map_height)
 
-        # Lecture de la carte
-        map_lines = [list(file.readline().rstrip('\n')) for _ in range(world.map_height)]
-        validate_map_dimensions(map_lines, world.map_width, world.map_height)
-        validate_map_switches_gates(map_lines, config, world.map_height)
+            # Vérification de la fin de fichier
+            if file.readline().strip() != "---":
+                raise InvalidMapFormat("Le fichier ne se termine pas par : '---'")
 
-        # Vérification de la fin de fichier
-        if file.readline().strip() != "---":
-            raise ValueError("Le fichier ne se termine pas par : '---'")
+            # Traitement des plateformes mobiles
+            process_map_lines(map_lines, world, map)
 
-        # Traitement des plateformes mobiles
-        process_map_lines(map_lines, world, map)
+            # Définition des limites des plateformes
+            platforms_list : list[arcade.SpriteSequence[platforms.Platform]] = [world.moving_platforms_list, world.exit_list, world.no_go_list, world.checkpoint_list, world.switches_list]
+            for platform in [p for lst  in  platforms_list
+                            for p in lst if isinstance(p, platforms.Platform)]:
+                platform.define_boundaries()
 
-        # Définition des limites des plateformes
-        platforms_list : list[arcade.SpriteSequence[platforms.Platform]] = [world.moving_platforms_list, world.exit_list, world.no_go_list, world.checkpoint_list, world.switches_list]
-        for platform in [p for lst  in  platforms_list
-                        for p in lst if isinstance(p, platforms.Platform)]:
-            platform.define_boundaries()
+            for index_y, line in enumerate(map_lines):
+                for index_x, character in enumerate(line):
+                    row_number = len(map_lines) - 1 - index_y
+                    x = TILE_SIZE * index_x
+                    y = TILE_SIZE * row_number
 
-        for index_y, line in enumerate(map_lines):
-            for index_x, character in enumerate(line):
-                row_number = len(map_lines) - 1 - index_y
-                x = TILE_SIZE * index_x
-                y = TILE_SIZE * row_number
+                    match character:
+                        case "=":
+                            world.wall_list.append(arcade.Sprite(
+                                ":resources:images/tiles/grassMid.png",
+                                scale=0.5,
+                                center_x=x,
+                                center_y=y
+                            ))
+                        case "-":
+                            world.wall_list.append(arcade.Sprite(
+                                ":resources:images/tiles/grassHalf_mid.png",
+                                scale=0.5,
+                                center_x=x,
+                                center_y=y
+                            ))
+                        case "x":
+                            world.wall_list.append(arcade.Sprite(
+                                ":resources:images/tiles/boxCrate_double.png",
+                                scale=0.5,
+                                center_x=x,
+                                center_y=y
+                            ))
+                        case "*":
+                            world.coins_list.append(Coin(center_x=x, center_y=y))
+                        case "o":
+                            world.monsters_list.append(monsters.Slime(
+                                scale=0.5,
+                                center_x=x,
+                                center_y=y,
+                                wall_list=world.wall_list
+                            ))
+                        case "v":
+                            world.monsters_list.append(monsters.Bat(center_x=x, center_y=y))
+                        case "£":
+                            world.no_go_list.append(Lava_Sprite(
+                                center_x=x,
+                                center_y=y
+                            ))
+                        case "S":
+                            if world.player_set_spawn:
+                                raise InvalidMapFormat("Le joueur ne peut avoir qu'un seul spawn")
+                            if not(world.player_sprite_list):
+                                world.player_sprite = player.Player(center_x=x, center_y=y, respawn_map = map)
+                                world.player_sprite_list.append(world.player_sprite)
+                            else :
+                                world.player_sprite_list[0].center_x = x
+                                world.player_sprite_list[0].center_y = y
 
-                match character:
-                    case "=":
-                        world.wall_list.append(arcade.Sprite(
-                            ":resources:images/tiles/grassMid.png",
-                            scale=0.5,
-                            center_x=x,
-                            center_y=y
-                        ))
-                    case "-":
-                        world.wall_list.append(arcade.Sprite(
-                            ":resources:images/tiles/grassHalf_mid.png",
-                            scale=0.5,
-                            center_x=x,
-                            center_y=y
-                        ))
-                    case "x":
-                        world.wall_list.append(arcade.Sprite(
-                            ":resources:images/tiles/boxCrate_double.png",
-                            scale=0.5,
-                            center_x=x,
-                            center_y=y
-                        ))
-                    case "*":
-                        world.coins_list.append(Coin(center_x=x, center_y=y))
-                    case "o":
-                        world.monsters_list.append(monsters.Slime(
-                            scale=0.5,
-                            center_x=x,
-                            center_y=y,
-                            wall_list=world.wall_list
-                        ))
-                    case "v":
-                        world.monsters_list.append(monsters.Bat(center_x=x, center_y=y))
-                    case "£":
-                        world.no_go_list.append(Lava_Sprite(
-                            center_x=x,
-                            center_y=y
-                        ))
-                    case "S":
-                        if world.player_set_spawn:
-                            raise RuntimeError("Le joueur ne peut avoir qu'un seul spawn")
-                        if not(world.player_sprite_list):
-                            world.player_sprite = player.Player(center_x=x, center_y=y, respawn_map = map)
-                            world.player_sprite_list.append(world.player_sprite)
-                        else :
-                            world.player_sprite_list[0].center_x = x
-                            world.player_sprite_list[0].center_y = y
+                            world.physics_engine = arcade.PhysicsEnginePlatformer(
+                                    world.player_sprite,
+                                    walls=world.wall_list,
+                                    platforms=world.moving_platforms_list,
+                                    gravity_constant=world.player_sprite.PLAYER_GRAVITY
+                                )
+                            world.player_set_spawn = True
+                        case "E":
+                            world.exit_list.append(Exit_Sprite(
+                                center_x=x,
+                                center_y=y
+                            ))
+                            world.set_exit = True
+                        case "^":
+                            # Ne rien faire ici - les interrupteurs sont gérés par la configuration YAML
+                            pass
+                        case "|":
+                            # Gates in the map are always closed by default
+                            gate = Gate(center_x=x, center_y=y, state=False)
+                            gate.set_wall_list(world.wall_list)
+                            world.gates_list.append(gate)
+                            # Store in gates_dict for switch actions
+                            map_x = int(x / TILE_SIZE)
+                            map_y = int(y / TILE_SIZE)
+                            world.gates_dict[(map_x, map_y)] = gate
+                        case "C":
+                            world.checkpoint_list.append(Checkpoint(center_x=x,center_y=y-6, linked_map = map))
 
-                        world.physics_engine = arcade.PhysicsEnginePlatformer(
-                                world.player_sprite,
-                                walls=world.wall_list,
-                                platforms=world.moving_platforms_list,
-                                gravity_constant=world.player_sprite.PLAYER_GRAVITY
-                            )
-                        world.player_set_spawn = True
-                    case "E":
-                        world.exit_list.append(Exit_Sprite(
-                            center_x=x,
-                            center_y=y
-                        ))
-                        world.set_exit = True
-                    case "^":
-                        # Ne rien faire ici - les interrupteurs sont gérés par la configuration YAML
-                        pass
-                    case "|":
-                        # Gates in the map are always closed by default
-                        gate = Gate(center_x=x, center_y=y, state=False)
-                        gate.set_wall_list(world.wall_list)
-                        world.gates_list.append(gate)
-                        # Store in gates_dict for switch actions
-                        map_x = int(x / TILE_SIZE)
-                        map_y = int(y / TILE_SIZE)
-                        world.gates_dict[(map_x, map_y)] = gate
-                    case "C":
-                        world.checkpoint_list.append(Checkpoint(center_x=x,center_y=y-6, linked_map = map))
-
-        # Validation finale
-        if not world.player_set_spawn:
-            raise InvalidMapFormat(f"Un endroit où le joueur 'spawn' doit être spécifié")
-        if not world.set_exit:
-            raise InvalidMapFormat(f"La fin du niveau doit être spécifiée")
-        
-    for switch in world.switches_list:
-        if switch.state:  # Si l'interrupteur est activé
-            for action in switch.actions_on:
-                if action["action"] == "open-gate" and (action["x"], action["y"]) in world.gates_dict:
-                    world.gates_dict[(action["x"], action["y"])].open()
-                if action["action"] == "close-gate" and (action["x"], action["y"]) in world.gates_dict:
-                    world.gates_dict[(action["x"], action["y"])].close()
-        else:  # Si l'interrupteur est désactivé
-            for action in switch.actions_off:
-                if action["action"] == "open-gate" and (action["x"], action["y"]) in world.gates_dict:
-                    world.gates_dict[(action["x"], action["y"])].open()
-                elif action["action"] == "close-gate" and (action["x"], action["y"]) in world.gates_dict:
-                    world.gates_dict[(action["x"], action["y"])].close()
+            # Validation finale
+            if not world.player_set_spawn:
+                raise InvalidMapFormat(f"Un endroit où le joueur 'spawn' doit être spécifié")
+            if not world.set_exit:
+                raise InvalidMapFormat(f"La fin du niveau doit être spécifiée")
+            
+            for switch in world.switches_list:
+                if switch.state:  # Si l'interrupteur est activé
+                    for action in switch.actions_on:
+                        if action["action"] == "open-gate" and (action["x"], action["y"]) in world.gates_dict:
+                            world.gates_dict[(action["x"], action["y"])].open()
+                        if action["action"] == "close-gate" and (action["x"], action["y"]) in world.gates_dict:
+                            world.gates_dict[(action["x"], action["y"])].close()
+                else:  # Si l'interrupteur est désactivé
+                    for action in switch.actions_off:
+                        if action["action"] == "open-gate" and (action["x"], action["y"]) in world.gates_dict:
+                            world.gates_dict[(action["x"], action["y"])].open()
+                        elif action["action"] == "close-gate" and (action["x"], action["y"]) in world.gates_dict:
+                            world.gates_dict[(action["x"], action["y"])].close()
+                            
+        except InvalidMapFormat as e:
+            raise InvalidMapFormat(f"{e}")
         
