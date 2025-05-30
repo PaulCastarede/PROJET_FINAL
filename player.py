@@ -5,34 +5,33 @@ import gameview
 import create_world
 import alt_game_views.gameover as gameover
 
-PLAYER_MOVEMENT_SPEED = 5
-"""Lateral speed of the player, in pixels per frame."""
-
-PLAYER_GRAVITY = 1.7
-"""Gravity applied to the player, in pixels per frame²."""
-
-PLAYER_JUMP_SPEED = 25
-"""Instant vertical speed for jumping, in pixels per frame."""
-
 INITIAL_PLAYER_LIVES = 5
 """How many lives the player has when (s)he starts the game"""
 
 
 class Player(arcade.Sprite):   
+    PLAYER_MOVEMENT_SPEED : Final[float] = 5
+    """Lateral speed of the player, in pixels per frame."""
+
+    PLAYER_GRAVITY : Final[float] = 1.7
+    """Gravity applied to the player, in pixels per frame²."""
+
+    PLAYER_JUMP_SPEED : Final[float] = 25
+    """Instant vertical speed for jumping, in pixels per frame."""
+
+
     player_sprite : arcade.Sprite
     coins_possessed : int
     lives : int
     respawn_point : tuple[float, float]
     respawn_map : str
-    death_sound : Final[arcade.Sound]
-    jump_sound : Final[arcade.Sound]
+    death_sound : Final[arcade.Sound] = arcade.load_sound(":resources:sounds/gameover1.wav")
+    jump_sound : Final[arcade.Sound] = arcade.load_sound(":resources:sounds/jump1.wav")
 
 
     def __init__(self, respawn_map: str, path_or_texture : str = ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png", center_x : float = 0, center_y : float = 0, scale : float = 0.5) -> None:
         super().__init__(path_or_texture,scale, center_x, center_y )
         self.death = False
-        self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
-        self.death_sound = arcade.load_sound(":resources:sounds/gameover1.wav")
         self.lives = INITIAL_PLAYER_LIVES
         self.coins_possessed = 0
         self.respawn_point = (self.center_x,self.center_y)
@@ -74,14 +73,14 @@ class Player(arcade.Sprite):
         """
         self.change_x = 0
         if gameview.right_pressed:
-            self.change_x += PLAYER_MOVEMENT_SPEED       #Joueur avance si -> pressed
+            self.change_x += self.PLAYER_MOVEMENT_SPEED       #Joueur avance si -> pressed
         if gameview.left_pressed:                 
-            self.change_x -= PLAYER_MOVEMENT_SPEED       #Joueur recule si <- pressed
+            self.change_x -= self.PLAYER_MOVEMENT_SPEED       #Joueur recule si <- pressed
 
     def jump(self) -> None:
         """Jump by giving an initial vertical speed. Called when user presses "Up Arrow"
         """
-        self.change_y = PLAYER_JUMP_SPEED
+        self.change_y = self.PLAYER_JUMP_SPEED
         arcade.play_sound(self.jump_sound)
 
     def collect_coins(self, gameview : gameview.GameView) -> None:

@@ -1,10 +1,9 @@
 # Journal
 
 A faire :
-Ecrire des tests !!
-Refactorer
-Corriger erreurs Mypy
-Pouvoir lancer 
+Finir design + benchmarks + autre docs admin.
+Finir tests
+Relire et ultimes refacto
 ## Suivi
 
 ### Semaine 2

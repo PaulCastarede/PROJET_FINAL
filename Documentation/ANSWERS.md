@@ -25,17 +25,20 @@ Q:Comment testez-vous l'épée ? Comment testez-vous que son orientation est imp
 A:
 
 Q: Comment transférez-vous le score de la joueuse d'un niveau à l'autre ? Où le remettez-vous à zéro ?
-A: Le score est (ré)initialisé au niveau de la fonction set-up, qui est appelée uniquement au début du programme, lors de la mort ou lorsque l'on appuie sur la touche échap. Cela correspond exactement aux moments où l'on veut reset le score. En effet, on passe d'une map à une autre sans utiliser la fonction set up mais uniquement la fonction readmap.
+A: Le score est un attribut de la joueuse. De plus, la classe World qui correspond au niveau a une méthode clear() qui admet un setting clear_player qui peut etre True ou False. Lors du passage d'un niveau à l'autre, ce setting est False, et la joueuse reste avec ses attributs. En revanche, lorsque l'on veut "hard reset" pour un gameover ou lorsque l'on appuie sur 'esc' par exemple, le setting "clear_player" est True, supprimant la joueuse en meme temps que son score.
 
 Q: Avez-vous du code dupliqué entre les cas où la joueuse perd parce qu'elle a touché un ou monstre ou de la lave ?
-A: On a implémenté un "Game_Over" qui s'active dès que le joueur touche un élément léthal
-("if not(not collided_no_go) or not(not collided_slimes)  :    self.death = True"). Le booléen "death", lorsqu'il devient True, lance une boucle conditionnelle qui, entre autres, appelle la fonctions set_up, qui réinitialise le score (et la première map)
+A: La classe Player a une méthode dies() implémentée comme suit :
+if no_go_touched or monsters_touched or self.center_y < -64:
+            self.lives -= 1
+            ...
+ou no_go_touched et monsters_touched sont les éléments en collision avec le joueur. Il y a du code dupliqué dans le sens où on applique deux fois arcade.check_for_collision pour obtenir les deux listes no_go_touched et monsters_touched, mais la défaite en elle-même est gérée au même endroit.
 
 Q: Comment modélisez-vous la "next-map" ? Où la stockez-vous, et comment la traitez-vous quand la joueuse atteint le point E 
-A: La next-map est simplement une valeur string, correspondant au nom du fichier .txt, qui est lue de la même façon que les ints de heigth et width dans la fonction readmap, et stockée dans le str "Next_map". Lorsque la joueuse atteint le point E, on appelle alors la fonction readmap, mais en prenant en argument le str "Next_map" (on a pour cela changé les paramètres de la fonction readmap et adapté son code pour que le chemin d'accès du fichier corresponde au nouveau paramètre map).
+A: La next-map est simplement une valeur string, correspondant au nom du fichier .txt, qui est lue de la même façon que les ints de heigth et width dans la fonction readmap, et stockée dans le str "Next-map". Lorsque la joueuse atteint le point E, on appelle alors la fonction readmap, mais en prenant en argument le str "Next_map" (on a pour cela changé les paramètres de la fonction readmap et adapté son code pour que le chemin d'accès du fichier corresponde au nouveau paramètre map).
 
 Q : Que se passe-t-il si la joueuse atteint le E mais la carte n'a pas de next-map ?
-A : Si la carte n'a pas de next map, on considère que le niveau est le dernier niveau et une variable bool "last_level", True par défaut, reste True. Ainsi, si le joueur atteint le E alors que last_level a pour valeur True, le booléen "Victory" devient true (ce qui fait apparaître un message à l'écran, et peut être à l'avenir une musique spécifique).
+A : Si la carte n'a pas de next map, on considère que le niveau est le dernier niveau et une variable bool "last_level", True par défaut, reste True. Ainsi, si le joueur atteint le E alors que last_level a pour valeur True, le booléen "Victory" devient true (ce qui fait apparaître un message à l'écran, et peut être à l'avenir une musique spécifique) (update : voir alt_game_views.endgame).
 
 
 Semaine 5 :
@@ -64,6 +67,8 @@ Q:Sur quelle structure travaille cet algorithme ? Quels sont les avantages et in
 
 A: Cet algorithme travaille sur la liste de liste (ou "matrice") qui correspond à la map en y enlevant les caractères considérés comme faisant partie d'un bloc de plateformes. Il agit également sur les listes moving_platforms_list et d'autres SpriteLists de World en y ajoutant au fur et à mesure les sprites considérés comme des plateformes avant d'effacer le caractère associé à la map.
 L'avantage d'agir directement sur la matrice de caractères qui représente la map en effacant les caractères au fur et à mesure est de garantir qu'on ajoute pas deux fois un même sprite a la liste de plateformes, mais aussi que l'algorithme ne cycle pas, puisque detect_block ne fait rien lorsqu'il rencontre un espace.  
+---
+En y repensant, j'ai réalisé que la question faisait probablement référence à l'utilisation d'un set pour s'assurer que l'on n'ajoute pas plusieurs fois la meme plateforme dans un bloc, ou encore a des dict pour associer un sprite de plateforme au bloc correspondant. Notre algorithme n'utilise aucun de ces deux éléments, et sa structure elle-même aurait rendu difficile l'utilisation d'une de ces solutions. Peut-être qu'un autre algorithme les utilisant aurait été plus satisfaisant et élégant, mais j'estime celui que l'on a choisi tout de même convenable, son principal défaut étant peut-être le nombre d'arguments que la fonction detect_block utilise.
 
 Q:Quelle bibliothèque utilisez-vous pour lire les instructions des interrupteurs ? Dites en une ou deux phrases pourquoi vous avez choisi celle-là.
 

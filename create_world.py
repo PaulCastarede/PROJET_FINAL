@@ -17,8 +17,7 @@ from world_sprites_types.lava import Lava_Sprite
 
 from typing import cast, Any
 
-TILE_SIZE = 64.0
-"""64 pixels par element"""
+from platforming.platforms import TILE_SIZE 
 
 class InvalidMapFormat(Exception):
     """Exception raised when the map format is invalid"""
@@ -275,7 +274,7 @@ def readmap(world: World, map: str) -> None:
                                 world.player_sprite,
                                 walls=world.wall_list,
                                 platforms=world.moving_platforms_list,
-                                gravity_constant=player.PLAYER_GRAVITY
+                                gravity_constant=world.player_sprite.PLAYER_GRAVITY
                             )
                         world.player_set_spawn = True
                     case "E":
