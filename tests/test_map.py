@@ -43,6 +43,3 @@ class TestMapValidation:
     def test_valid_map(self) -> None:
         create_world.readmap(self.world, "map1.txt")
         assert True
-
-    def teardown_method(self) -> None:
-        self.window.close()

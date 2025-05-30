@@ -116,5 +116,3 @@ class TestSwitchesGates:
         assert gate in wall_list
         assert gate.visible
 
-    def teardown_method(self) -> None:
-        self.window.close()

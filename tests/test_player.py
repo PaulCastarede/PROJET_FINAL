@@ -125,5 +125,3 @@ class TestPlayer:
         self.player.respawn(self.gameview)
         assert (self.player.center_x, self.player.center_y) == (checkpoint.center_x, checkpoint.center_y)
 
-        def teardown_method(self) -> None:
-            self.window.close()

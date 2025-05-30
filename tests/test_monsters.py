@@ -119,6 +119,3 @@ class TestMonsters:
         assert len(self.gameview.world.monsters_list) < initial_monsters
         assert len(self.gameview.world.monsters_list) == 0
 
-    
-    def teardown_method(self) -> None:
-        self.window.close()

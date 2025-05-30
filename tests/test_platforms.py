@@ -41,8 +41,3 @@ class TestPlatformsValidation:
                 assert platform.center_y >= platform.boundary_bottom
             else:
                 assert False
-    def teardown_method(self) -> None:
-        self.window.close()
-
-        
-    

@@ -4,6 +4,7 @@ Q: Comment avez-vous conçu la lecture du fichier ? Comment l'avez-vous structur
 A: On parcourt chaque caractère de chaque ligne du txt à partir des trois tirets '---'.
 Dès lors qu'un caractère consacré est rencontré, on ajoute le sprite correspondant à la sprite_list associée, à la position de la colonne et de la ligne multipliée par un facteur pour qu'elle corresponde aux coordonnées in game adéquates.
 ...
+Depuis l'utilisation de la bibliotheque YAML, on lit décompose le fichier en plusieurs partie : tout d'abord on lit jusqu'à la premiere "---" que YAML détecte automatiquement le type, puis on décompose les lignes suivante sous formes de listes de listes de str, en effectuant des verifications pour les dimensions, interrupteurs et portails
 
 Q: Comment avez-vous adapté vos tests existants au fait que la carte ne soit plus la même qu'au départ ? Est-ce que vos tests résisteront à d'autres changements dans le futur ? Si oui, pourquoi ? Si non, que pensez-vous faire plus tard ?
 
@@ -19,10 +20,10 @@ A: J'ai défini un sprite invisibile 'front' qui se situe à chaque instant just
 Semaine 4 :
 
 Q: Quelles formules utilisez-vous exactement pour l'épée ? Comment passez-vous des coordonnées écran aux coordonnées monde ?
-A: 
+A: Pour calculer l'angle entre le joueur et la position de la souris dans le monde, on utilise : math.atan2(self.world_y - self.world.player_sprite.center_y, self.world_x - self.world.player_sprite.center_x) , car dans un triangle rectangle tan = coté opposé / côté adjacent , donc en utilisant la fonction arctan de cette expression nous avons l'angle formé par le triangle.
 
 Q:Comment testez-vous l'épée ? Comment testez-vous que son orientation est importante pour déterminer si elle touche un monstre ?
-A:
+A:On teste l'épée dans le fichier test_monsters.py, et durant la séance d'implémentation , nous avons implémenté une fonctionnalité qui change le côté de maintien de l'épée en fonction d'un certain plus à gauche ou à droite. En réalisant cela, nous avons remarqué que l'orientation n'avait pas un certain impact, mais plutôt la position.
 
 Q: Comment transférez-vous le score de la joueuse d'un niveau à l'autre ? Où le remettez-vous à zéro ?
 A: Le score est un attribut de la joueuse. De plus, la classe World qui correspond au niveau a une méthode clear() qui admet un setting clear_player qui peut etre True ou False. Lors du passage d'un niveau à l'autre, ce setting est False, et la joueuse reste avec ses attributs. En revanche, lorsque l'on veut "hard reset" pour un gameover ou lorsque l'on appuie sur 'esc' par exemple, le setting "clear_player" est True, supprimant la joueuse en meme temps que son score.
@@ -53,6 +54,7 @@ Pour que le mouvement de la chauve souris soit erratique, j'ai fait en sorte que
 
 
 Q: Comment avez-vous structuré votre programme pour que les flèches puissent poursuivre leur vol ?
+
 
 Q: Comment gérez-vous le fait que vous avez maintenant deux types de monstres, et deux types d'armes ? Comment faites-vous pour ne pas dupliquer du code entre ceux-ci ?
 A: Pour les monstres, on a créé une classe abstraite monstre et deux sous-classes 'Slime' et 'Bat' qui héritent de cette classe abstraite. On a ainsi pu mettre les blobs et les chauve-souris dans une même liste 'monsters_list'. Les propriétés qui concernent ces deux monstres s'appliquent sur tous les éléments de la liste monsters, et chaque sous classe de type de monstre définit les méthodes qui sont propres au monstre. Par exemple, les slimes et les chauve souris héritent d'une même classe abstraite 'movement', mais qui est ensuite spécifiée différemment pour chaque type de monstre. Pour les armes, le procédé était à peu près similaire mais la classe Weapon dont elles héritent n'est pas abstraite et définit le gros des méthodes que les armes utilisent, ayant plus de similitudes dans leur comportement (la seule différence intrinsèque étant que l'épée tue les monstres en collision)

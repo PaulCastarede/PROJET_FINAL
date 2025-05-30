@@ -90,8 +90,4 @@ class TestWeapons:
         arrow.arrows_movement()
         assert arrow not in arrow_list
 
-        
-  
-        
-    def teardown_method(self) -> None:
-        self.window.close()
+ 
