@@ -302,7 +302,7 @@ def readmap(world: World, map: str) -> None:
         if not world.player_set_spawn:
             raise InvalidMapFormat(f"Un endroit où le joueur 'spawn' doit être spécifié")
         if not world.set_exit:
-            raise RuntimeError(f"La fin du niveau doit être spécifiée")
+            raise InvalidMapFormat(f"La fin du niveau doit être spécifiée")
         
     for switch in world.switches_list:
         if switch.state:  # Si l'interrupteur est activé

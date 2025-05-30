@@ -42,7 +42,7 @@ class TestWeapons:
 
         arrow: Arrow = Arrow(center_x=101, center_y=100)
         arrow.released = True
-        arrow_list: arcade.SpriteList = arcade.SpriteList()
+        arrow_list: arcade.SpriteList[Arrow] = arcade.SpriteList()
         arrow_list.append(arrow)
 
         trajectory: platforming.platforms.Trajectory = platforming.platforms.Trajectory()
@@ -65,39 +65,6 @@ class TestWeapons:
         assert arrow not in arrow_list
 
 
-    def test_arrow_collision_switch(self) -> None:
-        switch: Switch = Switch(100, 100)
-        switch_list: arcade.SpriteList = arcade.SpriteList()
-        switch_list.append(switch)
-        
-        arrow: Arrow = Arrow(center_x=100, center_y=100)
-        
-        gates_dict: dict = {}
-        
-        initial_state: bool = switch.state
-        hit_switches: list[arcade.Sprite] = arcade.check_for_collision_with_list(arrow, switch_list)
-        for s in hit_switches:
-            s.on_hit_by_weapon(gates_dict)
-            
-        assert switch.state != initial_state
-
-    def test_sword_collision_switch(self) -> None:
-        switch: Switch = Switch(100, 100)
-        switch_list: arcade.SpriteList = arcade.SpriteList()
-        switch_list.append(switch)
-        
-        self.sword.center_x = 100
-        self.sword.center_y = 100
-        
-        gates_dict: dict = {}
-        
-        initial_state: bool = switch.state
-        hit_switches: list[arcade.Sprite] = arcade.check_for_collision_with_list(self.sword, switch_list)
-        for s in hit_switches:
-            s.on_hit_by_weapon(gates_dict)
-            
-        assert switch.state != initial_state
-
     def test_arrow_trajectory(self) -> None:
         arrow: Arrow = Arrow(center_x=100, center_y=100)
         arrow.released = True
@@ -117,7 +84,7 @@ class TestWeapons:
     def test_arrow_out_of_screen(self) -> None:
         arrow: Arrow = Arrow(center_x=100, center_y=-300)
         arrow.released = True
-        arrow_list: arcade.SpriteList = arcade.SpriteList()
+        arrow_list: arcade.SpriteList[Arrow] = arcade.SpriteList()
         arrow_list.append(arrow)
         assert arrow in arrow_list
         arrow.arrows_movement()

@@ -89,8 +89,11 @@ class GameView(arcade.View):
         #UI SET UP
         self.UI = user_interface.UI()
         #MUSIC SET UP
-        self.music_playback = self.ambient_music.play( volume = 0.3, loop = True)
-        self.music_playback.seek(0)
+        if self.ambient_music is not None:
+            self.music_playback = self.ambient_music.play(volume=0.3, loop=True)
+            self.music_playback.seek(0)
+        else:
+            self.music_playback = None
 
   
 
