@@ -16,12 +16,8 @@ class TestPlayer:
 
     def setup_method(self) -> None:
         self.window = arcade.Window(1280, 720, "Test Window")
-        original_ambient_music = GameView.ambient_music
-        self.gameview = GameView()
-        if self.gameview.music_playback:
-            arcade.stop_sound(self.gameview.music_playback)
-            self.gameview.music_playback = None # type: ignore
-        # Nous avons été obligés de faire cela car autrement le son ne peut pas être arrêté    
+        self.gameview = GameView()   
+        self.gameview.music_playback.delete() 
         self.player = Player(respawn_map="map1.txt", center_x=100, center_y=100)
         self.gameview.world.player_sprite = self.player
         self.gameview.world.player_sprite_list.append(self.player)

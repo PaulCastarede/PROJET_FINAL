@@ -25,6 +25,7 @@ class TestWeapons:
         self.sword = Sword("Assets/kenney-voxel-items-png/sword_iron.png", 0.5, self.player.center_x, self.player.center_y, 0)
         
     def test_arrow_gravity(self) -> None:
+        """tests if arrows are indeed going down"""
         arrow: Arrow = Arrow(center_x=100, center_y=100)
         initial_y: float = arrow.center_y
         arrow.released = True
@@ -32,14 +33,15 @@ class TestWeapons:
         assert arrow.center_y != initial_y
         
     def test_arrow_charge_level(self) -> None:
+        """tests if arrows are charging"""
         arrow: Arrow = Arrow()
         initial_speed: float = arrow.speed
         arrow.charge_level_increases_speed()
         assert arrow.speed > initial_speed
             
     def test_arrow_collision_wall_platform(self) -> None:
+        """tests"""
         world: create_world.World = create_world.World()
-
         arrow: Arrow = Arrow(center_x=101, center_y=100)
         arrow.released = True
         arrow_list: arcade.SpriteList[Arrow] = arcade.SpriteList()

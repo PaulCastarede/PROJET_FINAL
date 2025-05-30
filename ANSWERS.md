@@ -3,10 +3,12 @@ Semaine 3 :
 Q: Comment avez-vous conçu la lecture du fichier ? Comment l'avez-vous structurée de sorte à pouvoir la tester de manière efficace ?
 A: On parcourt chaque caractère de chaque ligne du txt à partir des trois tirets '---'.
 Dès lors qu'un caractère consacré est rencontré, on ajoute le sprite correspondant à la sprite_list associée, à la position de la colonne et de la ligne multipliée par un facteur pour qu'elle corresponde aux coordonnées in game adéquates.
+Pour la tester de manière efficace, on en a fait une fonction qui prend n'importe quelle str en argument, et lit le txt correspondant s'il se trouve dans le dossier map. On peut ainsi mettre nos maps tests dans le dossier maps.
 ...
 Depuis l'utilisation de la bibliotheque YAML, on lit décompose le fichier en plusieurs partie : tout d'abord on lit jusqu'à la premiere "---" que YAML détecte automatiquement le type, puis on décompose les lignes suivante sous formes de listes de listes de str, en effectuant des verifications pour les dimensions, interrupteurs et portails
 
 Q: Comment avez-vous adapté vos tests existants au fait que la carte ne soit plus la même qu'au départ ? Est-ce que vos tests résisteront à d'autres changements dans le futur ? Si oui, pourquoi ? Si non, que pensez-vous faire plus tard ?
+Nous n'avions pas encore écrit de tests au moment de cetet extension dans notre jeu :(. Nos tests résisteront probablement à d'autres changements dans le future puisqu'ils sont définis de manière suffisament large et en utilisant des maps spécifiques appropriées qui devraient résister aux modifications futures.
 
 Q: Le code qui gère la lave ressemble-t-il plus à celui de l'herbe, des pièces, ou des blobs ? Expliquez votre réponse.
 A: Le code qui gère la lave s'inspire de celui de l'herbe et de celui des blobs. Il ressemble à l'herbe car on l'a défini comme un sprite qui devait rester toujours à la même position, comme un élément du terrain (avec use_spatial_hash=True), mais partage la même condition que le slime de tuer la joueuse si elle entre en collision avec. On a utilisé la boucle conditionnelle 
@@ -45,6 +47,12 @@ A : Si la carte n'a pas de next map, on considère que le niveau est le dernier 
 Semaine 5 :
 
 Q: Quelles formules utilisez-vous exactement pour l'arc et les flèches ?
+Pour l'arc, on utilise les mêmes formules que le déplacement de l'épée, puisqu'ils ont en réalité le même déplacement. Pour les flèches, avant d'être relachées, elles suivent la même formule pour l'angle que les armes à un angle constant de décalage près, mais leur position est calculée en fonction de la position de l'arc, et non plus du joueur comme c'était le cas pour l'épée et l'arc. Ensuite, une fois relachée, la flèche part avec une vitesse initiale verticale speed * cos(angle) et une vitesse horizontale initiale speed * cos(angle) (ce qui correspondrait à la réalité physique en appliquant les projections sur des axes x et y). Ensuite, la vitesse de la flèche décroit à chaque tick d'une valeur égale à une constante de gravité (qui lui est propre). On reconnaît la la 2ème loi de Newton avec la seule force de gravité : g = a.
+Pour l'orientation de la flèche, on a trouvé (par un calcul trigonométrique qu'on vous épargnera bien que pas si compliqué) 
+angle = math.degrees(math.acos(self.change_y/(math.sqrt((self.change_x)**2 +(self.change_y)**2)))) -45 
+lorsque la flèche va vers la droite, 
+self.angle = math.degrees(math.asin(self.change_y/(math.sqrt((self.change_x)**2 +(self.change_y)**2)))) +225
+lorsque la flèche va vers la gauche.
 
 
 Q : Quelles formules utilisez-vous exactement pour le déplacement des chauves-souris (champ d'action, changements de direction, etc.) ?
@@ -54,6 +62,7 @@ Pour que le mouvement de la chauve souris soit erratique, j'ai fait en sorte que
 
 
 Q: Comment avez-vous structuré votre programme pour que les flèches puissent poursuivre leur vol ?
+A: Dès que le boutton droit de la souris est relâché, nous ajoutons l'arrow à une liste arrow_sprite_list. J'ai défini une méthode arrows_movement() de Arrow appelée à chaque on_update() sur tous les éléments de arrow_sprite_list, qui gère la gestion du déplacement d'une flèche relâchée (donc toutes celles dans arrow_sprite_list), puis vérifie si la flèche est en collision avec un wall, auquel cas elle l'enlève de la liste arrow_sprite_list.
 
 
 Q: Comment gérez-vous le fait que vous avez maintenant deux types de monstres, et deux types d'armes ? Comment faites-vous pour ne pas dupliquer du code entre ceux-ci ?
@@ -66,7 +75,6 @@ Q: Quel algorithme utilisez-vous pour identifier tous les blocs d’une platefor
 A: J'utilise un algorithme récursif de pattern matching. Dans la fonction readmap, je parcours une première fois les caractères de la map pour détecter les blocs de plateforme. Dès qu'une flèche est rencontrée, readmap fait appel à une fonction récursive detect_block qui ajoute tous les sprites appartenant à un même bloc de plateformes et leur donne les mêmes limites de déplacement représentées par la dataclass "trajectory". En fonction du caractère rencontré,  Les limites de déplacement sont déterminées par la longueur des séries de flèches qui partent du bloc de plateformes
 
 Q:Sur quelle structure travaille cet algorithme ? Quels sont les avantages et inconvénients de votre choix ?
-
 A: Cet algorithme travaille sur la liste de liste (ou "matrice") qui correspond à la map en y enlevant les caractères considérés comme faisant partie d'un bloc de plateformes. Il agit également sur les listes moving_platforms_list et d'autres SpriteLists de World en y ajoutant au fur et à mesure les sprites considérés comme des plateformes avant d'effacer le caractère associé à la map.
 L'avantage d'agir directement sur la matrice de caractères qui représente la map en effacant les caractères au fur et à mesure est de garantir qu'on ajoute pas deux fois un même sprite a la liste de plateformes, mais aussi que l'algorithme ne cycle pas, puisque detect_block ne fait rien lorsqu'il rencontre un espace.  
 ---
@@ -77,5 +85,4 @@ Q:Quelle bibliothèque utilisez-vous pour lire les instructions des interrupteur
 A:Nous avons décidé d'utiliser Pyyaml pour sa simplicité. Elle détécte automatiquement les dictionnaires dans la partie config (avant --- ), et nous retourne un dictionnaire de listes de dictionnaires (i.e map1.txt).
 
 Q:Comment votre design général évolue-t-il pour tenir compte des interrupteurs et des portails ?
-
-A:Nous avons rencontré des difficultés pour modéliser les actions, raison pour laquelle nous avons commencés par créer une classe 
+A:Nous avons rencontré des difficultés pour modéliser les actions, raison pour laquelle nous avons commencé par créer une classe 
